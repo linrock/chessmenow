@@ -1,0 +1,44 @@
+!!!
+%html
+  %head
+    %script(type="text/javascript" src="/js/chess.js")
+    %script(type="text/javascript" src="/js/jquery-1.4.4.min.js")
+    :javascript
+      var chess = new Chess();
+      // console.dir(chess);
+      $(document).ready(function() {
+        $("td").click(function() {
+          $(this).css('background-color', 'green');
+        });
+      });
+    :css
+      #chessboard {
+        border: 3px solid black;
+      }
+      td {
+        background: white
+        text-align: center
+        vertical-align: middle
+      }
+      #chessboard tr:nth-child(odd) td:nth-child(even),
+      #chessboard tr:nth-child(even) td:nth-child(odd) {
+        background: #ccc
+      }
+      .pawn {
+      }
+      .bishop {
+      }
+      .knight {
+      }
+      .rook {
+      }
+      .queen {
+      }
+      .king {
+      }
+  %body
+    %table(id="chessboard" cellpadding=0 cellspacing=0)
+      - for i in 0..8
+        %tr
+          - for j in 0..8
+            %td(width="60px" height="60px") <span style="font-size: 50px;">&#9813;</span>
