@@ -1,0 +1,49 @@
+%table(id="chessboard" cellpadding=0 cellspacing=0)
+  - for i in (1..8).to_a.reverse
+    %tr
+      - for j in ('a'..'h')
+        %td(width="45px" height="45px" id="#{j+i.to_s}" class="#{(i+j.ord) % 2 == 1 ? 'white' : 'black'}")
+          %div
+#turn
+#table_info
+  Pick a color:
+  %input(type="submit" value="white" id="pick_white")
+  %input(type="submit" value="black" id="pick_black")
+%div= session
+
+:javascript
+  var chess = new Chess();
+  var selected;
+  $(document).ready(function() {
+    $("td").click(function() {
+      var position = $(this).attr('id');
+      if (selected && chess.move(selected, position)) {
+          movePiece(selected, position);
+          $("#turn").text(chess.turn());
+      }
+      else if (isYourPiece(position)) {
+        if (!$(this).hasClass('selected')) {
+          $(this).addClass('selected');
+          selected = position;
+        } else {
+          $(this).removeClass('selected');
+          selected = null;
+        }
+      }
+      $("td").not(this).removeClass("selected");
+    });
+    initializeBoard();
+
+    $("#pick_white").click(function() {
+      $.post("/", {color: 'white'}, function(data) {
+        alert('you chose white!')
+      });
+      return false;
+    });
+    $("#pick_black").click(function() {
+      $.post("/", {color: 'black'}, function(data) {
+        alert('you chose black!')
+      });
+      return false;
+    });
+  });

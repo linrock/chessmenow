@@ -11,13 +11,16 @@ use Rack::Session::Cookie,
 
 redis = Redis.new
 
-
 get '/' do
-  session[:id] ||= Random.new.rand(1000000..9999999)
   haml :index
 end
 
-post '/' do
+get '/:game_id' do
+  session[:id] ||= Random.new.rand(1000000..9999999)
+  haml :chessgame
+end
+
+post '/:game_id' do
   session[:color] = params[:color]
   content_type :json
   {:color => session[:color]}.to_json
