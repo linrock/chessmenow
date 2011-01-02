@@ -2,7 +2,7 @@
   - for i in session[:color] == 'b' ? 1..8 : (1..8).to_a.reverse
     %tr
       - for j in ('a'..'h')
-        %td(width="45px" height="45px" id="#{j+i.to_s}" class="#{(i+j.ord) % 2 == 1 ? 'white' : 'black'}")
+        %td(width="45px" height="45px" id="#{j+i.to_s}" class="#{(i+j.ord) % 2 == 1 ? 'white-tile' : 'black-tile'}")
           %div
 #turn
 #table_info
