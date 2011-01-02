@@ -10,9 +10,8 @@
 
       $(document).ready(function() {
         $("td").click(function() {
-          $("td").not(this).removeClass("selected");
           var position = $(this).attr('id');
-          if (hasPiece(position)) {
+          if (isYourPiece(position)) {
             if (!$(this).hasClass('selected')) {
               $(this).addClass('selected');
               selected = position;
@@ -23,8 +22,10 @@
           } else {
             if (chess.move(selected, position)) {
               movePiece(selected, position);
+              $("#turn").text(chess.turn());
             }
           }
+          $("td").not(this).removeClass("selected");
         });
         // $("#b3 > .piece").addClass('white-pawn');
         initializeBoard();
