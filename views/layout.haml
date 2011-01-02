@@ -6,4 +6,7 @@
     %script(type="text/javascript" src="/media/js/chessboard.js")
     %link(href="/media/css/screen.css" rel="stylesheet" type="text/css")
   %body
-    #container= yield
+    #container
+      #header
+        %h1 Instant Chess
+      #content= yield
