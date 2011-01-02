@@ -1,69 +1,23 @@
 !!!
 %html
   %head
-    %script(type="text/javascript" src="/js/chess.js")
-    %script(type="text/javascript" src="/js/jquery-1.4.4.min.js")
+    %script(type="text/javascript" src="/media/js/chess.js")
+    %script(type="text/javascript" src="/media/js/jquery-1.4.4.min.js")
     :javascript
       var chess = new Chess();
       // console.dir(chess);
       $(document).ready(function() {
         $("td").click(function() {
+          $("td").removeClass("selected");
           $(this).toggleClass('selected');
+          // alert($(this).attr('id'));
         });
       });
-    :css
-      #chessboard {
-        border: 3px solid black;
-      }
-      .white {
-        background: white
-      }
-      .black {
-        background: lightgray
-      }
-      .selected {
-        background-color: yellow !important;
-      }
-      .white-pawn {
-        height: 45px;
-        width: 45px;
-        background: url('/img/chesspieces.gif');
-        background-position: 0px 0px;
-      }
-      .white-knight {
-        height: 45px;
-        width: 45px;
-        background: url('/img/chesspieces.gif');
-        background-position: -45px 0px;
-      }
-      .white-bishop {
-        height: 45px;
-        width: 45px;
-        background: url('/img/chesspieces.gif');
-        background-position: -90px 0px;
-      }
-      .white-rook {
-        height: 45px;
-        width: 45px;
-        background: url('/img/chesspieces.gif');
-        background-position: -135px 0px;
-      }
-      .white-queen {
-        height: 45px;
-        width: 45px;
-        background: url('/img/chesspieces.gif');
-        background-position: -180px 0px;
-      }
-      .white-king {
-        height: 45px;
-        width: 45px;
-        background: url('/img/chesspieces.gif');
-        background-position: -225px 0px;
-      }
+    %link(href="/media/css/style.css" rel="stylesheet" type="text/css")
   %body
     %table(id="chessboard" cellpadding=0 cellspacing=0)
-      - for i in 0..7
+      - for i in ('a'..'h').to_a.reverse
         %tr
-          - for j in 0..7
-            %td(width="45px" height="45px" class="#{(i+j) % 2 == 0 ? 'white' : 'black'}")
+          - for j in 1..8
+            %td(width="45px" height="45px" id="#{i+j.to_s}" class="#{(i.ord+j) % 2 == 0 ? 'white' : 'black'}")
               .white-pawn
