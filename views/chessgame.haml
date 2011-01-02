@@ -14,6 +14,7 @@
 :javascript
   var chess = new Chess();
   var game_id = "#{params[:game_id]}";
+  var fen = "#{session[:fen]}";
   var selected;
 
   $(document).ready(function() {
@@ -34,7 +35,7 @@
       }
       $("td").not(this).removeClass("selected");
     });
-    initializeBoard();
+    initializeBoard(fen);
 
     $("#pick_white").click(function() {
       $.post("/", {color: 'white'}, function(data) {

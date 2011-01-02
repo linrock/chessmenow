@@ -1,7 +1,11 @@
-var initializeBoard = function() {
-  var initialFen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
-  chess.load(initialFen);
-  loadFen(initialFen);
+var startingPosition = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+
+var initializeBoard = function(fen) {
+  if (!fen) {
+    fen = startingPosition;
+  }
+  chess.load(fen);
+  loadFen(fen);
   $("#turn").text(chess.turn());
 }
 
