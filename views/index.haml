@@ -8,37 +8,62 @@
       // console.dir(chess);
       $(document).ready(function() {
         $("td").click(function() {
-          $(this).css('background-color', 'green');
+          $(this).toggleClass('selected');
         });
       });
     :css
       #chessboard {
         border: 3px solid black;
       }
-      td {
+      .white {
         background: white
-        text-align: center
-        vertical-align: middle
       }
-      #chessboard tr:nth-child(odd) td:nth-child(even),
-      #chessboard tr:nth-child(even) td:nth-child(odd) {
-        background: #ccc
+      .black {
+        background: lightgray
       }
-      .pawn {
+      .selected {
+        background-color: yellow !important;
       }
-      .bishop {
+      .white-pawn {
+        height: 45px;
+        width: 45px;
+        background: url('/img/chesspieces.gif');
+        background-position: 0px 0px;
       }
-      .knight {
+      .white-knight {
+        height: 45px;
+        width: 45px;
+        background: url('/img/chesspieces.gif');
+        background-position: -45px 0px;
       }
-      .rook {
+      .white-bishop {
+        height: 45px;
+        width: 45px;
+        background: url('/img/chesspieces.gif');
+        background-position: -90px 0px;
       }
-      .queen {
+      .white-rook {
+        height: 45px;
+        width: 45px;
+        background: url('/img/chesspieces.gif');
+        background-position: -135px 0px;
       }
-      .king {
+      .white-queen {
+        height: 45px;
+        width: 45px;
+        background: url('/img/chesspieces.gif');
+        background-position: -180px 0px;
+      }
+      .white-king {
+        height: 45px;
+        width: 45px;
+        background: url('/img/chesspieces.gif');
+        background-position: -225px 0px;
       }
   %body
     %table(id="chessboard" cellpadding=0 cellspacing=0)
-      - for i in 0..8
+      - for i in 0..7
         %tr
-          - for j in 0..8
-            %td(width="60px" height="60px") <span style="font-size: 50px;">&#9813;</span>
+          - for j in 0..7
+            %td(width="45px" height="45px" class="#{(i+j) % 2 == 0 ? 'white' : 'black'}")
+              .white-pawn
