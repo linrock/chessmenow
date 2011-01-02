@@ -32,6 +32,7 @@ var initializeBoard = function() {
   $("#d8 > div").addClass('piece b black-queen');
   $("#e8 > div").addClass('piece b black-king');
   chess.load('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
+  $("#turn").text(chess.turn());
 }
 
 var movePiece = function(from, to) {
