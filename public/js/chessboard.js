@@ -31,4 +31,11 @@ var initializeBoard = function() {
   $("#f8 > .piece").addClass('black-bishop');
   $("#d8 > .piece").addClass('black-queen');
   $("#e8 > .piece").addClass('black-king');
+  chess.load('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
+}
+
+var movePiece = function(from, to) {
+  var newClass = $('#' + from + ' > .piece').attr('class').replace('piece ', '');
+  $('#' + from + ' > .piece').removeClass(newClass);
+  $('#' + to + ' > .piece').addClass(newClass);
 }

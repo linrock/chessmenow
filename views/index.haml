@@ -6,20 +6,21 @@
     %script(type="text/javascript" src="/media/js/chessboard.js")
     :javascript
       var chess = new Chess();
-      chess.load('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
+      var selected;
 
       $(document).ready(function() {
         $("td").click(function() {
           $("td").not(this).removeClass("selected");
           $(this).toggleClass('selected');
+          selected = $(this);
+
           // alert($(this).attr('id'));
         });
         // $("#b3 > .piece").addClass('white-pawn');
         initializeBoard();
       });
-
       var move = function(from, to) {
-        chess.move(from, to)
+        chess.move(from, to);
       }
 
     %link(href="/media/css/style.css" rel="stylesheet" type="text/css")
