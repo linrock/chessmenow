@@ -10,39 +10,55 @@
 .selected {
     background-color: yellow !important;
 }
-.white-pawn {
+.piece {
     height: 45px;
     width: 45px;
+}
+.white-pawn {
     background: url('/img/chesspieces.gif');
     background-position: 0px 0px;
 }
 .white-knight {
-    height: 45px;
-    width: 45px;
     background: url('/img/chesspieces.gif');
     background-position: -45px 0px;
 }
 .white-bishop {
-    height: 45px;
-    width: 45px;
     background: url('/img/chesspieces.gif');
     background-position: -90px 0px;
 }
 .white-rook {
-    height: 45px;
-    width: 45px;
     background: url('/img/chesspieces.gif');
     background-position: -135px 0px;
 }
 .white-queen {
-    height: 45px;
-    width: 45px;
     background: url('/img/chesspieces.gif');
     background-position: -180px 0px;
 }
 .white-king {
-    height: 45px;
-    width: 45px;
     background: url('/img/chesspieces.gif');
     background-position: -225px 0px;
+}
+.black-pawn {
+    background: url('/img/chesspieces.gif');
+    background-position: 0px 45px;
+}
+.black-knight {
+    background: url('/img/chesspieces.gif');
+    background-position: -45px 45px;
+}
+.black-bishop {
+    background: url('/img/chesspieces.gif');
+    background-position: -90px 45px;
+}
+.black-rook {
+    background: url('/img/chesspieces.gif');
+    background-position: -135px 45px;
+}
+.black-queen {
+    background: url('/img/chesspieces.gif');
+    background-position: -180px 45px;
+}
+.black-king {
+    background: url('/img/chesspieces.gif');
+    background-position: -225px 45px;
 }

@@ -15,4 +15,20 @@ var initializeBoard = function() {
   $("#f1 > .piece").addClass('white-bishop');
   $("#d1 > .piece").addClass('white-queen');
   $("#e1 > .piece").addClass('white-king');
+  $("#a7 > .piece").addClass('black-pawn');
+  $("#b7 > .piece").addClass('black-pawn');
+  $("#c7 > .piece").addClass('black-pawn');
+  $("#d7 > .piece").addClass('black-pawn');
+  $("#e7 > .piece").addClass('black-pawn');
+  $("#f7 > .piece").addClass('black-pawn');
+  $("#g7 > .piece").addClass('black-pawn');
+  $("#h7 > .piece").addClass('black-pawn');
+  $("#a8 > .piece").addClass('black-rook');
+  $("#h8 > .piece").addClass('black-rook');
+  $("#b8 > .piece").addClass('black-knight');
+  $("#g8 > .piece").addClass('black-knight');
+  $("#c8 > .piece").addClass('black-bishop');
+  $("#f8 > .piece").addClass('black-bishop');
+  $("#d8 > .piece").addClass('black-queen');
+  $("#e8 > .piece").addClass('black-king');
 }
