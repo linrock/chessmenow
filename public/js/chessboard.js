@@ -6,7 +6,7 @@ var initializeBoard = function(fen) {
   }
   chess.load(fen);
   loadFen(fen);
-  $("#turn").text(chess.turn());
+  displayTurn();
 }
 
 var loadFen = function(fen) {
@@ -44,6 +44,16 @@ var movePiece = function(from, to) {
     alert('Stalemate!');
   }
   selected = null;
+}
+
+var displayTurn = function() {
+  if (chess.turn() == your_color) {
+    $("#turn").text("Your turn!");
+  } else if (chess.turn() == 'w') {
+    $("#turn").text("White's turn");
+  } else if (chess.turn() == 'b') {
+    $("#turn").text("Black's turn");
+  }
 }
 
 var pieceExistsAt = function(position) {
