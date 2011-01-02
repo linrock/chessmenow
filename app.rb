@@ -2,6 +2,7 @@ require 'sinatra'
 require 'redis'
 require 'haml'
 require 'json'
+require 'date'
 
 use Rack::Session::Cookie,
   :key => 'session',
@@ -22,6 +23,7 @@ get '/:game_id' do
   if not game_state
     redis.set(params[:game_id], {
       :started => false,
+      :created_at => DateTime.now.to_s
     }.to_json)
     game_state = redis.get(params[:game_id])
   else

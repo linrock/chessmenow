@@ -1,5 +1,5 @@
 %table(id="chessboard" cellpadding=0 cellspacing=0)
-  - for i in (1..8).to_a.reverse
+  - for i in session[:color] == 'b' ? 1..8 : (1..8).to_a.reverse
     %tr
       - for j in ('a'..'h')
         %td(width="45px" height="45px" id="#{j+i.to_s}" class="#{(i+j.ord) % 2 == 1 ? 'white' : 'black'}")
@@ -38,13 +38,13 @@
     initializeBoard(fen);
 
     $("#pick_white").click(function() {
-      $.post("/", {color: 'white'}, function(data) {
+      $.post("/#{params[:game_id]}/color", {color: 'w'}, function(data) {
         alert('you chose white!')
       });
       return false;
     });
     $("#pick_black").click(function() {
-      $.post("/", {color: 'black'}, function(data) {
+      $.post("/#{params[:game_id]}/color", {color: 'b'}, function(data) {
         alert('you chose black!')
       });
       return false;

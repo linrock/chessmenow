@@ -24,8 +24,7 @@ var loadFen = function(fen) {
           ++col_num;
         }
       } else {
-        $("#" + cols[col_num] + row_num + " > div").addClass('piece ' + rows[i][j]);
-        ++col_num;
+        $("#" + cols[col_num++] + row_num + " > div").removeClass().addClass('piece ' + rows[i][j]);
       }
     }
     --row_num;
@@ -33,14 +32,17 @@ var loadFen = function(fen) {
 }
 
 var movePiece = function(from, to) {
-  // var newClass = $('#' + from + ' > div').attr('class');
-  // $('#' + from + ' > div').removeClass(newClass);
-  // $('#' + to + ' > div').removeClass();
-  // $('#' + to + ' > div').addClass(newClass);
   loadFen(chess.fen());
   $.post('/' + game_id + '/move', { fen: chess.fen() }, function(data) {
     // alert(data);
   });
+  if (chess.in_checkmate()) {
+    alert('CHECKMATE!!');
+  } else if (chess.in_check()) {
+    alert('Check');
+  } else if (chess.in_stalemate()) {
+    alert('Stalemate!');
+  }
   selected = null;
 }
 
