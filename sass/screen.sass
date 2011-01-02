@@ -1,7 +1,12 @@
-/*
-  Welcome to Compass.
-  In this file you should write your main styles. (or centralize your imports)
-  Import this file using the following HTML or equivalent:
-  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css" />
+// This import applies a global reset to any page that imports this stylesheet.
+@import blueprint/reset
+// To configure blueprint, edit the partials/_base.sass file.
+@import partials/base
+// Import all the default blueprint modules so that we can access their mixins.
+@import blueprint
+// Import the non-default scaffolding module.
+@import blueprint/scaffolding
 
-@import compass/reset
+// Generate the blueprint framework according to your configuration:
++blueprint
++blueprint-scaffolding
