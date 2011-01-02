@@ -11,9 +11,11 @@
       $(document).ready(function() {
         $("td").click(function() {
           $("td").not(this).removeClass("selected");
-          $(this).toggleClass('selected');
+          position = $(this).attr('id');
+          if (hasPiece(position)) {
+            $(this).toggleClass('selected');
+          }
           selected = $(this);
-          // alert($(this).attr('id'));
         });
         // $("#b3 > .piece").addClass('white-pawn');
         initializeBoard();
