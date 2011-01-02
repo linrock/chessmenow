@@ -1,38 +1,27 @@
 var initializeBoard = function() {
-  $("#a2 > div").addClass('piece w white-pawn');
-  $("#b2 > div").addClass('piece w white-pawn');
-  $("#c2 > div").addClass('piece w white-pawn');
-  $("#d2 > div").addClass('piece w white-pawn');
-  $("#e2 > div").addClass('piece w white-pawn');
-  $("#f2 > div").addClass('piece w white-pawn');
-  $("#g2 > div").addClass('piece w white-pawn');
-  $("#h2 > div").addClass('piece w white-pawn');
-  $("#a1 > div").addClass('piece w white-rook');
-  $("#h1 > div").addClass('piece w white-rook');
-  $("#b1 > div").addClass('piece w white-knight');
-  $("#g1 > div").addClass('piece w white-knight');
-  $("#c1 > div").addClass('piece w white-bishop');
-  $("#f1 > div").addClass('piece w white-bishop');
-  $("#d1 > div").addClass('piece w white-queen');
-  $("#e1 > div").addClass('piece w white-king');
-  $("#a7 > div").addClass('piece b black-pawn');
-  $("#b7 > div").addClass('piece b black-pawn');
-  $("#c7 > div").addClass('piece b black-pawn');
-  $("#d7 > div").addClass('piece b black-pawn');
-  $("#e7 > div").addClass('piece b black-pawn');
-  $("#f7 > div").addClass('piece b black-pawn');
-  $("#g7 > div").addClass('piece b black-pawn');
-  $("#h7 > div").addClass('piece b black-pawn');
-  $("#a8 > div").addClass('piece b black-rook');
-  $("#h8 > div").addClass('piece b black-rook');
-  $("#b8 > div").addClass('piece b black-knight');
-  $("#g8 > div").addClass('piece b black-knight');
-  $("#c8 > div").addClass('piece b black-bishop');
-  $("#f8 > div").addClass('piece b black-bishop');
-  $("#d8 > div").addClass('piece b black-queen');
-  $("#e8 > div").addClass('piece b black-king');
-  chess.load('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
+  var initialFen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+  chess.load(initialFen);
+  loadFen(initialFen);
   $("#turn").text(chess.turn());
+}
+
+var loadFen = function(fen) {
+  rows = fen.split(' ')[0].split('/');
+  var cols = 'abcdefgh';
+  var row_num = 8;
+  var col_num;
+  for (i in rows) {
+    col_num = 0;
+    for (j in rows[i]) {
+      if (rows[i][j] >= 1) {
+        col_num += parseInt(rows[i][j]);
+      } else {
+        $("#" + cols[col_num] + row_num + " > div").addClass('piece ' + rows[i][j]);
+        ++col_num;
+      }
+    }
+    --row_num;
+  }
 }
 
 var movePiece = function(from, to) {
@@ -40,12 +29,30 @@ var movePiece = function(from, to) {
   $('#' + from + ' > div').removeClass(newClass);
   $('#' + to + ' > div').removeClass();
   $('#' + to + ' > div').addClass(newClass);
+  $.post('/' + game_id + '/move', { fen: chess.fen() }, function(data) {
+    // alert(data);
+  });
 }
 
 var hasPiece = function(position) {
   return $("#" + position + " > .piece").length !== 0;
 }
 
+var getPieceColor = function(position) {
+  var color = null;
+  var whites = 'PRNBQK';
+  var blacks = 'prnbqk';
+  var className = $("#" + position + " > div").attr('class').replace('piece ','');
+  if (hasPiece(position)) {
+    if (whites.indexOf(className) > -1) {
+      color = 'w';
+    } else if (blacks.indexOf(className) > -1) {
+      color = 'b';
+    }
+    return color;
+  }
+}
+
 var isYourPiece = function(position) {
-  return hasPiece(position) && $("#" + position + " > .piece").hasClass(chess.turn());
+  return hasPiece(position) && getPieceColor(position) === chess.turn();
 }

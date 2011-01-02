@@ -13,7 +13,9 @@
 
 :javascript
   var chess = new Chess();
+  var game_id = "#{params[:game_id]}";
   var selected;
+
   $(document).ready(function() {
     $("td").click(function() {
       var position = $(this).attr('id');
