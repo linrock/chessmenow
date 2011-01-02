@@ -13,11 +13,11 @@
           $("td").not(this).removeClass("selected");
           $(this).toggleClass('selected');
           selected = $(this);
-
           // alert($(this).attr('id'));
         });
         // $("#b3 > .piece").addClass('white-pawn');
         initializeBoard();
+        $("#turn").text(chess.turn());
       });
       var move = function(from, to) {
         chess.move(from, to);
@@ -30,4 +30,5 @@
         %tr
           - for j in ('a'..'h')
             %td(width="45px" height="45px" id="#{j+i.to_s}" class="#{(i+j.ord) % 2 == 1 ? 'white' : 'black'}")
-              .piece
+              %div
+    #turn
