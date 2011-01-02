@@ -32,6 +32,12 @@ get '/:game_id' do
   haml :chessgame, :locals => { :fen => game_state["fen"] }
 end
 
+get '/:game_id/wait' do
+  content_type :json
+  game_state = JSON.parse(redis.get(params[:game_id]))
+  game_state["fen"].to_json
+end
+
 post '/:game_id/color' do
   session[:color] = params[:color]
   content_type :json
@@ -45,3 +51,5 @@ post '/:game_id/move' do
   content_type :json
   1.to_json
 end
+
+

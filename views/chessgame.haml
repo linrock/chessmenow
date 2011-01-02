@@ -39,15 +39,23 @@
     initializeBoard(fen);
 
     $("#pick_white").click(function() {
-      $.post("/#{params[:game_id]}/color", {color: 'w'}, function(data) {
+      $.post("/" + game_id + "/color", {color: 'w'}, function(data) {
         alert('you chose white!')
       });
       return false;
     });
     $("#pick_black").click(function() {
-      $.post("/#{params[:game_id]}/color", {color: 'b'}, function(data) {
+      $.post("/" + game_id + "/color", {color: 'b'}, function(data) {
         alert('you chose black!')
       });
       return false;
     });
+
+    var poll = function() {
+      $.get("/" + game_id + "/wait", function(data) {
+        if (data !== chess.fen()) {
+          alert('position changed!')
+        }
+      });
+    }
   });
