@@ -35,9 +35,9 @@ var initializeBoard = function() {
 }
 
 var movePiece = function(from, to) {
-  var newClass = $('#' + from + ' > .piece').attr('class').replace('piece ', '');
-  $('#' + from + ' > .piece').removeClass(newClass);
-  $('#' + to + ' > .piece').addClass(newClass);
+  var newClass = $('#' + from + ' > .piece').attr('class');
+  $('#' + from + ' > div').removeClass(newClass);
+  $('#' + to + ' > div').addClass(newClass);
 }
 
 var hasPiece = function(position) {

@@ -11,11 +11,20 @@
       $(document).ready(function() {
         $("td").click(function() {
           $("td").not(this).removeClass("selected");
-          position = $(this).attr('id');
+          var position = $(this).attr('id');
           if (hasPiece(position)) {
-            $(this).toggleClass('selected');
+            if (!$(this).hasClass('selected')) {
+              $(this).addClass('selected');
+              selected = position;
+            } else {
+              $(this).removeClass('selected');
+              selected = null;
+            }
+          } else {
+            if (chess.move(selected, position)) {
+              movePiece(selected, position);
+            }
           }
-          selected = $(this);
         });
         // $("#b3 > .piece").addClass('white-pawn');
         initializeBoard();
