@@ -18,7 +18,11 @@ var loadFen = function(fen) {
     col_num = 0;
     for (j in rows[i]) {
       if (rows[i][j] >= 1) {
-        col_num += parseInt(rows[i][j]);
+        num_cols = parseInt(rows[i][j]);
+        for (var k=0 ; k < num_cols; ++k) {
+          $("#" + cols[col_num] + row_num + " > div").removeClass();
+          ++col_num;
+        }
       } else {
         $("#" + cols[col_num] + row_num + " > div").addClass('piece ' + rows[i][j]);
         ++col_num;
@@ -29,16 +33,18 @@ var loadFen = function(fen) {
 }
 
 var movePiece = function(from, to) {
-  var newClass = $('#' + from + ' > div').attr('class');
-  $('#' + from + ' > div').removeClass(newClass);
-  $('#' + to + ' > div').removeClass();
-  $('#' + to + ' > div').addClass(newClass);
+  // var newClass = $('#' + from + ' > div').attr('class');
+  // $('#' + from + ' > div').removeClass(newClass);
+  // $('#' + to + ' > div').removeClass();
+  // $('#' + to + ' > div').addClass(newClass);
+  loadFen(chess.fen());
   $.post('/' + game_id + '/move', { fen: chess.fen() }, function(data) {
     // alert(data);
   });
+  selected = null;
 }
 
-var hasPiece = function(position) {
+var pieceExistsAt = function(position) {
   return $("#" + position + " > .piece").length !== 0;
 }
 
@@ -47,7 +53,7 @@ var getPieceColor = function(position) {
   var whites = 'PRNBQK';
   var blacks = 'prnbqk';
   var className = $("#" + position + " > div").attr('class').replace('piece ','');
-  if (hasPiece(position)) {
+  if (pieceExistsAt(position)) {
     if (whites.indexOf(className) > -1) {
       color = 'w';
     } else if (blacks.indexOf(className) > -1) {
@@ -58,5 +64,5 @@ var getPieceColor = function(position) {
 }
 
 var isYourPiece = function(position) {
-  return hasPiece(position) && getPieceColor(position) === chess.turn();
+  return pieceExistsAt(position) && getPieceColor(position) === chess.turn();
 }

@@ -26,25 +26,20 @@ get '/:game_id' do
     game_state = redis.get(params[:game_id])
   else
     game_state = JSON.parse(game_state)
-    session[:fen] = game_state["fen"]
   end
-  haml :chessgame
-end
-
-post '/:game_id' do
-  session[:color] = params[:color]
-  content_type :json
-  {:color => session[:color]}.to_json
+  haml :chessgame, :locals => { :fen => game_state["fen"] }
 end
 
 post '/:game_id/color' do
+  session[:color] = params[:color]
+  content_type :json
+  {:color => session[:color]}.to_json
 end
 
 post '/:game_id/move' do
   game_state = JSON.parse(redis.get(params[:game_id]))
   game_state["fen"] = params[:fen]
   redis.set(params[:game_id], game_state.to_json)
-  session[:fen] = game_state["fen"]
   content_type :json
   1.to_json
 end
