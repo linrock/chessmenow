@@ -10,3 +10,47 @@
 // Generate the blueprint framework according to your configuration:
 +blueprint
 +blueprint-scaffolding
+
+#container
+  width: 900px
+table#chessboard
+  width: 400px
+  height: 400px
+  border: 3px solid black
+  td
+    margin: 0
+    padding: 0
+  .white
+    background: white
+  .black
+    background: lightgray
+  .selected
+    background-color: yellow !important
+  .piece
+    background: url('/img/chesspieces.gif')
+    height: 45px
+    width: 45px
+  .white-pawn
+    background-position: 0px 0px
+  .white-knight
+    background-position: -45px 0px
+  .white-bishop
+    background-position: -90px 0px
+  .white-rook
+    background-position: -135px 0px
+  .white-queen
+    background-position: -180px 0px
+  .white-king
+    background-position: -225px 0px
+  .black-pawn
+    background-position: 0px 45px
+  .black-knight
+    background-position: -45px 45px
+  .black-bishop
+    background-position: -90px 45px
+  .black-rook
+    background-position: -135px 45px
+  .black-queen
+    background-position: -180px 45px
+  .black-king
+    background-position: -225px 45px
