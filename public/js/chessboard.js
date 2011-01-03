@@ -33,9 +33,10 @@ var loadFen = function(fen) {
 
 var movePiece = function(from, to) {
   loadFen(chess.fen());
-  $.post('/' + game_id + '/move', { fen: chess.fen() }, function(data) {
-    // alert(data);
-  });
+  // $.post('/' + game_id + '/move', { fen: chess.fen() }, function(data) {
+  //   alert(data);
+  // });
+  client.publish('/game/' + game_id + '/moves', { fen: chess.fen() });
   if (chess.in_checkmate()) {
     alert('CHECKMATE!!');
   } else if (chess.in_check()) {
@@ -113,11 +114,13 @@ var initialize = function() {
     return false;
   });
 
-  var poll = function() {
-    $.get("/" + game_id + "/wait", function(data) {
-      if (data !== chess.fen()) {
-        alert('position changed!')
-      }
-    });
-  }
+  client = new Faye.Client('http://localhost:3000/game/' + game_id);
+  client.subscribe('/game/' + game_id, function(message) {
+    alert(message);
+  });
+  client.subscribe('/game/' + game_id + '/moves', function(message) {
+    if (message.fen) {
+      loadBoard(message.fen);
+    }
+  });
 }

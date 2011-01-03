@@ -1,6 +1,9 @@
 var express = require('express'),
     redis = require('redis').createClient(),
-    app = express.createServer();
+    Faye = require('faye'),
+    app = express.createServer(),
+    bayeux = new Faye.NodeAdapter({ mount: '/game/*', timeout: 120 });
+
 
 redis.on('error', function(err) {
   console.log("Error: " + err);
@@ -55,10 +58,13 @@ app.get('/:game_id', function(req, res) {
 
 app.post('/:game_id/color', function(req, res) {
   req.params.game_id;
+  res.send('1');
 });
 
 app.post('/:game_id/move', function(req, res) {
   req.params.game_id;
+  res.send('1');
 });
 
+bayeux.attach(app);
 app.listen(3000);
