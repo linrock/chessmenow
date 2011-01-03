@@ -13,12 +13,30 @@ app.configure(function() {
   });
 });
 
+var getKeys = function(obj){
+   var keys = [];
+   for(var key in obj){
+      if (obj.hasOwnProperty(key)) {
+        keys.push(key);
+      }
+   }
+   return keys;
+}
+
 app.get('/', function(req, res) {
+  console.dir(getKeys(req))
+  console.dir(req.sessionID)
   res.render('index');
 });
 
 app.get('/:game_id', function(req, res) {
-  res.render('game');
+  res.render('game', {
+    locals: {
+      fen: "",
+      your_color: "w",
+      game_id: req.params.game_id
+    }
+  });
 });
 
 app.post('/:game_id/color', function(req, res) {

@@ -1,6 +1,6 @@
 var startingPosition = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 
-var initializeBoard = function(fen) {
+var loadBoard = function(fen) {
   if (!fen) {
     fen = startingPosition;
   }
@@ -77,4 +77,47 @@ var getPieceColor = function(position) {
 
 var isYourPiece = function(position) {
   return pieceExistsAt(position) && getPieceColor(position) === chess.turn();
+}
+
+
+var initialize = function() {
+  $("td").click(function() {
+    var position = $(this).attr('id');
+    if (selected && chess.move(selected, position)) {
+      movePiece(selected, position);
+      displayTurn();
+    }
+    else if (isYourPiece(position)) {
+      if (!$(this).hasClass('selected')) {
+        $(this).addClass('selected');
+        selected = position;
+      } else {
+        $(this).removeClass('selected');
+        selected = null;
+      }
+    }
+    $("td").not(this).removeClass("selected");
+  });
+  loadBoard(fen);
+
+  $("#pick_white").click(function() {
+    $.post("/" + game_id + "/color", {color: 'w'}, function(data) {
+      alert('you chose white!')
+    });
+    return false;
+  });
+  $("#pick_black").click(function() {
+    $.post("/" + game_id + "/color", {color: 'b'}, function(data) {
+      alert('you chose black!')
+    });
+    return false;
+  });
+
+  var poll = function() {
+    $.get("/" + game_id + "/wait", function(data) {
+      if (data !== chess.fen()) {
+        alert('position changed!')
+      }
+    });
+  }
 }
