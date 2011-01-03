@@ -47,7 +47,6 @@ app.get('/:game_id', function(req, res) {
     }
     res.render('game', {
       locals: {
-        fen: "",
         your_color: "w",
         game_state: game_state,
         game_id: req.params.game_id
@@ -61,10 +60,20 @@ app.post('/:game_id/color', function(req, res) {
   res.send('1');
 });
 
-app.post('/:game_id/move', function(req, res) {
-  req.params.game_id;
-  res.send('1');
-});
+var moveMonitor = {
+  incoming: function(message, callback) {
+    if (message.channel !== '/meta/subscribe' && message.channel !== '/meta/connect') {
+      console.log(message);
+      return callback(message);
+    }
+    if (message.game_id) {
+      console.log('This is the game ID: ' + message.game_id);
+      console.log(message);
+    }
+    callback(message);
+  }
+};
 
+bayeux.addExtension(moveMonitor);
 bayeux.attach(app);
 app.listen(3000);
