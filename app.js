@@ -1,5 +1,10 @@
 var express = require('express'),
+    redis = require('redis').createClient(),
     app = express.createServer();
+
+redis.on('error', function(err) {
+  console.log("Error: " + err);
+});
 
 app.configure(function() {
   app.use(express.cookieDecoder());
@@ -30,12 +35,21 @@ app.get('/', function(req, res) {
 });
 
 app.get('/:game_id', function(req, res) {
-  res.render('game', {
-    locals: {
-      fen: "",
-      your_color: "w",
-      game_id: req.params.game_id
+  redis.get(req.params.game_id, function(err, reply) {
+    if (!reply) {
+      game_state = JSON.stringify({ started: false, created_at: (new Date()).toString() });
+      redis.set(req.params.game_id, game_state);
+    } else {
+      game_state = reply;
     }
+    res.render('game', {
+      locals: {
+        fen: "",
+        your_color: "w",
+        game_state: game_state,
+        game_id: req.params.game_id
+      }
+    });
   });
 });
 
