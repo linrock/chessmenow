@@ -1,12 +1,4 @@
 table(id="chessboard", cellpadding=0, cellspacing=0)
-  - var cols = '87654321'
-  - var rows = 'abcdefgh'
-  - for (var i in cols)
-    tr
-      - for (var j in rows)
-        - var class = ((parseInt(cols[i])+rows[j].charCodeAt(0)) % 2 == 1) ? 'white-tile' : 'black-tile'
-        td(width="45px", height="45px", id=rows[j]+cols[i], class=class)
-          div
 
 h2#turn
 #table_info

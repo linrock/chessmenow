@@ -9,6 +9,26 @@ var loadBoard = function(fen) {
   checkGameState();
 }
 
+var generateBoard = function(color) {
+  var cols;
+  var rows = 'abcdefgh';
+  if (color == 'b') {
+    cols = '12345678';
+  } else {
+    cols = '87654321';
+  }
+  var board = '';
+  for (var i in cols) {
+    board += '<tr>';
+    for (var j in rows) {
+      var tileco = ((parseInt(cols[i])+rows[j].charCodeAt(0)) % 2 == 1) ? 'white-tile' : 'black-tile';
+      board += '<td width="45px" height="45px" id="' + rows[j] + cols[i] + '" class="' + tileco + '"><div></div></td>';
+    }
+    board += '</tr>';
+  }
+  $("#chessboard").html(board);
+}
+
 var loadFen = function(fen) {
   rows = fen.split(' ')[0].split('/');
   var cols = 'abcdefgh';
@@ -101,8 +121,6 @@ var initialize = function() {
     }
     $("td").not(this).removeClass("selected");
   });
-  loadBoard(game_state.fen);
-
   $("#pick_white").click(function() {
     $.post("/" + game_id + "/color", {color: 'w'}, function(data) {
       alert('you chose white!')
@@ -127,4 +145,7 @@ var initialize = function() {
       loadBoard(message.fen);
     }
   });
+ 
+  generateBoard();
+  loadBoard(game_state.fen);
 }
