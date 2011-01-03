@@ -11,11 +11,13 @@ var loadBoard = function(fen) {
 
 var generateBoard = function(color) {
   var cols;
-  var rows = 'abcdefgh';
+  var rows;
   if (color == 'b') {
     cols = '12345678';
+    rows = 'hgfedcba';
   } else {
     cols = '87654321';
+    rows = 'abcdefgh';
   }
   var board = '';
   for (var i in cols) {
