@@ -62,15 +62,20 @@ app.post('/:game_id/color', function(req, res) {
 
 var moveMonitor = {
   incoming: function(message, callback) {
-    if (message.channel !== '/meta/subscribe' && message.channel !== '/meta/connect') {
-      console.log(message);
-      return callback(message);
+    console.log(message);
+    if (message.data) {
+      game_id = message.data.game_id;
+      if (game_id && message.channel.indexOf(game_id) > -1) {
+        redis.get(game_id, function(err, reply) {
+          game_state = JSON.parse(reply);
+          game_state.fen = message.data.fen;
+          console.log('Saving... ' + JSON.stringify(game_state));
+          redis.set(game_id, JSON.stringify(game_state));
+          callback(message);
+        });
+      }
     }
-    if (message.game_id) {
-      console.log('This is the game ID: ' + message.game_id);
-      console.log(message);
-    }
-    callback(message);
+    return callback(message);
   }
 };
 
