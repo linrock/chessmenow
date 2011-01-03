@@ -84,17 +84,15 @@ var pieceExistsAt = function(position) {
 }
 
 var getPieceColor = function(position) {
-  var color = null;
   var whites = 'PRNBQK';
   var blacks = 'prnbqk';
-  var className = $("#" + position + " > div").attr('class').replace('piece ','');
+  var className = chess.get(position);
   if (pieceExistsAt(position)) {
     if (whites.indexOf(className) > -1) {
-      color = 'w';
+      return 'w';
     } else if (blacks.indexOf(className) > -1) {
-      color = 'b';
+      return 'b';
     }
-    return color;
   }
 }
 
@@ -102,8 +100,10 @@ var isYourPiece = function(position) {
   return pieceExistsAt(position) && getPieceColor(position) === chess.turn();
 }
 
-
 var initialize = function() {
+  generateBoard();
+  loadBoard(game_state.fen);
+
   $("td").click(function() {
     var position = $(this).attr('id');
     if (selected && chess.move(selected, position)) {
@@ -122,18 +122,16 @@ var initialize = function() {
     $("td").not(this).removeClass("selected");
   });
   $("#pick_white").click(function() {
-    $.post("/" + game_id + "/color", {color: 'w'}, function(data) {
-      alert('you chose white!')
-    });
     client.publish('/game/' + game_id + '/colors', { game_id: game_id, color: 'w' });
-    return false;
+    your_color = 'w';
+    generateBoard(your_color);
+    loadBoard(game_state.fen);
   });
   $("#pick_black").click(function() {
-    $.post("/" + game_id + "/color", {color: 'b'}, function(data) {
-      alert('you chose black!')
-    });
     client.publish('/game/' + game_id + '/colors', { game_id: game_id, color: 'b' });
-    return false;
+    your_color = 'b';
+    generateBoard(your_color);
+    loadBoard(game_state.fen);
   });
 
   client = new Faye.Client('http://localhost:3000/game/' + game_id);
@@ -145,7 +143,4 @@ var initialize = function() {
       loadBoard(message.fen);
     }
   });
- 
-  generateBoard();
-  loadBoard(game_state.fen);
 }

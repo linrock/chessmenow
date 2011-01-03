@@ -2,7 +2,7 @@ var express = require('express'),
     redis = require('redis').createClient(),
     Faye = require('faye'),
     app = express.createServer(),
-    bayeux = new Faye.NodeAdapter({ mount: '/game/*', timeout: 120 });
+    bayeux = new Faye.NodeAdapter({ mount: '/game/*' });
 
 
 redis.on('error', function(err) {
@@ -55,17 +55,12 @@ app.get('/:game_id', function(req, res) {
   });
 });
 
-app.post('/:game_id/color', function(req, res) {
-  req.params.game_id;
-  res.send('1');
-});
-
 var moveMonitor = {
   incoming: function(message, callback) {
     console.log(message);
     if (message.data) {
       game_id = message.data.game_id;
-      if (game_id && message.channel.indexOf(game_id) > -1) {
+      if (game_id && message.channel.indexOf(game_id) > -1 && message.channel.indexOf('moves') > -1) {
         redis.get(game_id, function(err, reply) {
           game_state = JSON.parse(reply);
           game_state.fen = message.data.fen;
