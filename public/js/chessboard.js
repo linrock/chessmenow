@@ -31,7 +31,14 @@ var generateBoard = function(color) {
   $("#chessboard").html(board);
   $("td").click(function() {
     var position = $(this).attr('id');
+    var existing = chess.get(position);
     if (selected && chess.move(selected, position)) {
+      if (existing) {
+        if (!game_state.captured) {
+          game_state.captured = [];
+        }
+        game_state.captured.push(existing);
+      }
       movePiece(selected, position);
       checkGameState();
     }
@@ -84,7 +91,7 @@ var loadFen = function(fen) {
 
 var movePiece = function(from, to) {
   loadFen(chess.fen());
-  client.publish('/game/' + game_id + '/moves', { fen: chess.fen(), game_id: game_id });
+  client.publish('/game/' + game_id + '/moves', { fen: chess.fen(), captured: game_state.captured, game_id: game_id });
   checkGameState();
   selected = null;
 }
