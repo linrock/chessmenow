@@ -1,50 +1,51 @@
 var Chessboard = function(options) {
-  this.initial_position = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
-  this.selected = null;
-
-  this.state = (function() {
+  var self = this;
+  self.initial_position = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+  self.selected = null;
+  self.state = (function() {
     state = [];
     for (i in options) {
       state[i] = options[i];
     }
     return state;
   })();
+  
+  self.generateBoard();
+  self.loadFen(self.state.fen);
 
-  this.generate_board();
-  this.load_fen(this.state.fen);
-
-  $("#pick_white").click(function() {
-    this.color = 'w';
-    this.generate_board();
-    this.load_fen(this.state.fen);
-    client.publish('/game/' + game_id + '/colors', { game_id: game_id, color: 'w' });
-  });
-  $("#pick_black").click(function() {
-    this.color = 'b';
-    this.generate_board();
-    this.load_fen(this.state.fen);
-    client.publish('/game/' + game_id + '/colors', { game_id: game_id, color: 'b' });
-  });
-
-  this.client = new Faye.Client('http://localhost:3000/game/' + game_id);
-  this.client.subscribe('/game/' + game_id, function(message) {
+  self.client = new Faye.Client('http://localhost:3000/game/' + game_id);
+  self.client.subscribe('/game/' + game_id, function(message) {
     alert(message);
   });
-  this.client.subscribe('/game/' + game_id + '/moves', function(message) {
+  self.client.subscribe('/game/' + game_id + '/moves', function(message) {
     if (message.fen) {
-      loadBoard(message.fen);
+      self.loadFen(message.fen);
     }
+  });
+  
+  $("#pick_white").click(function() {
+    self.color = 'w';
+    self.generateBoard();
+    self.loadFen(self.state.fen);
+    self.client.publish('/game/' + game_id + '/colors', { game_id: game_id, color: 'w' });
+  });
+  $("#pick_black").click(function() {
+    self.color = 'b';
+    self.generateBoard();
+    self.loadFen(self.state.fen);
+    self.client.publish('/game/' + game_id + '/colors', { game_id: game_id, color: 'b' });
   });
 };
 
 Chessboard.prototype = new Chess();
 Chessboard.prototype.constructor = Chessboard;
 
-Chessboard.prototype.load_fen = function(fen) {
+Chessboard.prototype.loadFen = function(fen) {
   if (!fen) {
     fen = this.initial_position;
   }
   this.load(fen);
+  this.state.fen = fen;
   rows = fen.split(' ')[0].split('/');
   var cols = 'abcdefgh';
   var row_num = 8;
@@ -66,24 +67,24 @@ Chessboard.prototype.load_fen = function(fen) {
     }
     --row_num;
   }
-  this.check_game_state();
+  this.checkGameState();
 };
 
-Chessboard.prototype.move_to = function(to) {
+Chessboard.prototype.moveTo = function(to) {
   var existing = this.get(to);
   if (this.selected && this.move(this.selected, to)) {
     this.client.publish('/game/' + game_id + '/moves', {
       fen: this.fen(),
-      captured: game_state.captured,
+      captured: this.state.captured,
       game_id: game_id
     });
-    this.load_fen(this.fen());
-    this.check_game_state();
+    this.loadFen(this.fen());
+    this.checkGameState();
     selected = null;
   }
 };
 
-Chessboard.prototype.check_game_state = function() {
+Chessboard.prototype.checkGameState = function() {
   if (this.in_checkmate() && this.turn() == 'w') {
     $("#turn").text("CHECKMATE - Black wins!");
   } else if (this.in_checkmate() && this.turn() == 'b') {
@@ -101,15 +102,15 @@ Chessboard.prototype.check_game_state = function() {
   }
 }
 
-Chessboard.prototype.piece_exists_at = function(position) {
+Chessboard.prototype.pieceExistsAt = function(position) {
   return this.get(position) !== null;
 };
 
-Chessboard.prototype.get_piece_color = function(position) {
+Chessboard.prototype.getPieceColor = function(position) {
   var whites = 'PRNBQK';
   var blacks = 'prnbqk';
   var className = this.get(position);
-  if (this.piece_exists_at(position)) {
+  if (this.pieceExistsAt(position)) {
     if (whites.indexOf(className) > -1) {
       return 'w';
     } else if (blacks.indexOf(className) > -1) {
@@ -118,11 +119,11 @@ Chessboard.prototype.get_piece_color = function(position) {
   }
 }
 
-Chessboard.prototype.is_your_piece = function(position) {
-  return this.piece_exists_at(position) && this.get_piece_color(position) === this.turn();
+Chessboard.prototype.isYourPiece = function(position) {
+  return this.pieceExistsAt(position) && this.getPieceColor(position) === this.turn();
 }
 
-Chessboard.prototype.generate_board = function() {
+Chessboard.prototype.generateBoard = function() {
   var cols;
   var rows;
   var self = this;
@@ -145,7 +146,7 @@ Chessboard.prototype.generate_board = function() {
   $("#chessboard").html(board);
   $("td").click(function() {
     var position = $(this).attr('id');
-    if (self.is_your_piece(position)) {
+    if (self.isYourPiece(position)) {
       if ($(this).hasClass('selected')) {
         $(this).removeClass('selected');
         self.selected = null;
@@ -154,7 +155,7 @@ Chessboard.prototype.generate_board = function() {
         self.selected = position;
       }
     } else {
-      self.move_to(position);
+      self.moveTo(position);
     }
     $("td").not(this).removeClass("selected");
   });

@@ -7,8 +7,6 @@ h2#turn
   input(type="submit", value="black", id="pick_black")
 
 :javascript
-  | var board = new Chessboard(!{game_state});
   | var game_id = "#{game_id}";
-  | var game_state = !{game_state};
+  | var board = new Chessboard(!{game_state});
   | var your_color = "#{your_color}";
-  | var selected;
