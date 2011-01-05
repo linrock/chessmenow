@@ -15,6 +15,20 @@
   +container
   .name
     font-size: 14pt
+  #choose-white
+    border: 2px solid black
+    width: 200px
+    font-size: 16pt
+  #choose-black
+    border: 2px solid black
+    width: 200px
+    font-size: 16pt
+  #white-name
+    display: none
+    font-size: 16pt
+  #black-name
+    display: none
+    font-size: 16pt
   table#chessboard
     width: 400px
     height: 400px
@@ -28,10 +42,8 @@
       margin: 0
       padding: 0
     .white-tile
-      // background: white
       background-color: #FFCE9E
     .black-tile
-      // background: lightgray
       background-color: #D18B47
     .selected
       background-color: yellow !important
@@ -63,3 +75,5 @@
       background-position: -180px 45px
     .k
       background-position: -225px 45px
+  #misc
+    margin-top: 20px

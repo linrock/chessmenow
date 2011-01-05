@@ -1,14 +1,16 @@
-#player1.name
-  | GeorgeWashington
-table#chessboard(cellpadding=0, cellspacing=0)
-#player2.name
-  | AbrahamLincoln (you)
+// #player1.name GeorgeWashington
+#tablearea
+  #black-side
+    #black-name Black
+    input#choose-black(type="submit", value="Choose Black", data-color="b")
+  table#chessboard(cellpadding=0, cellspacing=0)
+  #white-side
+    input#choose-white(type="submit", value="Choose White", data-color="w")
+    #white-name White
+// #player2.name AbrahamLincoln (you)
 
-h2#turn
-#table_info
-  | Pick a color:
-  input(type="submit", value="white", id="pick_white")
-  input(type="submit", value="black", id="pick_black")
+#misc
+  h2#turn
 
 :javascript
   | var game_id = "#{game_id}";

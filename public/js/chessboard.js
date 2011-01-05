@@ -1,6 +1,5 @@
 var Chessboard = function(options) {
   var self = this;
-  self.initial_position = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
   self.selected = null;
   self.state = (function() {
     state = [];
@@ -26,17 +25,25 @@ var Chessboard = function(options) {
     return c;
   })();
   
-  $("#pick_white").click(function() {
+  $("#choose-white").click(function() {
     self.color = 'w';
     self.generateBoard();
     self.loadFen(self.state.fen);
     self.client.publish('/game/' + game_id + '/colors', { game_id: game_id, color: 'w' });
+    $(this).hide();
+    $("#black-name").hide();
+    $("#white-name").show();
+    $("#choose-black").show();
   });
-  $("#pick_black").click(function() {
+  $("#choose-black").click(function() {
     self.color = 'b';
     self.generateBoard();
     self.loadFen(self.state.fen);
     self.client.publish('/game/' + game_id + '/colors', { game_id: game_id, color: 'b' });
+    $(this).hide();
+    $("#white-name").hide();
+    $("#black-name").show();
+    $("#choose-white").show();
   });
 };
 
@@ -45,7 +52,7 @@ Chessboard.prototype.constructor = Chessboard;
 
 Chessboard.prototype.loadFen = function(fen) {
   if (!fen) {
-    fen = this.initial_position;
+    fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
   }
   this.load(fen);
   this.state.fen = fen;
@@ -88,20 +95,22 @@ Chessboard.prototype.moveTo = function(to) {
 };
 
 Chessboard.prototype.checkGameState = function() {
-  if (this.in_checkmate() && this.turn() == 'w') {
-    $("#turn").text("CHECKMATE - Black wins!");
-  } else if (this.in_checkmate() && this.turn() == 'b') {
-    $("#turn").text("CHECKMATE - White wins!");
-  } else if (this.in_check()) {
-    $("#turn").text("Check!");
-  } else if (this.in_stalemate()) {
-    $("#turn").text("Stalemate!");
-  } else if (this.turn() == this.color) {
-    $("#turn").text("Your turn!");
-  } else if (this.turn() == 'w') {
-    $("#turn").text("White's turn");
-  } else if (this.turn() == 'b') {
-    $("#turn").text("Black's turn");
+  if (this.state.started) {
+    if (this.in_checkmate() && this.turn() == 'w') {
+      $("#turn").text("CHECKMATE - Black wins!");
+    } else if (this.in_checkmate() && this.turn() == 'b') {
+      $("#turn").text("CHECKMATE - White wins!");
+    } else if (this.in_check()) {
+      $("#turn").text("Check!");
+    } else if (this.in_stalemate()) {
+      $("#turn").text("Stalemate!");
+    } else if (this.turn() == this.color) {
+      $("#turn").text("Your turn!");
+    } else if (this.turn() == 'w') {
+      $("#turn").text("White's turn");
+    } else if (this.turn() == 'b') {
+      $("#turn").text("Black's turn");
+    }
   }
 }
 
@@ -141,6 +150,13 @@ Chessboard.prototype.generateBoard = function() {
     board += '</tr>';
   }
   $("#chessboard").html(board);
+  if (self.color == 'b') {
+    $("#white-side").insertBefore("#chessboard");
+    $("#black-side").insertAfter("#chessboard");
+  } else {
+    $("#black-side").insertBefore("#chessboard");
+    $("#white-side").insertAfter("#chessboard");
+  }
   $("td").click(function() {
     var position = $(this).attr('id');
     if (self.isYourPiece(position)) {
