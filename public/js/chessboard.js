@@ -107,15 +107,9 @@ Chessboard.prototype.pieceExistsAt = function(position) {
 };
 
 Chessboard.prototype.getPieceColor = function(position) {
-  var whites = 'PRNBQK';
-  var blacks = 'prnbqk';
-  var className = this.get(position);
-  if (this.pieceExistsAt(position)) {
-    if (whites.indexOf(className) > -1) {
-      return 'w';
-    } else if (blacks.indexOf(className) > -1) {
-      return 'b';
-    }
+  var piece = this.get(position);
+  if (piece) {
+    return piece.toLowerCase() === piece ? 'b' : 'w';
   }
 }
 
