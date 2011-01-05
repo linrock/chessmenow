@@ -1,15 +1,71 @@
 var startingPosition = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 
-var loadBoard = function(fen) {
-  if (!fen) {
-    fen = startingPosition;
+var Chessboard = function() {
+  this.selected = null;
+};
+Chessboard.prototype = new Chess();
+
+Chessboard.prototype.load = function(fen) {
+  Chess.call(this, fen);
+  this.load_fen(fen);
+  this.check_game_state();
+};
+
+Chessboard.prototype.load_fen = function(fen) {
+  rows = fen.split(' ')[0].split('/');
+  var cols = 'abcdefgh';
+  var row_num = 8;
+  var col_num;
+  for (i in rows) {
+    col_num = 0;
+    for (j in rows[i]) {
+      if (rows[i][j] >= 1) {
+        num_cols = parseInt(rows[i][j]);
+        for (var k=0 ; k < num_cols; ++k) {
+          $("#" + cols[col_num] + row_num + " > div").removeClass();
+          ++col_num;
+        }
+      } else {
+        $("#" + cols[col_num++] + row_num + " > div")
+          .removeClass()
+          .addClass('piece ' + rows[i][j]);
+      }
+    }
+    --row_num;
   }
-  chess.load(fen);
-  loadFen(fen);
-  checkGameState();
+};
+
+Chessboard.prototype.check_game_state = function() {
+  if (this.in_checkmate() && this.turn() == 'w') {
+    $("#turn").text("CHECKMATE - Black wins!");
+  } else if (this.in_checkmate() && this.turn() == 'b') {
+    $("#turn").text("CHECKMATE - White wins!");
+  } else if (this.in_check()) {
+    $("#turn").text("Check!");
+  } else if (this.in_stalemate()) {
+    $("#turn").text("Stalemate!");
+  } else if (this.turn() == your_color) {
+    $("#turn").text("Your turn!");
+  } else if (this.turn() == 'w') {
+    $("#turn").text("White's turn");
+  } else if (this.turn() == 'b') {
+    $("#turn").text("Black's turn");
+  }
 }
 
-var generateBoard = function(color) {
+Chessboard.prototype.piece_exists_at = function(position) {
+  return this.get(position) !== null;
+};
+
+Chessboard.prototype.move = function(from, to) {
+  if (this.selected && Chess.call(this, from, to)) {
+    client.publish('/game/' + game_id + '/moves', { fen: this.fen(), captured: game_state.captured, game_id: game_id });
+    this.check_game_state();
+    selected = null;
+  }
+};
+
+Chessboard.prototype.generate_board = function(color) {
   var cols;
   var rows;
   if (color == 'b') {
@@ -64,6 +120,61 @@ var generateBoard = function(color) {
     your_color = 'b';
     generateBoard(your_color);
     loadBoard(game_state.fen);
+  });
+};
+
+var loadBoard = function(fen) {
+  if (!fen) {
+    fen = startingPosition;
+  }
+  chess.load(fen);
+  loadFen(fen);
+  checkGameState();
+}
+
+var generateBoard = function(color) {
+  var cols;
+  var rows;
+  if (color == 'b') {
+    cols = '12345678';
+    rows = 'hgfedcba';
+  } else {
+    cols = '87654321';
+    rows = 'abcdefgh';
+  }
+  var board = '';
+  for (var i in cols) {
+    board += '<tr>';
+    for (var j in rows) {
+      var tileco = ((parseInt(cols[i])+rows[j].charCodeAt(0)) % 2 == 1) ? 'white-tile' : 'black-tile';
+      board += '<td width="45px" height="45px" id="' + rows[j] + cols[i] + '" class="' + tileco + '"><div></div></td>';
+    }
+    board += '</tr>';
+  }
+  $("#chessboard").html(board);
+  $("td").click(function() {
+    var position = $(this).attr('id');
+    var existing = chess.get(position);
+    if (selected && chess.move(selected, position)) {
+      if (existing) {
+        if (!game_state.captured) {
+          game_state.captured = [];
+        }
+        game_state.captured.push(existing);
+      }
+      movePiece(selected, position);
+      checkGameState();
+    }
+    else if (isYourPiece(position)) {
+      if (!$(this).hasClass('selected')) {
+        $(this).addClass('selected');
+        selected = position;
+      } else {
+        $(this).removeClass('selected');
+        selected = null;
+      }
+    }
+    $("td").not(this).removeClass("selected");
   });
 }
 
@@ -138,6 +249,19 @@ var isYourPiece = function(position) {
 var initialize = function() {
   generateBoard();
   loadBoard(game_state.fen);
+  
+  $("#pick_white").click(function() {
+    client.publish('/game/' + game_id + '/colors', { game_id: game_id, color: 'w' });
+    your_color = 'w';
+    generateBoard(your_color);
+    loadBoard(game_state.fen);
+  });
+  $("#pick_black").click(function() {
+    client.publish('/game/' + game_id + '/colors', { game_id: game_id, color: 'b' });
+    your_color = 'b';
+    generateBoard(your_color);
+    loadBoard(game_state.fen);
+  });
 
   client = new Faye.Client('http://localhost:3000/game/' + game_id);
   client.subscribe('/game/' + game_id, function(message) {
