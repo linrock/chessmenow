@@ -21,23 +21,13 @@ app.configure(function() {
   });
 });
 
-var getKeys = function(obj){
-   var keys = [];
-   for(var key in obj){
-      if (obj.hasOwnProperty(key)) {
-        keys.push(key);
-      }
-   }
-   return keys;
-}
-
 app.get('/', function(req, res) {
-  console.dir(getKeys(req))
-  console.dir(req.sessionID)
+  console.log(req.sessionID + ' has joined the party!')
   res.render('index');
 });
 
 app.get('/:game_id', function(req, res) {
+  console.log(req.sessionID + ' has joined the party!')
   redis.get(req.params.game_id, function(err, reply) {
     if (!reply) {
       game_state = JSON.stringify({ started: false, created_at: (new Date()).toString() });

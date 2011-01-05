@@ -13,15 +13,18 @@ var Chessboard = function(options) {
   self.generateBoard();
   self.loadFen(self.state.fen);
 
-  self.client = new Faye.Client('http://localhost:3000/game/' + game_id);
-  self.client.subscribe('/game/' + game_id, function(message) {
-    alert(message);
-  });
-  self.client.subscribe('/game/' + game_id + '/moves', function(message) {
-    if (message.fen) {
-      self.loadFen(message.fen);
-    }
-  });
+  self.client = (function() {
+    var c = new Faye.Client('http://localhost:3000/game/' + game_id);
+    c.subscribe('/game/' + game_id, function(message) {
+      alert(message);
+    });
+    c.subscribe('/game/' + game_id + '/moves', function(message) {
+      if (message.fen) {
+        self.loadFen(message.fen);
+      }
+    });
+    return c;
+  })();
   
   $("#pick_white").click(function() {
     self.color = 'w';
@@ -93,7 +96,7 @@ Chessboard.prototype.checkGameState = function() {
     $("#turn").text("Check!");
   } else if (this.in_stalemate()) {
     $("#turn").text("Stalemate!");
-  } else if (this.turn() == this.your_color) {
+  } else if (this.turn() == this.color) {
     $("#turn").text("Your turn!");
   } else if (this.turn() == 'w') {
     $("#turn").text("White's turn");
