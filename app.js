@@ -48,6 +48,11 @@ app.get('/:game_id', function(req, res) {
 var stateRecorder = {
   incoming: function(message, callback) {
     console.dir(message);
+    // console.log('#Subscribers: ' + bayeux.countSubscribers())
+    console.dir(bayeux)
+    // console.dir(bayeux._server._connections)
+    // console.dir(bayeux._server._channels)
+    // console.dir(bayeux._server._channels._children.game._children.asdf.countSubscribers('message'))
     if (message.data) {
       game_id = message.data.game_id;
       if (game_id && message.channel.indexOf(game_id) > -1 && message.channel.indexOf('moves') > -1) {
@@ -59,6 +64,8 @@ var stateRecorder = {
           redis.set(game_id, JSON.stringify(game_state));
           callback(message);
         });
+      } else {
+        console.dir(message.data);
       }
     }
     return callback(message);

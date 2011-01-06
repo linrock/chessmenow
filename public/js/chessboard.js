@@ -24,13 +24,14 @@ var Chessboard = function(options, player) {
   self.client = (function() {
     var c = new Faye.Client('http://localhost:3000/game/' + game_id);
     c.subscribe('/game/' + game_id, function(message) {
-      alert(message);
+      alert(JSON.stringify(message));
     });
     c.subscribe('/game/' + game_id + '/moves', function(message) {
       if (message.fen) {
         self.loadFen(message.fen);
       }
     });
+    c.publish('/game/' + game_id, { game_id: game_id, id: self.player.id });
     return c;
   })();
   
@@ -38,7 +39,10 @@ var Chessboard = function(options, player) {
     self.player.color = 'w';
     self.generateBoard();
     self.loadFen(self.state.fen);
-    self.client.publish('/game/' + game_id + '/colors', { game_id: game_id, color: 'w' });
+    self.client.publish('/game/' + game_id + '/colors', {
+      game_id: game_id,
+      color: 'w'
+    });
     $(this).hide();
     $("#black-name").hide();
     $("#white-name").show();
@@ -48,7 +52,10 @@ var Chessboard = function(options, player) {
     self.player.color = 'b';
     self.generateBoard();
     self.loadFen(self.state.fen);
-    self.client.publish('/game/' + game_id + '/colors', { game_id: game_id, color: 'b' });
+    self.client.publish('/game/' + game_id + '/colors', {
+      game_id: game_id,
+      color: 'b'
+    });
     $(this).hide();
     $("#white-name").hide();
     $("#black-name").show();
