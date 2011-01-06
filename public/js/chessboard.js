@@ -1,10 +1,17 @@
-var Chessboard = function(options) {
+var Chessboard = function(options, player) {
   var self = this;
   self.selected = null;
 
-  self.player = [];
+  self.player = (function() {
+    p = new Object();
+    for (i in player) {
+      p[i] = player[i];
+    }
+    return p;
+  })();
+
   self.state = (function() {
-    state = [];
+    state = new Object();
     for (i in options) {
       state[i] = options[i];
     }
@@ -85,6 +92,12 @@ Chessboard.prototype.loadFen = function(fen) {
 Chessboard.prototype.moveTo = function(to) {
   var existing = this.get(to);
   if (this.selected && this.move(this.selected, to)) {
+    if (existing) {
+      if (!this.state.captured) {
+        this.state.captured = [];
+      }
+      this.state.captured.push(existing);
+    }
     this.client.publish('/game/' + game_id + '/moves', {
       fen: this.fen(),
       captured: this.state.captured,
