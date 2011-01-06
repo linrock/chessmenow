@@ -110,6 +110,7 @@ Chessboard.prototype.moveTo = function(to) {
 };
 
 Chessboard.prototype.checkGameState = function() {
+  this.showCaptured();
   if (this.state.started) {
     if (this.in_checkmate() && this.turn() == this.player.color) {
       $("#turn").text("CHECKMATE - You win!");
@@ -189,9 +190,16 @@ Chessboard.prototype.generateBoard = function() {
 };
 
 Chessboard.prototype.showCaptured = function() {
-  var captured = '';
+  var w_captured = '';
+  var b_captured = '';
   for (i in this.state.captured) {
-    captured += '<div class="piece ' + this.state.captured[i] + '" style="float: left"></div>';
+    var piece = this.state.captured[i];
+    if (piece.toLowerCase() === piece) {
+      b_captured += '<div class="piece ' + this.state.captured[i] + '" style="float: left"></div>';
+    } else {
+      w_captured += '<div class="piece ' + this.state.captured[i] + '" style="float: left"></div>';
+    }
   }
-  $("#captured").html(captured);
+  $("#white-captured").html(b_captured);
+  $("#black-captured").html(w_captured);
 }
