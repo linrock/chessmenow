@@ -187,3 +187,11 @@ Chessboard.prototype.generateBoard = function() {
     $("td").not(this).removeClass("selected");
   });
 };
+
+Chessboard.prototype.showCaptured = function() {
+  var captured = '';
+  for (i in this.state.captured) {
+    captured += '<div class="piece ' + this.state.captured[i] + '" style="float: left"></div>';
+  }
+  $("#captured").html(captured);
+}
