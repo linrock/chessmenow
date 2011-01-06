@@ -47,7 +47,7 @@ app.get('/:game_id', function(req, res) {
 
 var stateRecorder = {
   incoming: function(message, callback) {
-    // console.log(message);
+    console.log(message);
     if (message.data) {
       game_id = message.data.game_id;
       if (game_id && message.channel.indexOf(game_id) > -1 && message.channel.indexOf('moves') > -1) {

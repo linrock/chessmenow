@@ -1,6 +1,8 @@
 var Chessboard = function(options) {
   var self = this;
   self.selected = null;
+
+  self.player = [];
   self.state = (function() {
     state = [];
     for (i in options) {
@@ -26,7 +28,7 @@ var Chessboard = function(options) {
   })();
   
   $("#choose-white").click(function() {
-    self.color = 'w';
+    self.player.color = 'w';
     self.generateBoard();
     self.loadFen(self.state.fen);
     self.client.publish('/game/' + game_id + '/colors', { game_id: game_id, color: 'w' });
@@ -36,7 +38,7 @@ var Chessboard = function(options) {
     $("#choose-black").show();
   });
   $("#choose-black").click(function() {
-    self.color = 'b';
+    self.player.color = 'b';
     self.generateBoard();
     self.loadFen(self.state.fen);
     self.client.publish('/game/' + game_id + '/colors', { game_id: game_id, color: 'b' });
@@ -104,7 +106,7 @@ Chessboard.prototype.checkGameState = function() {
       $("#turn").text("Check!");
     } else if (this.in_stalemate()) {
       $("#turn").text("Stalemate!");
-    } else if (this.turn() == this.color) {
+    } else if (this.turn() == this.player.color) {
       $("#turn").text("Your turn!");
     } else if (this.turn() == 'w') {
       $("#turn").text("White's turn");
@@ -130,15 +132,12 @@ Chessboard.prototype.isYourPiece = function(position) {
 }
 
 Chessboard.prototype.generateBoard = function() {
-  var cols;
-  var rows;
+  var cols = '87654321';
+  var rows = 'abcdefgh';
   var self = this;
-  if (self.color == 'b') {
-    cols = '12345678';
-    rows = 'hgfedcba';
-  } else {
-    cols = '87654321';
-    rows = 'abcdefgh';
+  if (self.player.color == 'b') {
+    cols = cols.split('').reverse().join('');
+    rows = rows.split('').reverse().join('');
   }
   var board = '';
   for (var i in cols) {
@@ -150,7 +149,7 @@ Chessboard.prototype.generateBoard = function() {
     board += '</tr>';
   }
   $("#chessboard").html(board);
-  if (self.color == 'b') {
+  if (self.player.color == 'b') {
     $("#white-side").insertBefore("#chessboard");
     $("#black-side").insertAfter("#chessboard");
   } else {
