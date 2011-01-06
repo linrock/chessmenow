@@ -4,20 +4,21 @@
     #black-captured
     button#choose-black.choose Choose Black
   .clear
-  table#chessboard(cellpadding=0, cellspacing=0)
+  #middlearea
+    #chessboard
+    #misc
+      #captured
+      .clear
+      h2#turn Awesome guy's turn
+      .clear
+      .success Some awesome dude has connected to the game.
+      .success GeorgeWashington has connected to the game.
   .clear
   #white-side.color-info
     button#choose-white.choose Choose White
     #white-name.color-name White
     #white-captured
   // #turn-indicator lol
-#misc
-  #captured
-  .clear
-  h2#turn
-  .clear
-  .success Some awesome dude has connected to the game.
-  .success GeorgeWashington has connected to the game.
 
 :javascript
   | var game_id = "#{game_id}";

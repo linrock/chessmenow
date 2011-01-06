@@ -155,7 +155,7 @@ Chessboard.prototype.generateBoard = function() {
     cols = cols.split('').reverse().join('');
     rows = rows.split('').reverse().join('');
   }
-  var board = '';
+  var board = '<table cellpadding=0 cellspacing=0>';
   for (var i in cols) {
     board += '<tr>';
     for (var j in rows) {
@@ -164,13 +164,14 @@ Chessboard.prototype.generateBoard = function() {
     }
     board += '</tr>';
   }
+  board += '</table>';
   $("#chessboard").html(board);
   if (self.player.color == 'b') {
-    $("#white-side").insertBefore("#chessboard");
-    $("#black-side").insertAfter("#chessboard");
+    $("#white-side").insertBefore("#middlearea");
+    $("#black-side").insertAfter("#middlearea");
   } else {
-    $("#black-side").insertBefore("#chessboard");
-    $("#white-side").insertAfter("#chessboard");
+    $("#black-side").insertBefore("#middlearea");
+    $("#white-side").insertAfter("#middlearea");
   }
   $("td").click(function() {
     var position = $(this).attr('id');
