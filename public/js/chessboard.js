@@ -111,7 +111,9 @@ Chessboard.prototype.moveTo = function(to) {
 
 Chessboard.prototype.checkGameState = function() {
   if (this.state.started) {
-    if (this.in_checkmate() && this.turn() == 'w') {
+    if (this.in_checkmate() && this.turn() == this.player.color) {
+      $("#turn").text("CHECKMATE - You win!");
+    } else if (this.in_checkmate() && this.turn() == 'w') {
       $("#turn").text("CHECKMATE - Black wins!");
     } else if (this.in_checkmate() && this.turn() == 'b') {
       $("#turn").text("CHECKMATE - White wins!");
