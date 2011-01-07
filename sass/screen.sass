@@ -36,6 +36,7 @@
         +column(24, true)
         #boardarea
           +column(10)
+          position: relative
           #chessboard
             width: 360px
             height: 360px
@@ -51,12 +52,22 @@
               background-color: #D18B47
             .selected
               background-color: yellow !important
-        button.choose
-          +fancy-button(#2966a8)
-          +column(6, true)
-          position: relative
-          border: 3px solid black
-          font-size: 16pt
+          button.choose
+            +fancy-button(#2966a8)
+            height: 45px
+            width: 180px
+            border: 3px solid black
+            font-size: 16pt
+          #choose-white
+            position: absolute
+            top: 135px + 4px
+            left: 90px + 4px
+          #choose-black
+            position: absolute
+            top: 180px + 4px
+            left: 90px + 4px
+            // top: -229px
+            // left: 94px
         #misc
           +column(12, true)
     .piece
