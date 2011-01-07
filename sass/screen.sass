@@ -16,7 +16,7 @@
 #header
   +append-bottom(20px)
   height: 80px
-  background-color: lightblue
+  // background-color: lightblue
   border-bottom: 2px solid black
 #wrapper
   +container
@@ -28,24 +28,21 @@
     +column(22, true)
     #tablearea
       .color-info
-        +column(24, true)
-        .color-name
-          display: none
-          font-size: 16pt
+        +column(22, true)
       #middlearea
-        +column(24, true)
+        +column(22, true)
         #boardarea
           +column(10)
           position: relative
           #chessboard
-            width: 360px
-            height: 360px
+            +float-left
+            width: 8*$tile-size
+            height: 8*$tile-size
             border: 4px solid black
-            float: left
             .tile
-              float: left
-              width: 45px
-              height: 45px
+              +float-left
+              width: $tile-size
+              height: $tile-size
             .white
               background-color: #FFCE9E
             .black
@@ -54,26 +51,41 @@
               background-color: yellow !important
           button.choose
             +fancy-button(#2966a8)
-            height: 45px
-            width: 180px
+            height: $tile-size
+            width: 4*$tile-size
             border: 3px solid black
             font-size: 16pt
           #choose-white
             position: absolute
-            top: 135px + 4px
-            left: 90px + 4px
+            top: 3*$tile-size + 4px
+            left: 2*$tile-size + 4px
           #choose-black
             position: absolute
-            top: 180px + 4px
-            left: 90px + 4px
-            // top: -229px
-            // left: 94px
+            top: 4*$tile-size + 4px
+            left: 2*$tile-size + 4px
         #misc
-          +column(12, true)
+          +column(11, true)
+          height: 8*$tile-size + 8px
+          border: 1px solid black
+          position: relative
+          #black-side
+            #black-name
+              position: absolute
+              top: 0px
+            #black-captured
+              position: absolute
+              top: 30px
+          #white-side
+            #white-name
+              position: absolute
+              bottom: 0px
+            #white-captured
+              position: absolute
+              bottom: 30px
     .piece
       background: url('/media/img/chesspieces.gif')
-      height: 45px
-      width: 45px
+      height: $tile-size
+      width: $tile-size
     .P
       background-position: 0px 0px
     .N
@@ -98,5 +110,34 @@
       background-position: -180px 45px
     .k
       background-position: -225px 45px
-    #turn-indicator
-      +prepend(-1)
+    .piece-small
+      background: url('/media/img/chesspieces_small.gif')
+      height: 30px
+      width: 30px
+    .P-small
+      background-position: 0px 0px
+    .N-small
+      background-position: -30px 0px
+    .B-small
+      background-position: -60px 0px
+    .R-small
+      background-position: -90px 0px
+    .Q-small
+      background-position: -120px 0px
+    .K-small
+      background-position: -150px 0px
+    .p-small
+      background-position: 0px 30px
+    .n-small
+      background-position: -30px 30px
+    .b-small
+      background-position: -60px 30px
+    .r-small
+      background-position: -90px 30px
+    .q-small
+      background-position: -120px 30px
+    .k-small
+      background-position: -150px 30px
+    .color-name
+      // display: none
+      font-size: 16pt

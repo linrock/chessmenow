@@ -18,9 +18,6 @@ var Chessboard = function(options, player) {
     return state;
   })();
   
-  self.generateBoard();
-  self.loadFen(self.state.fen);
-
   self.client = (function() {
     var c = new Faye.Client('http://localhost:3000/game/' + game_id);
     c.subscribe('/game/' + game_id, function(message) {
@@ -35,6 +32,9 @@ var Chessboard = function(options, player) {
     return c;
   })();
   
+  self.generateBoard();
+  self.loadFen(self.state.fen);
+
   $("#choose-white").click(function() {
     self.player.color = 'w';
     self.generateBoard();
@@ -76,9 +76,9 @@ Chessboard.prototype.loadFen = function(fen) {
   var cols = 'abcdefgh';
   var row_num = 8;
   var col_num;
-  for (i in rows) {
+  for (var i in rows) {
     col_num = 0;
-    for (j in rows[i]) {
+    for (var j in rows[i]) {
       if (rows[i][j] >= 1) {
         num_cols = parseInt(rows[i][j]);
         for (var k=0 ; k < num_cols; ++k) {
@@ -172,6 +172,7 @@ Chessboard.prototype.generateBoard = function() {
   }
   $("#chessboard").html(board);
 
+  /*
   if (self.player.color == 'b') {
     $("#white-side").insertBefore("#middlearea");
     $("#black-side").insertAfter("#middlearea");
@@ -179,6 +180,7 @@ Chessboard.prototype.generateBoard = function() {
     $("#black-side").insertBefore("#middlearea");
     $("#white-side").insertAfter("#middlearea");
   }
+  */
   $(".tile").click(function() {
     var position = $(this).attr('id');
     if (self.isYourPiece(position)) {
@@ -199,12 +201,12 @@ Chessboard.prototype.generateBoard = function() {
 Chessboard.prototype.showCaptured = function() {
   var w_captured = '';
   var b_captured = '';
-  for (i in this.state.captured) {
+  for (var i in this.state.captured) {
     var piece = this.state.captured[i];
     if (piece.toLowerCase() === piece) {
-      b_captured += '<div class="piece ' + this.state.captured[i] + '" style="float: left"></div>';
+      b_captured += '<div class="piece-small ' + this.state.captured[i] + '-small" style="float: left"></div>';
     } else {
-      w_captured += '<div class="piece ' + this.state.captured[i] + '" style="float: left"></div>';
+      w_captured += '<div class="piece-small ' + this.state.captured[i] + '-small" style="float: left"></div>';
     }
   }
   $("#white-captured").html(b_captured);

@@ -1,24 +1,16 @@
 #tablearea
-  #black-side.color-info
-    #black-name.color-name Black
-    #black-captured
-  .clear
   #middlearea
     #boardarea
       #chessboard
       button#choose-white.choose White
       button#choose-black.choose Black
     #misc
-      #captured
-      .clear
-      h2#turn Awesome guy's turn
-      .clear
-      .success Some awesome dude has connected to the game.
-      .success GeorgeWashington has connected to the game.
-  .clear
-  #white-side.color-info
-    #white-name.color-name White
-    #white-captured
+      #black-side.color-info
+        #black-name.color-name Black!
+        #black-captured
+      #white-side.color-info
+        #white-captured
+        #white-name.color-name White! (you)
 
 :javascript
   | var game_id = "#{game_id}";
