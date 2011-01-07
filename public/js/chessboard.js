@@ -155,23 +155,23 @@ Chessboard.prototype.isYourPiece = function(position) {
 }
 
 Chessboard.prototype.generateBoard = function() {
+  var self = this;
   var cols = '87654321';
   var rows = 'abcdefgh';
-  var self = this;
   if (self.player.color == 'b') {
     cols = cols.split('').reverse().join('');
     rows = rows.split('').reverse().join('');
   }
   var board = '';
+  var count = 0;
   for (var i in cols) {
-    board += '<tr>';
     for (var j in rows) {
-      var tileco = ((parseInt(cols[i])+rows[j].charCodeAt(0)) % 2 == 1) ? 'white-tile' : 'black-tile';
-      board += '<td width="45px" height="45px" id="' + rows[j] + cols[i] + '" class="' + tileco + '"><div></div></td>';
+      board += '<div id="' + rows[j]+cols[i] + '" class="tile ' + ((count++ % 2 == 0) ? 'white':'black') + '"><div></div></div>';
     }
-    board += '</tr>';
+    ++count;
   }
-  $("#chessboard table").html(board);
+  $("#chessboard").html(board);
+
   if (self.player.color == 'b') {
     $("#white-side").insertBefore("#middlearea");
     $("#black-side").insertAfter("#middlearea");
@@ -179,7 +179,7 @@ Chessboard.prototype.generateBoard = function() {
     $("#black-side").insertBefore("#middlearea");
     $("#white-side").insertAfter("#middlearea");
   }
-  $("td").click(function() {
+  $(".tile").click(function() {
     var position = $(this).attr('id');
     if (self.isYourPiece(position)) {
       if ($(this).hasClass('selected')) {
@@ -192,7 +192,7 @@ Chessboard.prototype.generateBoard = function() {
     } else {
       self.moveTo(position);
     }
-    $("td").not(this).removeClass("selected");
+    $(".tile").not(this).removeClass("selected");
   });
 };
 
