@@ -44,8 +44,8 @@ var Chessboard = function(options, player) {
       color: 'w'
     });
     $(this).hide();
-    $("#black-name").hide();
-    $("#white-name").show();
+    $("#top-name").hide();
+    $("#bottom-name").show();
     $("#choose-black").show();
   });
   $("#choose-black").click(function() {
@@ -57,8 +57,8 @@ var Chessboard = function(options, player) {
       color: 'b'
     });
     $(this).hide();
-    $("#white-name").hide();
-    $("#black-name").show();
+    $("#top-name").hide();
+    $("#bottom-name").show();
     $("#choose-white").show();
   });
 };
@@ -209,6 +209,11 @@ Chessboard.prototype.showCaptured = function() {
       w_captured += '<div class="piece-small ' + this.state.captured[i] + '-small" style="float: left"></div>';
     }
   }
-  $("#white-captured").html(b_captured);
-  $("#black-captured").html(w_captured);
+  if (this.player && this.player.color == 'b') {
+    $("#top-captured").html(b_captured);
+    $("#bottom-captured").html(w_captured);
+  } else {
+    $("#top-captured").html(w_captured);
+    $("#bottom-captured").html(b_captured);
+  }
 }
