@@ -24,6 +24,8 @@
   #header
     margin: 20px 0 50px 0
   #content
+    +push(1)
+    +column(22, true)
     #tablearea
       .color-info
         +column(24, true)
@@ -32,27 +34,29 @@
           font-size: 16pt
       #middlearea
         +column(24, true)
+        #boardarea
+          +column(10)
+          #chessboard
+            width: 360px
+            height: 360px
+            border: 4px solid black
+            float: left
+            .tile
+              float: left
+              width: 45px
+              height: 45px
+            .white
+              background-color: #FFCE9E
+            .black
+              background-color: #D18B47
+            .selected
+              background-color: yellow !important
         button.choose
           +fancy-button(#2966a8)
           +column(6, true)
           position: relative
           border: 3px solid black
           font-size: 16pt
-        #chessboard
-          +column(11)
-          width: 360px
-          height: 360px
-          border: 4px solid black
-          .tile
-            float: left
-            width: 45px
-            height: 45px
-          .white
-            background-color: #FFCE9E
-          .black
-            background-color: #D18B47
-          .selected
-            background-color: yellow !important
         #misc
           +column(12, true)
     .piece
