@@ -162,7 +162,7 @@ Chessboard.prototype.generateBoard = function() {
     cols = cols.split('').reverse().join('');
     rows = rows.split('').reverse().join('');
   }
-  var board = '<table cellpadding=0 cellspacing=0>';
+  var board = '';
   for (var i in cols) {
     board += '<tr>';
     for (var j in rows) {
@@ -171,8 +171,7 @@ Chessboard.prototype.generateBoard = function() {
     }
     board += '</tr>';
   }
-  board += '</table>';
-  $("#chessboard").html(board);
+  $("#chessboard table").html(board);
   if (self.player.color == 'b') {
     $("#white-side").insertBefore("#middlearea");
     $("#black-side").insertAfter("#middlearea");
