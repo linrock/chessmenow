@@ -38,36 +38,28 @@ var Chessboard = function(options, player) {
   $("#choose-white").click(function() {
     self.player.color = 'w';
     self.generateBoard();
+    $(this).hide();
+    $("#top-name").hide().removeClass().addClass('black-player');
+    $("#bottom-name").show().removeClass().addClass('white-player');
+    $("#choose-black").show();
     self.loadFen(self.state.fen);
     self.client.publish('/game/' + game_id + '/colors', {
       game_id: game_id,
       color: 'w'
     });
-    $(this).hide();
-    $("#top-name").hide();
-    $("#top-name").removeClass();
-    $("#top-name").addClass('black-player');
-    $("#bottom-name").show();
-    $("#bottom-name").removeClass();
-    $("#bottom-name").addClass('white-player');
-    $("#choose-black").show();
   });
   $("#choose-black").click(function() {
     self.player.color = 'b';
     self.generateBoard();
+    $(this).hide();
+    $("#top-name").hide().removeClass().addClass('white-player');
+    $("#bottom-name").show().removeClass().addClass('black-player');
+    $("#choose-white").show();
     self.loadFen(self.state.fen);
     self.client.publish('/game/' + game_id + '/colors', {
       game_id: game_id,
       color: 'b'
     });
-    $(this).hide();
-    $("#top-name").hide();
-    $("#top-name").removeClass();
-    $("#top-name").addClass('white-player');
-    $("#bottom-name").show();
-    $("#bottom-name").removeClass();
-    $("#bottom-name").addClass('black-player');
-    $("#choose-white").show();
   });
 };
 
@@ -191,16 +183,6 @@ Chessboard.prototype.generateBoard = function() {
     ++count;
   }
   $("#chessboard").html(board);
-
-  /*
-  if (self.player.color == 'b') {
-    $("#white-side").insertBefore("#middlearea");
-    $("#black-side").insertAfter("#middlearea");
-  } else {
-    $("#black-side").insertBefore("#middlearea");
-    $("#white-side").insertAfter("#middlearea");
-  }
-  */
   $(".tile").click(function() {
     var position = $(this).attr('id');
     if (self.isYourPiece(position)) {
