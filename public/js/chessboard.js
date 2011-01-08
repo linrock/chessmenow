@@ -11,7 +11,7 @@ var Chessboard = function(options, player) {
   })();
 
   self.state = (function() {
-    state = new Object();
+    state = { captured: [] };
     for (i in options) {
       state[i] = options[i];
     }
@@ -99,9 +99,6 @@ Chessboard.prototype.moveTo = function(to) {
   var existing = this.get(to);
   if (this.selected && this.move(this.selected, to)) {
     if (existing) {
-      if (!this.state.captured) {
-        this.state.captured = [];
-      }
       this.state.captured.push(existing);
     }
     this.client.publish('/game/' + game_id + '/moves', {
