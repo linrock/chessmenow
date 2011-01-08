@@ -14,9 +14,8 @@
 +blueprint-scaffolding
 
 #header
-  +append-bottom(20px)
+  +append-bottom(30px)
   height: 100px
-  // background-color: lightblue
   font-family: 'Yanone Kaffeesatz', sans-serif
   background-color: $bg-color1
   border-bottom: 4px solid black
@@ -34,8 +33,7 @@
   #header
     margin: 20px 0 50px 0
   #content
-    +push(1)
-    +column(22, true)
+    +column(24, true)
     button#new-game
       +fancy-button($button-color1)
       border: 3px solid black
@@ -43,66 +41,66 @@
     #tablearea
       .color-info
         +column(22, true)
-      #middlearea
-        +column(22, true)
-        #boardarea
-          +column(10)
-          position: relative
-          #chessboard
+        font-size: 16pt
+      #boardarea
+        +column(10)
+        position: relative
+        #chessboard
+          +float-left
+          width: 8*$tile-size
+          height: 8*$tile-size
+          border: 4px solid black
+          .tile
             +float-left
-            width: 8*$tile-size
-            height: 8*$tile-size
-            border: 4px solid black
-            .tile
-              +float-left
-              width: $tile-size
-              height: $tile-size
-            .white
-              background-color: #FFCE9E
-              // background-color: #ffc675
-            .black
-              background-color: #D18B47
-              // background-color: #c2410a
-            .selected
-              background-color: yellow !important
-          button.choose
-            +fancy-button($button-color1)
+            width: $tile-size
             height: $tile-size
-            width: 4*$tile-size
-            border: 3px solid black
-            font-size: 16pt
-          #choose-white
-            position: absolute
-            top: 3*$tile-size + 4px
-            left: 2*$tile-size + 4px
-          #choose-black
-            position: absolute
-            top: 4*$tile-size + 4px
-            left: 2*$tile-size + 4px
-        #misc
-          +column(11, true)
-          height: 8*$tile-size + 8px
-          position: relative
-          #top-side
-            position: absolute
-            top: 0px
-            #top-name
-              +float-left
-            #top-captured
-              +float-left
-          #bottom-side
-            position: absolute
-            bottom: 0px
-            #bottom-name
-              +float-left
-            #bottom-captured
-              +float-left
-          #turn-indicator
+          .white
+            background-color: #FFCE9E
+            // background-color: #ffc675
+          .black
+            background-color: #D18B47
+            // background-color: #c2410a
+          .selected
+            background-color: yellow !important
+        button.choose
+          +fancy-button($button-color1)
+          height: $tile-size
+          width: 4*$tile-size
+          border: 3px solid black
+          font-size: 16pt
+        #choose-white
+          position: absolute
+          top: 3*$tile-size + 4px
+          left: 2*$tile-size + 4px
+        #choose-black
+          position: absolute
+          top: 4*$tile-size + 4px
+          left: 2*$tile-size + 4px
+      #infoarea
+        +column(11, true)
+        height: 8*$tile-size + 8px
+        position: relative
+        #top-side
+          position: absolute
+          top: 0px
+          #top-name
             +float-left
-            margin-left: 20px
-            background: url('/media/img/left.gif')
-            width: 60px
-            height: 32px
+          #top-captured
+            +float-left
+        #bottom-side
+          position: absolute
+          bottom: 0px
+          #bottom-name
+            +float-left
+          #bottom-captured
+            +float-left
+        .turn-indicator
+          +float-left
+          display: none
+          margin-left: 20px
+          background: url('/media/img/left.gif')
+          width: 60px
+          height: 32px
     .piece
       background: url('/media/img/chesspieces.gif')
       height: $tile-size
@@ -159,6 +157,3 @@
       background-position: -120px 30px
     .k-small
       background-position: -150px 30px
-    .color-name
-      // display: none
-      font-size: 16pt

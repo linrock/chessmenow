@@ -45,7 +45,11 @@ var Chessboard = function(options, player) {
     });
     $(this).hide();
     $("#top-name").hide();
+    $("#top-name").removeClass();
+    $("#top-name").addClass('black-player');
     $("#bottom-name").show();
+    $("#bottom-name").removeClass();
+    $("#bottom-name").addClass('white-player');
     $("#choose-black").show();
   });
   $("#choose-black").click(function() {
@@ -58,7 +62,11 @@ var Chessboard = function(options, player) {
     });
     $(this).hide();
     $("#top-name").hide();
+    $("#top-name").removeClass();
+    $("#top-name").addClass('white-player');
     $("#bottom-name").show();
+    $("#bottom-name").removeClass();
+    $("#bottom-name").addClass('black-player');
     $("#choose-white").show();
   });
 };
@@ -132,9 +140,11 @@ Chessboard.prototype.checkGameState = function() {
       $("#turn").text("Stalemate!");
     } else {
       if (turn == 'w') {
-        $("#turn-indicator").insertAfter("#top-name")
+        $('.turn-indicator').hide()
+        $('.white-player + .turn-indicator').show()
       } else {
-        $("#turn-indicator").insertAfter("#bottom-name")
+        $('.turn-indicator').hide()
+        $('.black-player + .turn-indicator').show()
       }
       if (this.in_check()) {
         $("#turn").text("Check!");

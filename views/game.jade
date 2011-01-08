@@ -1,19 +1,19 @@
 #tablearea
-  #middlearea
-    #boardarea
-      #chessboard
-      button#choose-white.choose White
-      button#choose-black.choose Black
-    #misc
-      #top-side.color-info
-        #top-name.color-name Black!
-        #turn-indicator
-        .clear
-        #top-captured
-      #bottom-side.color-info
-        #bottom-captured
-        .clear
-        #bottom-name.color-name White! (you)
+  #boardarea
+    #chessboard
+    button#choose-white.choose White
+    button#choose-black.choose Black
+  #infoarea
+    #top-side.color-info
+      #top-name.black-player Black!
+      .turn-indicator
+      .clear
+      #top-captured
+    #bottom-side.color-info
+      #bottom-captured
+      .clear
+      #bottom-name.white-player White! (you)
+      .turn-indicator
 
 :javascript
   | var game_id = "#{game_id}";
