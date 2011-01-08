@@ -19,7 +19,7 @@
   // background-color: lightblue
   font-family: 'Yanone Kaffeesatz', sans-serif
   background-color: $bg-color1
-  border-bottom: 2px solid black
+  border-bottom: 4px solid black
   a
     text-decoration: none
     font-size: 250%
@@ -36,6 +36,10 @@
   #content
     +push(1)
     +column(22, true)
+    button#new-game
+      +fancy-button($button-color1)
+      border: 3px solid black
+      font-size: 16pt
     #tablearea
       .color-info
         +column(22, true)
@@ -55,12 +59,14 @@
               height: $tile-size
             .white
               background-color: #FFCE9E
+              // background-color: #ffc675
             .black
               background-color: #D18B47
+              // background-color: #c2410a
             .selected
               background-color: yellow !important
           button.choose
-            +fancy-button(#2966a8)
+            +fancy-button($button-color1)
             height: $tile-size
             width: 4*$tile-size
             border: 3px solid black
@@ -79,19 +85,25 @@
           border: 1px solid black
           position: relative
           #top-side
+            position: absolute
+            top: 0px
             #top-name
-              position: absolute
-              top: 0px
+              +float-left
             #top-captured
-              position: absolute
-              top: 30px
+              +float-left
           #bottom-side
+            position: absolute
+            bottom: 0px
             #bottom-name
-              position: absolute
-              bottom: 0px
+              +float-left
             #bottom-captured
-              position: absolute
-              bottom: 30px
+              +float-left
+          #leftarrow
+            +float-left
+            margin-left: 20px
+            background: url('/media/img/left.gif')
+            width: 60px
+            height: 32px
     .piece
       background: url('/media/img/chesspieces.gif')
       height: $tile-size
