@@ -82,8 +82,7 @@ Chessboard.prototype.loadFen = function(fen) {
       if (rows[i][j] >= 1) {
         num_cols = parseInt(rows[i][j]);
         for (var k=0 ; k < num_cols; ++k) {
-          $("#" + cols[col_num] + row_num + " > div").removeClass();
-          ++col_num;
+          $("#" + cols[col_num++] + row_num + " > div").removeClass();
         }
       } else {
         $("#" + cols[col_num++] + row_num + " > div")
@@ -118,23 +117,34 @@ Chessboard.prototype.moveTo = function(to) {
 
 Chessboard.prototype.checkGameState = function() {
   this.showCaptured();
-  if (this.state.started) {
-    if (this.in_checkmate() && this.turn() == this.player.color) {
-      $("#turn").text("CHECKMATE - You win!");
-    } else if (this.in_checkmate() && this.turn() == 'w') {
-      $("#turn").text("CHECKMATE - Black wins!");
-    } else if (this.in_checkmate() && this.turn() == 'b') {
-      $("#turn").text("CHECKMATE - White wins!");
-    } else if (this.in_check()) {
-      $("#turn").text("Check!");
+  var turn = this.turn();
+  // if (this.state.started) {
+  if (true) {
+    if (this.in_checkmate()) {
+     if (turn == this.player.color) {
+        $("#turn").text("CHECKMATE - You win!");
+      } else if (turn == 'w') {
+        $("#turn").text("CHECKMATE - Black wins!");
+      } else if (turn == 'b') {
+        $("#turn").text("CHECKMATE - White wins!");
+      }
     } else if (this.in_stalemate()) {
       $("#turn").text("Stalemate!");
-    } else if (this.turn() == this.player.color) {
-      $("#turn").text("Your turn!");
-    } else if (this.turn() == 'w') {
-      $("#turn").text("White's turn");
-    } else if (this.turn() == 'b') {
-      $("#turn").text("Black's turn");
+    } else {
+      if (turn == 'w') {
+        $("#turn-indicator").insertAfter("#top-name")
+      } else {
+        $("#turn-indicator").insertAfter("#bottom-name")
+      }
+      if (this.in_check()) {
+        $("#turn").text("Check!");
+      } else if (turn == this.player.color) {
+        $("#turn").text("Your turn!");
+      } else if (turn == 'w') {
+        $("#turn").text("White's turn");
+      } else if (turn == 'b') {
+        $("#turn").text("Black's turn");
+      }
     }
   }
 }
