@@ -26,6 +26,10 @@ app.get('/', function(req, res) {
   res.render('index');
 });
 
+app.get('/new', function(req, res) {
+  return 1
+});
+
 app.get('/:game_id', function(req, res) {
   console.log(req.sessionID + ' has joined the party!')
   redis.get(req.params.game_id, function(err, reply) {
