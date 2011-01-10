@@ -40,6 +40,12 @@ var Chessboard = function(options, player) {
   self.generateBoard();
   self.loadFen(self.state.fen);
 
+  if ($.inArray('w', self.state.players) === -1) {
+    $("#choose-white").show();
+  }
+  if ($.inArray('b', self.state.players) === -1) {
+    $("#choose-black").show();
+  }
   $("#choose-white").click(function() {
     self.player.color = 'w';
     self.generateBoard();

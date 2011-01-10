@@ -51,7 +51,11 @@ app.get('/:game_id', function(req, res) {
   redis.get(req.params.game_id, function(err, reply) {
     if (!reply) {
       data = {
-        game: { started: false, created_at: (new Date()).toString() },
+        game: {
+          started: false,
+          players: [],
+          created_at: (new Date()).toString()
+        },
         colors: { w: '', b: '' }
       };
       redis.set(req.params.game_id, JSON.stringify(data));
@@ -61,14 +65,12 @@ app.get('/:game_id', function(req, res) {
         color = 'w';
       } else if (data.colors.b == id) {
         color = 'b';
-      } else {
-        color = '';
       }
     }
     res.render('game', {
       locals: {
         game_state: JSON.stringify(data.game),
-        player_state: JSON.stringify({id: id, color: color}),
+        player_state: JSON.stringify({ id: id, color: color }),
         game_id: req.params.game_id
       }
     });
@@ -99,18 +101,15 @@ var stateRecorder = {
           console.log('Dude, color changed! ' + JSON.stringify(message.data));
           redis.get(game_id, function(err, reply) {
             data = JSON.parse(reply);
-            if (!data.colors.w && !data.colors.b) {
+            console.dir(message.data);
+            if (!data.colors[message.data.color]) {
               data.colors[message.data.color] = message.data.player_id;
+              data.game.players.push(message.data.color);
               redis.set(game_id, JSON.stringify(data));
-            } else {
-              if (!data.colors[message.data.color]) {
-                data.colors[message.data.color] = message.data.player_id;
-                redis.set(game_id, JSON.stringify(data));
-              }
             }
+            message.data.player_id = '';
+            return callback(message);
           });
-          message.data.player_id = '';
-          return callback(message);
         }
       } else {
         console.dir(message.data);
