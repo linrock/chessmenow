@@ -142,11 +142,11 @@ Chessboard.prototype.checkGameState = function() {
       $("#turn").text("Stalemate!");
     } else {
       if (turn == 'w') {
-        $('.turn-indicator').hide()
-        $('.white-player + .turn-indicator').show()
+        $('.black-player').removeClass('current-turn');
+        $('.white-player').addClass('current-turn');
       } else {
-        $('.turn-indicator').hide()
-        $('.black-player + .turn-indicator').show()
+        $('.white-player').removeClass('current-turn');
+        $('.black-player').addClass('current-turn');
       }
       if (this.in_check()) {
         $("#turn").text("Check!");
