@@ -1,8 +1,9 @@
 var express = require('express'),
     redis = require('redis').createClient(),
+    uuid = require('node-uuid'),
     Faye = require('faye'),
-    app = express.createServer(),
-    bayeux = new Faye.NodeAdapter({ mount: '/game/*' });
+    bayeux = new Faye.NodeAdapter({ mount: '/game/*' }),
+    app = express.createServer();
 
 
 redis.on('error', function(err) {
@@ -11,7 +12,7 @@ redis.on('error', function(err) {
 
 app.configure(function() {
   app.use(express.cookieDecoder());
-  app.use(express.session());
+  // app.use(express.session());
   app.set('views', __dirname + '/views');
   app.set('view engine', 'jade');
   app.dynamicHelpers({
@@ -22,7 +23,14 @@ app.configure(function() {
 });
 
 app.get('/', function(req, res) {
-  console.log(req.sessionID + ' has joined the party!')
+  var id;
+  if (!req.cookies.id) {
+    id = uuid();
+    res.cookie('id', id, { expires: new Date(Date.now() + 22118400000) });
+  } else {
+    id = req.cookies.id;
+  }
+  console.log(id + ' has joined the party!');
   res.render('index');
 });
 
@@ -31,18 +39,36 @@ app.get('/new', function(req, res) {
 });
 
 app.get('/:game_id', function(req, res) {
-  console.log(req.sessionID + ' has joined the party!')
+  var color = '';
+  var id;
+  if (!req.cookies.id) {
+    id = uuid();
+    res.cookie('id', id, { expires: new Date(Date.now() + 22118400000) });
+  } else {
+    id = req.cookies.id;
+  }
+  console.log(id + ' has joined the party!');
   redis.get(req.params.game_id, function(err, reply) {
     if (!reply) {
-      game_state = JSON.stringify({ started: false, created_at: (new Date()).toString() });
-      redis.set(req.params.game_id, game_state);
+      data = {
+        game: { started: false, created_at: (new Date()).toString() },
+        colors: { w: '', b: '' }
+      };
+      redis.set(req.params.game_id, JSON.stringify(data));
     } else {
-      game_state = reply;
+      data = JSON.parse(reply);
+      if (data.colors.w === id) {
+        color = 'w';
+      } else if (data.colors.b == id) {
+        color = 'b';
+      } else {
+        color = '';
+      }
     }
     res.render('game', {
       locals: {
-        game_state: game_state,
-        player_state: JSON.stringify({id: req.sessionID, color: 'w'}),
+        game_state: JSON.stringify(data.game),
+        player_state: JSON.stringify({id: id, color: color}),
         game_id: req.params.game_id
       }
     });
@@ -53,21 +79,39 @@ var stateRecorder = {
   incoming: function(message, callback) {
     console.dir(message);
     // console.log('#Subscribers: ' + bayeux.countSubscribers())
-    console.dir(bayeux)
+    // console.dir(bayeux)
     // console.dir(bayeux._server._connections)
     // console.dir(bayeux._server._channels)
     // console.dir(bayeux._server._channels._children.game._children.asdf.countSubscribers('message'))
     if (message.data) {
       game_id = message.data.game_id;
-      if (game_id && message.channel.indexOf(game_id) > -1 && message.channel.indexOf('moves') > -1) {
-        redis.get(game_id, function(err, reply) {
-          game_state = JSON.parse(reply);
-          game_state.fen = message.data.fen;
-          game_state.captured = message.data.captured;
-          console.log('Saving... ' + JSON.stringify(game_state));
-          redis.set(game_id, JSON.stringify(game_state));
-          callback(message);
-        });
+      if (game_id && message.channel.indexOf(game_id) > -1) {
+        if (message.channel.indexOf('/moves') > -1) {
+          redis.get(game_id, function(err, reply) {
+            data = JSON.parse(reply);
+            data.game.fen = message.data.fen;
+            data.game.captured = message.data.captured;
+            console.log('Saving... ' + JSON.stringify(data));
+            redis.set(game_id, JSON.stringify(data));
+            return callback(message);
+          });
+        } else if (message.channel.indexOf('/colors') > -1) {
+          console.log('Dude, color changed! ' + JSON.stringify(message.data));
+          redis.get(game_id, function(err, reply) {
+            data = JSON.parse(reply);
+            if (!data.colors.w && !data.colors.b) {
+              data.colors[message.data.color] = message.data.player_id;
+              redis.set(game_id, JSON.stringify(data));
+            } else {
+              if (!data.colors[message.data.color]) {
+                data.colors[message.data.color] = message.data.player_id;
+                redis.set(game_id, JSON.stringify(data));
+              }
+            }
+          });
+          message.data.player_id = '';
+          return callback(message);
+        }
       } else {
         console.dir(message.data);
       }

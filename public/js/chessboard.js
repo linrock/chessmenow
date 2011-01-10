@@ -3,7 +3,7 @@ var Chessboard = function(options, player) {
   self.selected = null;
 
   self.player = (function() {
-    p = new Object();
+    p = {};
     for (i in player) {
       p[i] = player[i];
     }
@@ -28,6 +28,11 @@ var Chessboard = function(options, player) {
         self.loadFen(message.fen);
       }
     });
+    c.subscribe('/game/' + game_id + '/colors', function(message) {
+      if (message) {
+        alert(JSON.stringify(message));
+      }
+    });
     c.publish('/game/' + game_id, { game_id: game_id, id: self.player.id });
     return c;
   })();
@@ -45,6 +50,7 @@ var Chessboard = function(options, player) {
     self.loadFen(self.state.fen);
     self.client.publish('/game/' + game_id + '/colors', {
       game_id: game_id,
+      player_id: self.player.id,
       color: 'w'
     });
   });
@@ -58,6 +64,7 @@ var Chessboard = function(options, player) {
     self.loadFen(self.state.fen);
     self.client.publish('/game/' + game_id + '/colors', {
       game_id: game_id,
+      player_id: self.player.id,
       color: 'b'
     });
   });
@@ -146,7 +153,7 @@ Chessboard.prototype.checkGameState = function() {
       }
     }
   }
-}
+};
 
 Chessboard.prototype.pieceExistsAt = function(position) {
   return this.get(position) !== null;
@@ -157,11 +164,11 @@ Chessboard.prototype.getPieceColor = function(position) {
   if (piece) {
     return piece.toLowerCase() === piece ? 'b' : 'w';
   }
-}
+};
 
 Chessboard.prototype.isYourPiece = function(position) {
   return this.pieceExistsAt(position) && this.getPieceColor(position) === this.turn();
-}
+};
 
 Chessboard.prototype.generateBoard = function() {
   var self = this;
@@ -215,4 +222,4 @@ Chessboard.prototype.showCaptured = function() {
     $("#top-captured").html(w_captured);
     $("#bottom-captured").html(b_captured);
   }
-}
+};
