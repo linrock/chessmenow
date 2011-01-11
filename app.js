@@ -107,9 +107,13 @@ var stateRecorder = {
             if (!data.colors[message.data.color]) {
               data.colors[message.data.color] = message.data.player_id;
               data.game.players.push(message.data.color);
-              redis.set(game_id, JSON.stringify(data));
             }
+            if (data.colors.w && data.colors.b) {
+              data.game.started = true;
+            }
+            redis.set(game_id, JSON.stringify(data));
             message.data.player_id = '';
+            message.data.started = data.game.started;
             return callback(message);
           });
         }

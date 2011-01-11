@@ -35,6 +35,9 @@ var Chessboard = function(options, player) {
         } else if (message.color === 'w') {
           $(".white-player").html('White');
         }
+        if (message.started) {
+          self.state.started = true;
+        }
       }
     });
     c.publish('/game/' + game_id, { game_id: game_id, id: self.player.id });
