@@ -35,7 +35,26 @@ app.get('/', function(req, res) {
 });
 
 app.get('/new', function(req, res) {
-  return 1
+  var generateId = function() {
+    var chars = 'abcdefghijklmnopqrstuvwxyz';
+    var length = 8;
+    var game_id = '';
+    for (var i=0; i < 8; ++i) {
+      game_id += chars[Math.floor(Math.random()*chars.length)];
+    }
+    return game_id;
+  };
+  var getNewId = function() {
+    game_id = generateId();
+    redis.get(game_id, function(err, reply) {
+      if (!reply) {
+        res.redirect('/' + game_id)
+      } else {
+        getNewId()
+      }
+    });
+  }
+  getNewId();
 });
 
 app.get('/:game_id', function(req, res) {

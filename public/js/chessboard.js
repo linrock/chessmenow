@@ -138,9 +138,9 @@ Chessboard.prototype.moveTo = function(to) {
 };
 
 Chessboard.prototype.checkGameState = function() {
-  this.showCaptured();
-  var turn = this.turn();
   if (this.state.started) {
+    this.showCaptured();
+    var turn = this.turn();
     if (this.in_checkmate()) {
      if (turn == this.player.color) {
         $("#turn").text("CHECKMATE - You win!");
