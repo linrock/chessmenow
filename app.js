@@ -61,10 +61,12 @@ app.get('/:game_id', function(req, res) {
       redis.set(req.params.game_id, JSON.stringify(data));
     } else {
       data = JSON.parse(reply);
-      if (data.colors.w === id) {
-        color = 'w';
-      } else if (data.colors.b == id) {
-        color = 'b';
+      if (data.colors) {
+        if (data.colors.w === id) {
+          color = 'w';
+        } else if (data.colors.b === id) {
+          color = 'b';
+        }
       }
     }
     res.render('game', {

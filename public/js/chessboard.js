@@ -30,7 +30,11 @@ var Chessboard = function(options, player) {
     });
     c.subscribe('/game/' + game_id + '/colors', function(message) {
       if (message) {
-        alert(JSON.stringify(message));
+        if (message.color === 'b') {
+          $(".black-player").html('Black');
+        } else if (message.color === 'w') {
+          $(".white-player").html('White');
+        }
       }
     });
     c.publish('/game/' + game_id, { game_id: game_id, id: self.player.id });
@@ -42,38 +46,42 @@ var Chessboard = function(options, player) {
 
   if ($.inArray('w', self.state.players) === -1) {
     $("#choose-white").show();
+    $("#choose-white").click(function() {
+      self.player.color = 'w';
+      $(this).hide();
+      $(".white-player").insertAfter("#bottom-name");
+      $(".black-player").insertAfter("#top-name");
+      $(".white-player").html('White');
+      self.generateBoard();
+      self.loadFen(self.state.fen);
+      self.client.publish('/game/' + game_id + '/colors', {
+        game_id: game_id,
+        player_id: self.player.id,
+        color: 'w'
+      });
+    });
+  } else {
+    $(".white-player").html('White');
   }
   if ($.inArray('b', self.state.players) === -1) {
     $("#choose-black").show();
+    $("#choose-black").click(function() {
+      self.player.color = 'b';
+      $(this).hide();
+      $(".black-player").insertAfter("#bottom-name");
+      $(".white-player").insertAfter("#top-name");
+      $(".black-player").html('Black');
+      self.generateBoard();
+      self.loadFen(self.state.fen);
+      self.client.publish('/game/' + game_id + '/colors', {
+        game_id: game_id,
+        player_id: self.player.id,
+        color: 'b'
+      });
+    });
+  } else {
+    $(".black-player").html('Black');
   }
-  $("#choose-white").click(function() {
-    self.player.color = 'w';
-    self.generateBoard();
-    $(this).hide();
-    $("#top-name").hide().removeClass().addClass('black-player');
-    $("#bottom-name").show().removeClass().addClass('white-player');
-    $("#choose-black").show();
-    self.loadFen(self.state.fen);
-    self.client.publish('/game/' + game_id + '/colors', {
-      game_id: game_id,
-      player_id: self.player.id,
-      color: 'w'
-    });
-  });
-  $("#choose-black").click(function() {
-    self.player.color = 'b';
-    self.generateBoard();
-    $(this).hide();
-    $("#top-name").hide().removeClass().addClass('white-player');
-    $("#bottom-name").show().removeClass().addClass('black-player');
-    $("#choose-white").show();
-    self.loadFen(self.state.fen);
-    self.client.publish('/game/' + game_id + '/colors', {
-      game_id: game_id,
-      player_id: self.player.id,
-      color: 'b'
-    });
-  });
 };
 
 Chessboard.prototype = new Chess();
@@ -183,6 +191,11 @@ Chessboard.prototype.generateBoard = function() {
   if (self.player.color == 'b') {
     cols = cols.split('').reverse().join('');
     rows = rows.split('').reverse().join('');
+    $(".white-player").insertAfter($("top-name"));
+    $(".black-player").insertAfter($("bottom-name"));
+  } else {
+    $(".black-player").insertAfter($("top-name"));
+    $(".white-player").insertAfter($("bottom-name"));
   }
   var board = '';
   var count = 0;
