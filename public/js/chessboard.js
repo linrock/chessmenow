@@ -37,6 +37,7 @@ var Chessboard = function(options, player) {
         }
         if (message.started) {
           self.state.started = true;
+          self.checkGameState();
         }
       }
     });
@@ -139,8 +140,7 @@ Chessboard.prototype.moveTo = function(to) {
 Chessboard.prototype.checkGameState = function() {
   this.showCaptured();
   var turn = this.turn();
-  // if (this.state.started) {
-  if (true) {
+  if (this.state.started) {
     if (this.in_checkmate()) {
      if (turn == this.player.color) {
         $("#turn").text("CHECKMATE - You win!");
