@@ -77,7 +77,9 @@ app.get('/:game_id', function(req, res) {
         },
         colors: { w: '', b: '' }
       };
-      redis.set(req.params.game_id, JSON.stringify(data));
+      redis.set(req.params.game_id, JSON.stringify(data), function(err, reply) {
+        redis.send_command('expire', [req.params.game_id, 600]); 
+      });
     } else {
       data = JSON.parse(reply);
       if (data.colors) {
