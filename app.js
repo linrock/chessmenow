@@ -116,7 +116,6 @@ var stateRecorder = {
             data = JSON.parse(reply);
             data.game.fen = message.data.fen;
             data.game.captured = message.data.captured;
-            console.log('Saving... ' + JSON.stringify(data));
             redis.set(game_id, JSON.stringify(data));
             return callback(message);
           });
