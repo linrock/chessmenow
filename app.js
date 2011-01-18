@@ -151,5 +151,5 @@ var stateRecorder = {
 redis.select(2, function() {
   bayeux.addExtension(stateRecorder);
   bayeux.attach(app);
-  app.listen(3000);
+  app.listen(3000, '127.0.0.1');
 });
