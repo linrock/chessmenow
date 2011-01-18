@@ -107,7 +107,7 @@ Chessboard.prototype.loadFen = function(fen) {
   this.load(fen);
   this.state.fen = fen;
   rows = fen.split(' ')[0].split('/');
-  var cols = 'abcdefgh';
+  var cols = ['a','b','c','d','e','f','g','h'];
   var row_num = 8;
   var col_num;
   for (var i in rows) {
