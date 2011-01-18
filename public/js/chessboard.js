@@ -112,16 +112,17 @@ Chessboard.prototype.loadFen = function(fen) {
   var col_num;
   for (var i in rows) {
     col_num = 0;
-    for (var j in rows[i]) {
-      if (rows[i][j] >= 1) {
-        num_cols = parseInt(rows[i][j]);
+    row = rows[i].split('');
+    for (var j in row) {
+      if (row[j] >= 1) {
+        num_cols = parseInt(row[j]);
         for (var k=0 ; k < num_cols; ++k) {
           $("#" + cols[col_num++] + row_num + " > div").removeClass();
         }
       } else {
         $("#" + cols[col_num++] + row_num + " > div")
           .removeClass()
-          .addClass('piece ' + rows[i][j]);
+          .addClass('piece ' + row[j]);
       }
     }
     --row_num;
