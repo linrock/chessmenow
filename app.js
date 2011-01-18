@@ -145,6 +145,8 @@ var stateRecorder = {
   }
 };
 
-bayeux.addExtension(stateRecorder);
-bayeux.attach(app);
-app.listen(3000);
+redis.select(2, function() {
+  bayeux.addExtension(stateRecorder);
+  bayeux.attach(app);
+  app.listen(3000);
+});
