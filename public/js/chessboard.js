@@ -52,7 +52,6 @@ var Chessboard = function(options, player) {
   
   self.generateBoard();
   self.loadFen(self.state.fen);
-  console.dir(self.state);
   self.showLastMoved(self.state.last_move);
 
   if ($.inArray('w', self.state.players) === -1) {
