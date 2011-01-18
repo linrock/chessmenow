@@ -24,10 +24,13 @@ var Chessboard = function(options, player) {
       // alert(JSON.stringify(message));
     });
     c.subscribe('/game/' + game_id + '/moves', function(message) {
+      // console.dir(message);
       if (message.fen) {
         self.state.captured = message.captured;
         self.loadFen(message.fen);
       }
+      $("#" + message.move[0]).addClass('moved');
+      $("#" + message.move[1]).addClass('moved');
     });
     c.subscribe('/game/' + game_id + '/colors', function(message) {
       if (message) {
@@ -100,6 +103,7 @@ Chessboard.prototype.loadFen = function(fen) {
   if (!fen) {
     fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
   }
+  $(".moved").removeClass('moved');
   this.load(fen);
   this.state.fen = fen;
   rows = fen.split(' ')[0].split('/');
@@ -133,6 +137,7 @@ Chessboard.prototype.moveTo = function(to) {
     }
     this.client.publish('/game/' + game_id + '/moves', {
       fen: this.fen(),
+      move: [this.selected, to],
       captured: this.state.captured,
       game_id: game_id
     });
