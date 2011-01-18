@@ -73,7 +73,9 @@ app.get('/:game_id', function(req, res) {
         game: {
           started: false,
           players: [],
-          created_at: (new Date()).toString()
+          created_at: Date.now(),
+          started_at: null,
+          ended_at: null
         },
         colors: { w: '', b: '' }
       };

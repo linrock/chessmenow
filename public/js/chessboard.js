@@ -29,8 +29,7 @@ var Chessboard = function(options, player) {
         self.state.captured = message.captured;
         self.loadFen(message.fen);
       }
-      $("#" + message.move[0]).addClass('moved');
-      $("#" + message.move[1]).addClass('moved');
+      self.showLastMoved(message.move);
     });
     c.subscribe('/game/' + game_id + '/colors', function(message) {
       if (message) {
@@ -53,6 +52,8 @@ var Chessboard = function(options, player) {
   
   self.generateBoard();
   self.loadFen(self.state.fen);
+  console.dir(self.state);
+  self.showLastMoved(self.state.last_move);
 
   if ($.inArray('w', self.state.players) === -1) {
     $("#choose-white").show();
@@ -144,6 +145,13 @@ Chessboard.prototype.moveTo = function(to) {
     this.loadFen(this.fen());
     this.checkGameState();
     selected = null;
+  }
+};
+
+Chessboard.prototype.showLastMoved = function(move) {
+  if (move && move.length === 2) {
+    $("#" + move[0]).addClass('moved');
+    $("#" + move[1]).addClass('moved');
   }
 };
 
