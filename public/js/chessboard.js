@@ -106,7 +106,7 @@ Chessboard.prototype.loadFen = function(fen) {
   $(".moved").removeClass('moved');
   this.load(fen);
   this.state.fen = fen;
-  rows = fen.split(' ')[0].split('/').split('');
+  rows = fen.split(' ')[0].split('/');
   var cols = ['a','b','c','d','e','f','g','h'];
   var row_num = 8;
   var col_num;
