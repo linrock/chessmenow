@@ -3,16 +3,16 @@ var Chessboard = function(options, player) {
   self.selected = null;
 
   self.player = (function() {
-    p = {};
-    for (i in player) {
+    var p = {};
+    for (var i in player) {
       p[i] = player[i];
     }
     return p;
   })();
 
   self.state = (function() {
-    state = { captured: [] };
-    for (i in options) {
+    var state = { captured: [] };
+    for (var i in options) {
       state[i] = options[i];
     }
     return state;
@@ -205,11 +205,11 @@ Chessboard.prototype.isYourPiece = function(position) {
 
 Chessboard.prototype.generateBoard = function() {
   var self = this;
-  var cols = '87654321';
-  var rows = 'abcdefgh';
+  var cols = ['8','7','6','5','4','3','2','1'];
+  var rows = ['a','b','c','d','e','f','g','h'];
   if (self.player.color == 'b') {
-    cols = cols.split('').reverse().join('');
-    rows = rows.split('').reverse().join('');
+    cols = cols.reverse();
+    rows = rows.reverse();
     $(".white-player").insertAfter($("top-name"));
     $(".black-player").insertAfter($("bottom-name"));
   } else {
