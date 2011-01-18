@@ -11,6 +11,8 @@
   h2
     b Step 3:
     | Play!
-  
-  a(href="/new")
-    button#new-game New Game
+  button#new-game New Game
+:javascript
+  | $("#new-game").click(function() {
+  |   window.location = '/new';
+  | });
