@@ -21,10 +21,11 @@ var Chessboard = function(options, player) {
   self.client = (function() {
     var c = new Faye.Client('http://localhost:3000/game/' + game_id);
     c.subscribe('/game/' + game_id, function(message) {
-      alert(JSON.stringify(message));
+      // alert(JSON.stringify(message));
     });
     c.subscribe('/game/' + game_id + '/moves', function(message) {
       if (message.fen) {
+        self.state.captured = message.captured;
         self.loadFen(message.fen);
       }
     });
@@ -32,8 +33,10 @@ var Chessboard = function(options, player) {
       if (message) {
         if (message.color === 'b') {
           $(".black-player").html('Black');
+          $("#choose-black").remove();
         } else if (message.color === 'w') {
           $(".white-player").html('White');
+          $("#choose-white").remove();
         }
         if (message.started) {
           self.state.started = true;

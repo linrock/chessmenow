@@ -128,7 +128,7 @@ var stateRecorder = {
               data.colors[message.data.color] = message.data.player_id;
               data.game.players.push(message.data.color);
             }
-            if (data.colors.w && data.colors.b) {
+            if (data.colors && (data.colors.w && data.colors.b)) {
               data.game.started = true;
             }
             redis.set(game_id, JSON.stringify(data));
