@@ -17,7 +17,7 @@ Faye.extend(Faye, {
   BAYEUX_VERSION:   '1.0',
   ID_LENGTH:        128,
   JSONP_CALLBACK:   'jsonpcallback',
-  CONNECTION_TYPES: ['long-polling', 'callback-polling', 'websocket'],
+  CONNECTION_TYPES: ['long-polling', 'callback-polling'],
   
   MANDATORY_CONNECTION_TYPES: ['long-polling', 'callback-polling', 'in-process'],
   
