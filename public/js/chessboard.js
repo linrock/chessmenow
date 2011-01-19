@@ -55,14 +55,9 @@ var Chessboard = function(options, player) {
   self.showLastMoved(self.state.last_move);
 
   if ($.inArray('w', self.state.players) === -1) {
-    $("#choose-white").show();
-    $("#choose-white").click(function() {
+    $("#choose-white").show().click(function() {
       self.player.color = 'w';
       self.state.players.push('w');
-      $(this).hide();
-      $(".white-player").insertAfter("#bottom-name");
-      $(".black-player").insertAfter("#top-name");
-      $(".white-player").html('White');
       self.generateBoard();
       self.loadFen(self.state.fen);
       self.client.publish('/game/' + game_id + '/colors', {
@@ -70,19 +65,17 @@ var Chessboard = function(options, player) {
         player_id: self.player.id,
         color: 'w'
       });
+      $(".white-player").insertAfter("#bottom-name").html('White');
+      $(".black-player").insertAfter("#top-name");
+      $(this).hide();
     });
   } else {
     $(".white-player").html('White');
   }
   if ($.inArray('b', self.state.players) === -1) {
-    $("#choose-black").show();
-    $("#choose-black").click(function() {
+    $("#choose-black").show().click(function() {
       self.player.color = 'b';
       self.state.players.push('b');
-      $(this).hide();
-      $(".black-player").insertAfter("#bottom-name");
-      $(".white-player").insertAfter("#top-name");
-      $(".black-player").html('Black');
       self.generateBoard();
       self.loadFen(self.state.fen);
       self.client.publish('/game/' + game_id + '/colors', {
@@ -90,10 +83,28 @@ var Chessboard = function(options, player) {
         player_id: self.player.id,
         color: 'b'
       });
+      $(".black-player").insertAfter("#bottom-name").html('Black');
+      $(".white-player").insertAfter("#top-name");
+      $(this).hide();
     });
   } else {
     $(".black-player").html('Black');
   }
+  $(".tile").live('click', function() {
+    var position = $(this).attr('id');
+    if (self.isYourPiece(position)) {
+      if ($(this).hasClass('selected')) {
+        $(this).removeClass('selected');
+        self.selected = null;
+      } else {
+        $(this).addClass('selected');
+        self.selected = position;
+      }
+    } else {
+      self.moveTo(position);
+    }
+    $(".tile").not(this).removeClass("selected");
+  });
 };
 
 Chessboard.prototype = new Chess();
@@ -106,7 +117,7 @@ Chessboard.prototype.loadFen = function(fen) {
   $(".moved").removeClass('moved');
   this.load(fen);
   this.state.fen = fen;
-  rows = fen.split(' ')[0].split('/');
+  var rows = fen.split(' ')[0].split('/');
   var cols = ['a','b','c','d','e','f','g','h'];
   var row_num = 8;
   var col_num;
@@ -159,21 +170,20 @@ Chessboard.prototype.checkGameState = function() {
   if (this.state.started) {
     this.showCaptured();
     var turn = this.turn();
+    var info = '';
     if (this.in_checkmate()) {
      if (turn !== this.player.color) {
-        $("#info").text("Checkmate - You win!");
+        info = "Checkmate - You win!";
       } else if (turn == 'w') {
-        $("#info").text("Checkmate - White wins!");
+        info = "Checkmate - White wins!";
       } else if (turn == 'b') {
-        $("#info").text("Checkmate - Black wins!");
+        info = "Checkmate - Black wins!";
       }
     } else if (this.in_stalemate()) {
-      $("#info").text("Stalemate!");
+      info = "Stalemate!";
     } else {
       if (this.in_check()) {
-        $("#info").text("Check!");
-      } else {
-        $("#info").text('');
+        info = "Check!";
       }
       if (turn == this.player.color) {
         // $("#turn").text("Your turn!");
@@ -186,6 +196,7 @@ Chessboard.prototype.checkGameState = function() {
         $('.black-player').addClass('current-turn');
       }
     }
+    $("#info").text(info);
   }
 };
 
@@ -208,39 +219,24 @@ Chessboard.prototype.generateBoard = function() {
   var self = this;
   var cols = ['8','7','6','5','4','3','2','1'];
   var rows = ['a','b','c','d','e','f','g','h'];
-  if (self.player.color == 'b') {
+  if (self.player.color === 'b') {
     cols = cols.reverse();
     rows = rows.reverse();
-    $(".white-player").insertAfter($("top-name"));
-    $(".black-player").insertAfter($("bottom-name"));
+    $(".white-player").insertAfter($("#top-name"));
+    $(".black-player").insertAfter($("#bottom-name"));
   } else {
-    $(".black-player").insertAfter($("top-name"));
-    $(".white-player").insertAfter($("bottom-name"));
+    $(".black-player").insertAfter($("#top-name"));
+    $(".white-player").insertAfter($("#bottom-name"));
   }
   var board = '';
   var count = 0;
   for (var i in cols) {
     for (var j in rows) {
-      board += '<div id="' + rows[j]+cols[i] + '" class="tile ' + ((count++ % 2 == 0) ? 'white':'black') + '"><div></div></div>';
+      board += '<div id="' + rows[j]+cols[i] + '" class="tile ' + ((count++ % 2 === 0) ? 'white':'black') + '"><div></div></div>';
     }
     ++count;
   }
   $("#chessboard").html(board);
-  $(".tile").click(function() {
-    var position = $(this).attr('id');
-    if (self.isYourPiece(position)) {
-      if ($(this).hasClass('selected')) {
-        $(this).removeClass('selected');
-        self.selected = null;
-      } else {
-        $(this).addClass('selected');
-        self.selected = position;
-      }
-    } else {
-      self.moveTo(position);
-    }
-    $(".tile").not(this).removeClass("selected");
-  });
 };
 
 Chessboard.prototype.showCaptured = function() {
