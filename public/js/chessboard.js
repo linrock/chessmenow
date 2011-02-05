@@ -175,9 +175,9 @@ Chessboard.prototype.checkGameState = function() {
      if (turn !== this.player.color) {
         info = "Checkmate - You win!";
       } else if (turn == 'w') {
-        info = "Checkmate - White wins!";
-      } else if (turn == 'b') {
         info = "Checkmate - Black wins!";
+      } else if (turn == 'b') {
+        info = "Checkmate - White wins!";
       }
     } else if (this.in_stalemate()) {
       info = "Stalemate!";
@@ -185,15 +185,17 @@ Chessboard.prototype.checkGameState = function() {
       if (this.in_check()) {
         info = "Check!";
       }
-      if (turn == this.player.color) {
-        // $("#turn").text("Your turn!");
-      }
       if (turn == 'w') {
+        document.title = "White's Turn | Chess Me Now";
         $('.black-player').removeClass('current-turn');
         $('.white-player').addClass('current-turn');
       } else if (turn == 'b') {
+        document.title = "Black's Turn | Chess Me Now";
         $('.white-player').removeClass('current-turn');
         $('.black-player').addClass('current-turn');
+      }
+      if (turn == this.player.color) {
+        document.title = 'Your Turn | Chess Me Now';
       }
     }
     $("#info").text(info);
