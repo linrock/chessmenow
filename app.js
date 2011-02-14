@@ -121,8 +121,10 @@ var stateRecorder = {
       game_id = message.data.game_id;
       if (game_id && message.channel.indexOf(game_id) > -1) {
         if (message.channel.indexOf('/moves') > -1) {
-          redis.get('game: ' + game_id, function(err, reply) {
+          redis.get('game:' + game_id, function(err, reply) {
             data = JSON.parse(reply);
+            console.log('Data:');
+            console.dir(data);
             data.game.fen = message.data.fen;
             data.game.last_move = message.data.move;
             data.game.captured = message.data.captured;
