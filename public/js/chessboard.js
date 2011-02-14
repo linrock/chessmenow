@@ -238,10 +238,10 @@ Chessboard.prototype.showCaptured = function() {
   var b_captured = '';
   for (var i in this.state.captured) {
     var piece = this.state.captured[i];
-    if (piece.toLowerCase() === piece) {
-      b_captured += '<div class="piece-small ' + this.state.captured[i] + '-small" style="float: left"></div>';
+    if (piece.color === 'w') {
+      w_captured += '<div class="piece-small ' + piece.type.toUpperCase() + '-small" style="float: left"></div>';
     } else {
-      w_captured += '<div class="piece-small ' + this.state.captured[i] + '-small" style="float: left"></div>';
+      b_captured += '<div class="piece-small ' + piece.type + '-small" style="float: left"></div>';
     }
   }
   if (this.player && this.player.color == 'b') {
