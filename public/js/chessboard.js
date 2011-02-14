@@ -155,8 +155,8 @@ Chessboard.prototype.moveTo = function(to) {
     });
     this.loadFen(this.fen());
     this.checkGameState();
-    selected = null;
   }
+  this.selected = null;
 };
 
 Chessboard.prototype.showLastMoved = function(move) {
