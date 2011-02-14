@@ -143,7 +143,7 @@ Chessboard.prototype.loadFen = function(fen) {
 
 Chessboard.prototype.moveTo = function(to) {
   var existing = this.get(to);
-  if (this.selected && this.move(this.selected, to)) {
+  if (this.selected && this.move({from: this.selected, to: to})) {
     if (existing) {
       this.state.captured.push(existing);
     }
@@ -181,6 +181,8 @@ Chessboard.prototype.checkGameState = function() {
       }
     } else if (this.in_stalemate()) {
       info = "Stalemate!";
+    } else if (this.in_draw() || this.in_threefold_repetition()) {
+      info = "Draw!";
     } else {
       if (this.in_check()) {
         info = "Check!";

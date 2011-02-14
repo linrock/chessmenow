@@ -22,6 +22,13 @@ app.configure(function() {
   });
 });
 
+app.configure('development', function() {
+
+});
+app.configure('production', function() {
+  
+});
+
 app.get('/', function(req, res) {
   var id;
   if (!req.cookies.id) {
@@ -46,7 +53,7 @@ app.get('/new', function(req, res) {
   };
   var getNewId = function() {
     game_id = generateId();
-    redis.get(game_id, function(err, reply) {
+    redis.get('game:' + game_id, function(err, reply) {
       if (!reply) {
         res.redirect('/' + game_id)
       } else {
@@ -67,7 +74,7 @@ app.get('/:game_id', function(req, res) {
     id = req.cookies.id;
   }
   console.log(id + ' has joined the party!');
-  redis.get(req.params.game_id, function(err, reply) {
+  redis.get('game:' + req.params.game_id, function(err, reply) {
     if (!reply) {
       data = {
         game: {
@@ -79,8 +86,8 @@ app.get('/:game_id', function(req, res) {
         },
         colors: { w: '', b: '' }
       };
-      redis.set(req.params.game_id, JSON.stringify(data), function(err, reply) {
-        redis.send_command('expire', [req.params.game_id, 600]); 
+      redis.set('game:' + req.params.game_id, JSON.stringify(data), function(err, reply) {
+        redis.send_command('expire', ['game:' + req.params.game_id, 600]); 
       });
     } else {
       data = JSON.parse(reply);
@@ -114,17 +121,17 @@ var stateRecorder = {
       game_id = message.data.game_id;
       if (game_id && message.channel.indexOf(game_id) > -1) {
         if (message.channel.indexOf('/moves') > -1) {
-          redis.get(game_id, function(err, reply) {
+          redis.get('game: ' + game_id, function(err, reply) {
             data = JSON.parse(reply);
             data.game.fen = message.data.fen;
             data.game.last_move = message.data.move;
             data.game.captured = message.data.captured;
-            redis.set(game_id, JSON.stringify(data));
+            redis.set('game:' + game_id, JSON.stringify(data));
             return callback(message);
           });
         } else if (message.channel.indexOf('/colors') > -1) {
           console.log('Dude, color changed! ' + JSON.stringify(message.data));
-          redis.get(game_id, function(err, reply) {
+          redis.get('game:' + game_id, function(err, reply) {
             data = JSON.parse(reply);
             console.dir(message.data);
             if (!data.colors[message.data.color]) {
@@ -134,7 +141,7 @@ var stateRecorder = {
             if (data.colors && (data.colors.w && data.colors.b)) {
               data.game.started = true;
             }
-            redis.set(game_id, JSON.stringify(data));
+            redis.set('game:' + game_id, JSON.stringify(data));
             message.data.player_id = '';
             message.data.started = data.game.started;
             return callback(message);
