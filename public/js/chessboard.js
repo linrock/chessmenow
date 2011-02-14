@@ -204,19 +204,9 @@ Chessboard.prototype.checkGameState = function() {
   }
 };
 
-Chessboard.prototype.pieceExistsAt = function(position) {
-  return this.get(position) !== null;
-};
-
-Chessboard.prototype.getPieceColor = function(position) {
-  var piece = this.get(position);
-  if (piece) {
-    return piece.toLowerCase() === piece ? 'b' : 'w';
-  }
-};
-
 Chessboard.prototype.isYourPiece = function(position) {
-  return this.pieceExistsAt(position) && this.getPieceColor(position) === this.turn();
+  var piece = this.get(position);
+  return piece && piece.color === this.turn();
 };
 
 Chessboard.prototype.generateBoard = function() {
