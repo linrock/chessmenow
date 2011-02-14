@@ -12,12 +12,12 @@ Faye.extend = function(dest, source, overwrite) {
 };
 
 Faye.extend(Faye, {
-  VERSION:          '0.5.4',
+  VERSION:          '0.5.5',
   
   BAYEUX_VERSION:   '1.0',
   ID_LENGTH:        128,
   JSONP_CALLBACK:   'jsonpcallback',
-  CONNECTION_TYPES: ['long-polling', 'callback-polling'],
+  CONNECTION_TYPES: ['long-polling', 'callback-polling', 'websocket'],
   
   MANDATORY_CONNECTION_TYPES: ['long-polling', 'callback-polling', 'in-process'],
   
@@ -105,6 +105,33 @@ Faye.extend(Faye, {
       });
       return result;
     }
+  },
+  
+  asyncEach: function(list, iterator) {
+    var n       = list.length,
+        i       = -1,
+        calls   = 0,
+        looping = false;
+
+    var iterate = function() {
+      calls -= 1;
+      i += 1;
+      if (i === n) return;
+      iterator(list[i], resume);
+    };
+
+    var loop = function() {
+      if (looping) return;
+      looping = true;
+      while (calls > 0) iterate();
+      looping = false;
+    };
+
+    var resume = function() {
+      calls += 1;
+      loop();
+    };
+    resume();
   },
   
   // http://assanka.net/content/tech/2009/09/02/json2-js-vs-prototype/
@@ -634,7 +661,10 @@ Faye.Client = Faye.Class({
     this._endpoint  = endpoint || this.DEFAULT_ENDPOINT;
     this._options   = options || {};
     
-    this._transport = Faye.Transport.get(this, Faye.MANDATORY_CONNECTION_TYPES);
+    Faye.Transport.get(this, Faye.MANDATORY_CONNECTION_TYPES, function(transport) {
+      this._transport = transport;
+    }, this);
+    
     this._state     = this.UNCONNECTED;
     this._outbox    = [];
     this._channels  = new Faye.Channel.Tree();
@@ -690,7 +720,10 @@ Faye.Client = Faye.Class({
       if (response.successful) {
         this._state     = this.CONNECTED;
         this._clientId  = response.clientId;
-        this._transport = Faye.Transport.get(this, response.supportedConnectionTypes);
+        
+        Faye.Transport.get(this, response.supportedConnectionTypes, function(transport) {
+          this._transport = transport;
+        }, this);
         
         this.info('Handshake successful: ?', this._clientId);
         
@@ -984,21 +1017,21 @@ Faye.Transport = Faye.extend(Faye.Class({
   }
   
 }), {
-  get: function(client, connectionTypes) {
+  get: function(client, connectionTypes, callback, scope) {
     var endpoint = client._endpoint;
     if (connectionTypes === undefined) connectionTypes = this.supportedConnectionTypes();
     
-    var candidateClass = null;
-    Faye.each(this._transports, function(pair) {
+    Faye.asyncEach(this._transports, function(pair, resume) {
       var connType = pair[0], klass = pair[1];
-      if (Faye.indexOf(connectionTypes, connType) < 0) return;
-      if (candidateClass) return;
-      if (klass.isUsable(endpoint)) candidateClass = klass;
+      if (Faye.indexOf(connectionTypes, connType) < 0) return resume();
+      
+      klass.isUsable(endpoint, function(isUsable) {
+        if (isUsable) callback.call(scope, new klass(client, endpoint));
+        else resume();
+      });
+    }, function() {
+      throw 'Could not find a usable connection type for ' + endpoint;
     });
-    
-    if (!candidateClass) throw 'Could not find a usable connection type for ' + endpoint;
-    
-    return new candidateClass(client, endpoint);
   },
   
   register: function(type, klass) {
@@ -1737,17 +1770,13 @@ Faye.WebSocketTransport = Faye.Class(Faye.Transport, {
     this.connect();
   },
   
-  getSocketUrl: function() {
-    return Faye.URI.parse(this._endpoint).toURL().replace(/^http(s?):/ig, 'ws$1:');
-  },
-  
   connect: function() {
     this._state = this._state || this.UNCONNECTED;
     if (this._state !== this.UNCONNECTED) return;
     
     this._state = this.CONNECTING;
     
-    this._socket = new WebSocket(this.getSocketUrl());
+    this._socket = new WebSocket(Faye.WebSocketTransport.getSocketUrl(this._endpoint));
     var self = this;
     
     this._socket.onopen = function() {
@@ -1783,12 +1812,36 @@ Faye.WebSocketTransport = Faye.Class(Faye.Transport, {
   }
 });
 
+Faye.WebSocketTransport.getSocketUrl = function(endpoint) {
+  return Faye.URI.parse(endpoint).toURL().replace(/^http(s?):/ig, 'ws$1:');
+};
+
 Faye.extend(Faye.WebSocketTransport.prototype, Faye.Deferrable);
 
 
-Faye.WebSocketTransport.isUsable = function(endpoint) {
-  return !!Faye.ENV.WebSocket;
+Faye.WebSocketTransport.isUsable = function(endpoint, callback, scope) {
+  if (!Faye.ENV.WebSocket) return callback.call(scope, false);
+  
+  var connected = false,
+      socketUrl = this.getSocketUrl(endpoint),
+      socket    = new WebSocket(socketUrl);
+  
+  socket.onopen = function() {
+    connected = true;
+    socket.close();
+    callback.call(scope, true);
+    socket = null;
+  };
+  
+  var notconnected = function() {
+    if (!connected) callback.call(scope, false);
+  };
+  
+  socket.onclose = socket.onerror = notconnected;
+  setTimeout(notconnected, this.WEBSOCKET_TIMEOUT);
 };
+
+Faye.WebSocketTransport.WEBSOCKET_TIMEOUT = 1000;
 
 Faye.Transport.register('websocket', Faye.WebSocketTransport);
 
@@ -1810,8 +1863,8 @@ Faye.XHRTransport = Faye.Class(Faye.Transport, {
   }
 });
 
-Faye.XHRTransport.isUsable = function(endpoint) {
-  return Faye.URI.parse(endpoint).isLocal();
+Faye.XHRTransport.isUsable = function(endpoint, callback, scope) {
+  callback.call(scope, Faye.URI.parse(endpoint).isLocal());
 };
 
 Faye.Transport.register('long-polling', Faye.XHRTransport);
@@ -1859,8 +1912,8 @@ Faye.JSONPTransport = Faye.extend(Faye.Class(Faye.Transport, {
   }
 });
 
-Faye.JSONPTransport.isUsable = function(endpoint) {
-  return true;
+Faye.JSONPTransport.isUsable = function(endpoint, callback, scope) {
+  callback.call(scope, true);
 };
 
 Faye.Transport.register('callback-polling', Faye.JSONPTransport);
