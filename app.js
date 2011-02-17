@@ -155,6 +155,7 @@ socket.on('connection', function(client) {
   });
   client.on('disconnect', function() {
     subscriber.quit();
+    publisher.quit();
   });
 });
 
