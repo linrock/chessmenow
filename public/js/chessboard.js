@@ -138,6 +138,9 @@ var Chessboard = function(options, player) {
     s.on('disconnect', function() {
       s.connect();
     });
+    setInterval(function() {
+      s.send('ping');
+    }, 5000);
     // c.publish('/game/' + game_id, { game_id: game_id, id: self.player.id });
     return s;
   })();
@@ -347,3 +350,4 @@ Chessboard.prototype.showCaptured = function() {
     $("#bottom-captured").html(b_captured);
   }
 };
+
