@@ -1,3 +1,89 @@
+var ChessPiece = Backbone.Model.extend({
+  initialize: function(options) {
+    this.set(options);
+  }
+});
+
+var ChessPieceCollection = Backbone.Collection.extend({
+  model: ChessPiece,
+  getSelected: function() {
+    return this.detect(function(piece) {
+      return piece.get('selected');
+    });
+  }
+});
+var Pieces = new ChessPieceCollection();
+
+var ChessPieceView = Backbone.View.extend({
+  tagName: 'div',
+  initialize: function() {
+    _.bindAll(this, 'render');
+    this.model.view = this;
+  },
+  events: {
+    'click': 'selectPiece'
+  },
+  selectPiece: function() {
+    var selected = Pieces.getSelected();
+    this.model.set({ selected: true });
+    $(this.el).parent().addClass('selected');
+    if (selected) {
+      selected.set({ selected: false });
+      $(selected.view.el).parent().removeClass('selected');
+    }
+  },
+  render: function() {
+    $(this.el).html('<div class="piece ' + this.model.get('type') + '"></div>');
+    return this;
+  }
+});
+
+var Application = Backbone.Model.extend({
+  initialize: function() {
+  }
+});
+
+var ApplicationView = Backbone.View.extend({
+  model: new Application(),
+  el: $("#tablearea"),
+  initialize: function() {
+    _.bindAll(this, 'loadFen', 'addPiece');
+    this.model.view = this;
+  },
+  loadFen: function(fen) {
+    fen = fen || 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+    var rows = fen.split(' ')[0].split('/');
+    var cols = ['a','b','c','d','e','f','g','h'];
+    var row_num = 8;
+    var col_num;
+    for (var i in rows) {
+      col_num = 0;
+      row = rows[i].split('');
+      for (var j in row) {
+        if (row[j] >= 1) {
+          num_cols = parseInt(row[j]);
+          for (var k=0 ; k < num_cols; ++k) {
+            col_num++;
+          }
+        } else {
+          this.addPiece(row[j], cols[col_num++] + row_num);
+        }
+      }
+      --row_num;
+    }
+  },
+  addPiece: function(type, position) {
+    var piece = new ChessPiece({ type: type, position: position, board: this });
+    var view = new ChessPieceView({ model: piece });
+    this.$('#' + position).html(view.render().el);
+    Pieces.add(piece);
+  }
+});
+
+var a = new ApplicationView();
+a.addPiece('K', 'd3');
+a.addPiece('k', 'e3');
+
 var Chessboard = function(options, player) {
   var self = this;
   self.selected = null;

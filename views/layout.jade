@@ -6,8 +6,9 @@ html
     script(type="text/javascript", src="/media/js/json2.js")
     script(type="text/javascript", src="/media/js/jquery-1.5.js")
     script(type="text/javascript", src="/media/js/socket.io.js")
+    script(type="text/javascript", src="/media/js/underscore.js")
+    script(type="text/javascript", src="/media/js/backbone.js")
     script(type="text/javascript", src="/media/js/chess.js")
-    script(type="text/javascript", src="/media/js/chessboard.js")
     title Chess Me Now
   body
     #header
@@ -16,3 +17,4 @@ html
           img(src="/media/img/logo.gif", alt="Chess Me NOW")
     #wrapper
       #content!= body
+    script(type="text/javascript", src="/media/js/chessboard.js")
