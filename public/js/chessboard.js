@@ -17,37 +17,43 @@ var Chessboard = function(options, player) {
     }
     return state;
   })();
-  
-  self.client = (function() {
-    var c = new Faye.Client('http://localhost:3000/game/' + game_id);
-    c.subscribe('/game/' + game_id, function(message) {
-      // alert(JSON.stringify(message));
+ 
+  self.socket = (function() {
+    var s = new io.Socket('127.0.0.1', { port: 3000 });
+    s.connect();
+    s.on('connect', function() {
+      s.send({ type: 'auth', auth: document.cookie, game_id: game_id });
     });
-    c.subscribe('/game/' + game_id + '/moves', function(message) {
-      // console.dir(message);
-      if (message.fen) {
-        self.state.captured = message.captured;
-        self.loadFen(message.fen);
+    s.on('message', function(message) {
+      switch (message.type) {
+        case 'moves':
+          if (message.fen) {
+            self.state.captured = message.captured;
+            self.loadFen(message.fen);
+          }
+          self.showLastMoved(message.move);
+          break
+
+        case 'colors':
+          if (message.color === 'b') {
+            $(".black-player").html('Black');
+            $("#choose-black").remove();
+          } else if (message.color === 'w') {
+            $(".white-player").html('White');
+            $("#choose-white").remove();
+          }
+          if (message.started) {
+            self.state.started = true;
+            self.checkGameState();
+          }
+          break
       }
-      self.showLastMoved(message.move);
     });
-    c.subscribe('/game/' + game_id + '/colors', function(message) {
-      if (message) {
-        if (message.color === 'b') {
-          $(".black-player").html('Black');
-          $("#choose-black").remove();
-        } else if (message.color === 'w') {
-          $(".white-player").html('White');
-          $("#choose-white").remove();
-        }
-        if (message.started) {
-          self.state.started = true;
-          self.checkGameState();
-        }
-      }
+    s.on('disconnect', function() {
+      s.connect();
     });
-    c.publish('/game/' + game_id, { game_id: game_id, id: self.player.id });
-    return c;
+    // c.publish('/game/' + game_id, { game_id: game_id, id: self.player.id });
+    return s;
   })();
   
   self.generateBoard();
@@ -60,7 +66,8 @@ var Chessboard = function(options, player) {
       self.state.players.push('w');
       self.generateBoard();
       self.loadFen(self.state.fen);
-      self.client.publish('/game/' + game_id + '/colors', {
+      self.socket.send({
+        type: 'colors',
         game_id: game_id,
         player_id: self.player.id,
         color: 'w'
@@ -78,7 +85,8 @@ var Chessboard = function(options, player) {
       self.state.players.push('b');
       self.generateBoard();
       self.loadFen(self.state.fen);
-      self.client.publish('/game/' + game_id + '/colors', {
+      self.socket.send({
+        type: 'colors',
         game_id: game_id,
         player_id: self.player.id,
         color: 'b'
@@ -147,7 +155,8 @@ Chessboard.prototype.moveTo = function(to) {
     if (existing) {
       this.state.captured.push(existing);
     }
-    this.client.publish('/game/' + game_id + '/moves', {
+    this.socket.send({
+      type: 'moves',
       fen: this.fen(),
       move: [this.selected, to],
       captured: this.state.captured,
