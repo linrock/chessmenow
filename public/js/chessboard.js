@@ -1,6 +1,9 @@
 var ChessPiece = Backbone.Model.extend({
   initialize: function(options) {
     this.set(options);
+  },
+  clear: function() {
+    this.view.remove();
   }
 });
 
@@ -21,7 +24,7 @@ var ChessPieceView = Backbone.View.extend({
     this.model.view = this;
   },
   events: {
-    'click': 'selectPiece'
+    'click': 'selectPiece',
   },
   selectPiece: function() {
     var selected = Pieces.getSelected();
@@ -35,11 +38,21 @@ var ChessPieceView = Backbone.View.extend({
   render: function() {
     $(this.el).html('<div class="piece ' + this.model.get('type') + '"></div>');
     return this;
+  },
+  remove: function() {
+    $(this.el).remove();
+  },
+  clear: function() {
+    this.model.clear();
   }
 });
 
 var Application = Backbone.Model.extend({
   initialize: function() {
+    this.set({
+      socket: null,
+      player: null,
+    })
   }
 });
 
@@ -77,6 +90,9 @@ var ApplicationView = Backbone.View.extend({
     var view = new ChessPieceView({ model: piece });
     this.$('#' + position).html(view.render().el);
     Pieces.add(piece);
+  },
+  removePiece: function(position) {
+    // Pieces.remove(Pieces.find(function(piece) { return piece.get('position') === position }));
   }
 });
 
