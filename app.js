@@ -113,28 +113,19 @@ var socket = io.listen(app);
 socket.on('connection', function(client) {
   var subscriber = redis.createClient();
   var publisher = redis.createClient();
-  console.log('New client!');
   client.on('message', function(message) {
     var channel = 'game:' + message.game_id;
     switch (message.type) {
       case 'auth':
-        console.dir(message);
-        console.log('Subscribing...');
         subscriber.subscribe(channel);
         subscriber.on('message', function(channel, message) {
           message = JSON.parse(message);
           client.send(message);
-          console.log('Message:');
-          console.dir(message);
-          console.log('Message found!');
         });
         break
       case 'moves':
-        console.log('Socket.IO: new move!');
         r_client.get(channel, function(err, reply) {
           data = JSON.parse(reply);
-          console.log('Data:');
-          console.dir(message)
           data.game.fen = message.fen;
           data.game.last_move = message.move;
           data.game.captured = message.captured;
@@ -143,11 +134,8 @@ socket.on('connection', function(client) {
         });
         break
       case 'colors':
-        console.log('Socket.IO: color changed! ' + JSON.stringify(message));
         r_client.get(channel, function(err, reply) {
           data = JSON.parse(reply);
-          console.log('Colors:');
-          console.dir(message);
           if (!data.colors[message.color]) {
             data.colors[message.color] = message.player_id;
             data.game.players.push(message.color);
@@ -156,7 +144,11 @@ socket.on('connection', function(client) {
             data.game.started = true;
           }
           r_client.set(channel, JSON.stringify(data));
-          publisher.publish(channel, JSON.stringify(message));
+          publisher.publish(channel, JSON.stringify({
+            type: 'colors',
+            color: message.color,
+            started: data.game.started
+          }));
         });
         break
     }

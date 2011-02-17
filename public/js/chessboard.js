@@ -25,7 +25,6 @@ var Chessboard = function(options, player) {
       s.send({ type: 'auth', auth: document.cookie, game_id: game_id });
     });
     s.on('message', function(message) {
-      console.dir(message);
       switch (message.type) {
         case 'moves':
           if (message.fen) {
@@ -36,18 +35,16 @@ var Chessboard = function(options, player) {
           break
 
         case 'colors':
-          if (message) {
-            if (message.color === 'b') {
-              $(".black-player").html('Black');
-              $("#choose-black").remove();
-            } else if (message.color === 'w') {
-              $(".white-player").html('White');
-              $("#choose-white").remove();
-            }
-            if (message.started) {
-              self.state.started = true;
-              self.checkGameState();
-            }
+          if (message.color === 'b') {
+            $(".black-player").html('Black');
+            $("#choose-black").remove();
+          } else if (message.color === 'w') {
+            $(".white-player").html('White');
+            $("#choose-white").remove();
+          }
+          if (message.started) {
+            self.state.started = true;
+            self.checkGameState();
           }
           break
       }
