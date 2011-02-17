@@ -1,12 +1,12 @@
 var express = require('express'),
-    redis = require('redis').createClient(),
+    redis = require('redis'),
     uuid = require('node-uuid'),
-    Faye = require('faye'),
-    bayeux = new Faye.NodeAdapter({ mount: '/game/*' }),
+    io = require('socket.io'),
     app = express.createServer();
 
 
-redis.on('error', function(err) {
+r_client = redis.createClient();
+r_client.on('error', function(err) {
   console.log("Error: " + err);
 });
 
@@ -53,7 +53,7 @@ app.get('/new', function(req, res) {
   };
   var getNewId = function() {
     game_id = generateId();
-    redis.get('game:' + game_id, function(err, reply) {
+    r_client.get('game:' + game_id, function(err, reply) {
       if (!reply) {
         res.redirect('/' + game_id)
       } else {
@@ -74,7 +74,7 @@ app.get('/:game_id', function(req, res) {
     id = req.cookies.id;
   }
   console.log(id + ' has joined the party!');
-  redis.get('game:' + req.params.game_id, function(err, reply) {
+  r_client.get('game:' + req.params.game_id, function(err, reply) {
     if (!reply) {
       data = {
         game: {
@@ -86,8 +86,8 @@ app.get('/:game_id', function(req, res) {
         },
         colors: { w: '', b: '' }
       };
-      redis.set('game:' + req.params.game_id, JSON.stringify(data), function(err, reply) {
-        redis.send_command('expire', ['game:' + req.params.game_id, 600]); 
+      r_client.set('game:' + req.params.game_id, JSON.stringify(data), function(err, reply) {
+        r_client.send_command('expire', ['game:' + req.params.game_id, 600]); 
       });
     } else {
       data = JSON.parse(reply);
@@ -109,56 +109,63 @@ app.get('/:game_id', function(req, res) {
   });
 });
 
-var stateRecorder = {
-  incoming: function(message, callback) {
-    console.dir(message);
-    // console.log('#Subscribers: ' + bayeux.countSubscribers())
-    // console.dir(bayeux)
-    // console.dir(bayeux._server._connections)
-    // console.dir(bayeux._server._channels)
-    // console.dir(bayeux._server._channels._children.game._children.asdf.countSubscribers('message'))
-    if (message.data) {
-      game_id = message.data.game_id;
-      if (game_id && message.channel.indexOf(game_id) > -1) {
-        if (message.channel.indexOf('/moves') > -1) {
-          redis.get('game:' + game_id, function(err, reply) {
-            data = JSON.parse(reply);
-            console.log('Data:');
-            console.dir(data);
-            data.game.fen = message.data.fen;
-            data.game.last_move = message.data.move;
-            data.game.captured = message.data.captured;
-            redis.set('game:' + game_id, JSON.stringify(data));
-            return callback(message);
-          });
-        } else if (message.channel.indexOf('/colors') > -1) {
-          console.log('Dude, color changed! ' + JSON.stringify(message.data));
-          redis.get('game:' + game_id, function(err, reply) {
-            data = JSON.parse(reply);
-            console.dir(message.data);
-            if (!data.colors[message.data.color]) {
-              data.colors[message.data.color] = message.data.player_id;
-              data.game.players.push(message.data.color);
-            }
-            if (data.colors && (data.colors.w && data.colors.b)) {
-              data.game.started = true;
-            }
-            redis.set('game:' + game_id, JSON.stringify(data));
-            message.data.player_id = '';
-            message.data.started = data.game.started;
-            return callback(message);
-          });
-        }
-      } else {
-        console.dir(message.data);
-      }
+var socket = io.listen(app);
+socket.on('connection', function(client) {
+  var subscriber = redis.createClient();
+  var publisher = redis.createClient();
+  console.log('New client!');
+  client.on('message', function(message) {
+    var channel = 'game:' + message.game_id;
+    switch (message.type) {
+      case 'auth':
+        console.dir(message);
+        console.log('Subscribing...');
+        subscriber.subscribe(channel);
+        subscriber.on('message', function(channel, message) {
+          message = JSON.parse(message);
+          client.send(message);
+          console.log('Message:');
+          console.dir(message);
+          console.log('Message found!');
+        });
+        break
+      case 'moves':
+        console.log('Socket.IO: new move!');
+        r_client.get(channel, function(err, reply) {
+          data = JSON.parse(reply);
+          console.log('Data:');
+          console.dir(message)
+          data.game.fen = message.fen;
+          data.game.last_move = message.move;
+          data.game.captured = message.captured;
+          r_client.set(channel, JSON.stringify(data));
+          publisher.publish(channel, JSON.stringify(message));
+        });
+        break
+      case 'colors':
+        console.log('Socket.IO: color changed! ' + JSON.stringify(message));
+        r_client.get(channel, function(err, reply) {
+          data = JSON.parse(reply);
+          console.log('Colors:');
+          console.dir(message);
+          if (!data.colors[message.color]) {
+            data.colors[message.color] = message.player_id;
+            data.game.players.push(message.color);
+          }
+          if (data.colors && (data.colors.w && data.colors.b)) {
+            data.game.started = true;
+          }
+          r_client.set(channel, JSON.stringify(data));
+          publisher.publish(channel, JSON.stringify(message));
+        });
+        break
     }
-    return callback(message);
-  }
-};
+  });
+  client.on('disconnect', function() {
+    subscriber.quit();
+  });
+});
 
-redis.select(2, function() {
-  bayeux.addExtension(stateRecorder);
-  bayeux.attach(app);
+r_client.select(2, function() {
   app.listen(3000, '127.0.0.1');
 });
