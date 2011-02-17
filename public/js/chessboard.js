@@ -72,7 +72,7 @@ var Chessboard = function(options, player) {
       self.socket.send({
         type: 'colors',
         game_id: game_id,
-        player_id: self.player_id,
+        player_id: self.player.id,
         color: 'w'
       });
       $(".white-player").insertAfter("#bottom-name").html('White');
@@ -91,7 +91,7 @@ var Chessboard = function(options, player) {
       self.socket.send({
         type: 'colors',
         game_id: game_id,
-        player_id: self.player_id,
+        player_id: self.player.id,
         color: 'b'
       });
       $(".black-player").insertAfter("#bottom-name").html('Black');
