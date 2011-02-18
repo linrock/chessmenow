@@ -19,8 +19,8 @@ var Application = Backbone.Model.extend({
     s.on('message', function(message) {
       switch (message.type) {
         case 'move':
-          if (message.data.fen) {
-            self.loadFen(message.data.fen);
+          if (message.data.move) {
+            self.move(message.data.move);
           }
           break;
         case 'colors':
