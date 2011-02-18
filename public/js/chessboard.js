@@ -4,6 +4,7 @@ var Application = Backbone.Model.extend({
     this.set({
       client: new Chess(),
       selected: null,
+      captured: [],
       player: player_state,
       socket: this.initializeSocket(),
     });
@@ -76,13 +77,23 @@ var Application = Backbone.Model.extend({
         }
       }
     }
-    console.log(position);
   },
   move: function(move) {
     var client = this.get('client');
     var board = this.get('board');
     var move = client.move(move);
     if (move) {
+      if (move.captured) {
+        console.dir(move);
+        var captured = this.get('captured');
+        var piece = move.captured;
+        if (move.color === 'w') {
+          piece = piece.toUpperCase();
+        }
+        captured.push(piece);
+        this.set({ captured: captured });
+        console.log('captured a piece - ' + captured);
+      }
       var board_diff = {};
       _.each(client.SQUARES, function(square) {
         var s1 = board[square];
