@@ -137,7 +137,7 @@ socket.on('connection', function(client) {
           }
           if (message.data.move.captured) {
             var piece = message.data.move.captured;
-            if (message.data.move.captured.color === 'w') {
+            if (message.data.move.color === 'b') {
               piece = piece.toUpperCase();
             }
             data.game.captured.push(piece);

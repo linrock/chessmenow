@@ -9,7 +9,6 @@ var Application = Backbone.Model.extend({
       socket: this.initializeSocket(),
     });
     this.bind('change:board_diff', this.updateState);
-    this.bind('change:captured', this.updateCaptured);
   },
   initializeSocket: function() {
     var self = this;
@@ -87,7 +86,7 @@ var Application = Backbone.Model.extend({
       if (move.captured) {
         var captured = this.get('captured');
         var piece = move.captured;
-        if (move.color === 'w') {
+        if (move.color === 'b') {
           piece = piece.toUpperCase();
         }
         captured.push(piece);
@@ -142,19 +141,18 @@ var Application = Backbone.Model.extend({
       state = "Check!";
     }
     this.set({ state: state });
-  },
-  updateCaptured: function() {
-    console.log('Oh dude, a new piece was captured!');
   }
 });
 
 var ApplicationView = Backbone.View.extend({
   el: $("#content"),
   initialize: function() {
-    _.bindAll(this, 'generateBoard', 'updateBoard', 'updateState');
+    _.bindAll(this, 'generateBoard', 'updateBoard', 'updateState', 'updateCaptured');
     this.model.view = this;
     this.model.bind('change:board_diff', this.updateBoard);
     this.model.bind('change:board_diff', this.updateState);
+    this.model.bind('change:captured', this.updateCaptured);
+    this.updateCaptured();
     this.generateBoard();
   },
   selectColor: function(color) {
@@ -204,6 +202,26 @@ var ApplicationView = Backbone.View.extend({
   updateState: function() {
     console.log('Updating state... ');
     this.$("#info").text(this.model.get('state'));
+  },
+  updateCaptured: function() {
+    // XXX - Clean this shit up.
+    var w_captured = '';
+    var b_captured = '';
+    _.each(this.model.get('captured'), function(piece) {
+      if (piece.toUpperCase() === piece) {
+        b_captured += '<div class="piece-small ' + piece + '-small" style="float: left"></div>';
+      } else {
+        w_captured += '<div class="piece-small ' + piece + '-small" style="float: left"></div>';
+      }
+    });
+    // if (this.player && this.player.color == 'b') {
+    if (true) {
+      $("#top-captured").html(b_captured);
+      $("#bottom-captured").html(w_captured);
+    } else {
+      $("#top-captured").html(w_captured);
+      $("#bottom-captured").html(b_captured);
+    }
   },
   highlightMove: function(move) {
     this.$(".moved").removeClass('moved');
