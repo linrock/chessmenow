@@ -27,3 +27,4 @@ script(type="text/javascript", src="/media/js/chessboard.js")
 
   | var a = new ApplicationView({ model: new Application() });
   | a.model.loadFen(game_state.fen);
+  | a.highlightMove(game_state.last_move);

@@ -18,8 +18,7 @@ var Application = Backbone.Model.extend({
                 self.loadFen(message.fen);
               }
               self.showLastMoved(message.move);
-              break
-
+              break;
             case 'colors':
               if (message.color === 'b') {
                 $(".black-player").html('Black');
@@ -32,7 +31,7 @@ var Application = Backbone.Model.extend({
                 self.state.started = true;
                 self.checkGameState();
               }
-              break
+              break;
           }
         });
         s.on('disconnect', function() {
@@ -100,7 +99,7 @@ var Application = Backbone.Model.extend({
         game_id: game_id,
         data: {
           fen: client.fen(),
-          move: move.san,
+          move: move,
           captured: [],
         }
       });
