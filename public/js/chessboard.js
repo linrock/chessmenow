@@ -72,7 +72,11 @@ var Application = Backbone.Model.extend({
   selectTile: function(position) {
     var selected = this.get('selected');
     var client = this.get('client');
-    if (client.get(position)) {
+    if (selected) {
+      this.set({ selected: null });
+      this.view.toggleTileHighlight(selected, 'off');
+      this.move({ from: selected, to: position, promotion: 'q' });
+    } else if (client.get(position)) {
       if (!selected) {
         this.set({ selected: position });
         this.view.toggleTileHighlight(position, 'on');
@@ -81,10 +85,6 @@ var Application = Backbone.Model.extend({
         this.view.toggleTileHighlight(position, 'on');
         this.view.toggleTileHighlight(selected, 'off');
       }
-    } else if (selected) {
-      this.set({ selected: null });
-      this.view.toggleTileHighlight(selected, 'off');
-      this.move({ from: selected, to: position });
     }
     console.log(position);
   },
