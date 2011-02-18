@@ -67,8 +67,7 @@ var Application = Backbone.Model.extend({
     _.each(client.SQUARES, function(square) {
       board[square] = client.get(square);
     });
-    this.set({ client: client, board: board });
-    this.change();
+    this.set({ client: client, board: board, board_diff: board });
   },
   move: function(move) {
     var client = this.get('client');
@@ -96,7 +95,6 @@ var ApplicationView = Backbone.View.extend({
   el: $("#tablearea"),
   initialize: function() {
     _.bindAll(this, 'generateBoard', 'updateBoard', 'addPiece');
-    this.model.bind('change:board', this.updateBoard);
     this.model.bind('change:board_diff', this.updateBoard);
     this.model.view = this;
     this.generateBoard();
@@ -132,13 +130,7 @@ var ApplicationView = Backbone.View.extend({
         }
       });
     };
-    if (!_.isEmpty(board_diff)) {
-      showChanges(board_diff);
-      this.model.set({ board_diff: {} });
-    } else {
-      var board = this.model.get('board');
-      showChanges(board);
-    }
+    showChanges(board_diff);
     console.log('Board updated!');
   },
   addPiece: function(position, type) {
@@ -154,7 +146,7 @@ var ApplicationView = Backbone.View.extend({
 
 var a = new ApplicationView({ model: new Application() });
 // a.addPiece('d3', 'K');
-a.model.loadFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq e3 0 0");
+a.model.loadFen('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
 // a.model.loadFen("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1");
 
 
