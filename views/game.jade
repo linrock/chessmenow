@@ -23,9 +23,10 @@ script(type="text/javascript", src="/media/js/chessboard.js")
 :javascript
   | var game_id = "#{game_id}";
   | var player_state = !{player_state};
-  | var player = new Player({ pid: player_state.id });
-  | var board = new Chessboard(!{game_state}, !{player_state});
+  | // var board = new Chessboard(!{game_state}, !{player_state});
 
+  | var a = new ApplicationView({ model: new Application() });
+  | a.model.loadFen('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
 
   | console.dir('dude, sending info through socket...');
   | player.get('socket').send({ type: 'colors', game_id: game_id, player_id: 'asdfdude', color: 'b' });

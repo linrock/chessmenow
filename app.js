@@ -133,18 +133,20 @@ socket.on('connection', function(client) {
           client.send(message);
         });
         break;
-      case 'moves':
+      case 'move':
         r_client.get(channel, function(err, reply) {
           var data = JSON.parse(reply);
+          console.dir(data);
           var last_move = data.game.moves[data.game.moves.length-1];
-          if (last_move.length === 2) {
-            data.game.moves.push([message.move]);
+          if (!last_move || last_move.length === 2) {
+            data.game.moves.push([message.data.move]);
           } else {
-            last_move.push(message.move);
+            last_move.push(message.data.move);
             data.game.moves[data.game.moves.length-1] = last_move;
           }
-          data.game.fen = message.fen;
-          data.game.captured = message.captured;
+          data.game.fen = message.data.fen;
+          data.game.captured = message.data.captured;
+          console.dir(message);
           r_client.set(channel, JSON.stringify(data));
           publisher.publish(channel, JSON.stringify(message));
         });
