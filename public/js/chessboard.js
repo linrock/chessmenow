@@ -2,9 +2,6 @@ var ChessPiece = Backbone.Model.extend({
   initialize: function(options) {
     this.set(options);
   },
-  clear: function() {
-    this.view.remove();
-  }
 });
 
 var ChessPieceCollection = Backbone.Collection.extend({
@@ -21,6 +18,11 @@ var ChessPieceCollection = Backbone.Collection.extend({
       $(selected.view.el).parent().removeClass('selected');
     }
   },
+  getPiece: function(position) {
+    return this.detect(function(piece) {
+      return piece.get('position') === position;
+    });
+  }
 });
 var Pieces = new ChessPieceCollection();
 
@@ -46,55 +48,98 @@ var ChessPieceView = Backbone.View.extend({
     $(this.el).html('<div class="piece ' + this.model.get('type') + '"></div>');
     return this;
   },
-  remove: function() {
-    $(this.el).remove();
-  },
-  clear: function() {
-    this.model.clear();
-  }
 });
 
 var Application = Backbone.Model.extend({
   initialize: function() {
-    this.set({
-      socket: null,
-      player: null,
-      client: new Chess(),
-    })
+    var client = new Chess();
+    var board = {};
+    for (var square in client.SQUARES) {
+      board[square] = '';
+    }
+    this.set({ socket: null, player: null, client: client, board: board, board_diff: {} });
   },
-  movePiece: function() {
-
+  loadFen: function(fen) {
+    fen = fen || 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+    var client = this.get('client');
+    var board = {};
+    client.load(fen);
+    _.each(client.SQUARES, function(square) {
+      board[square] = client.get(square);
+    });
+    this.set({ client: client, board: board });
+    this.change();
+  },
+  move: function(move) {
+    var client = this.get('client');
+    var board = this.get('board');
+    if (client.move(move)) {
+      var board_diff = {};
+      _.each(client.SQUARES, function(square) {
+        var s1 = board[square];
+        var s2 = client.get(square);
+        if (s1 && s2) {
+          if (s1.type !== s2.type || s1.color !== s2.color) {
+            board_diff[square] = s2;
+          }
+        } else if (s1 || s2) {
+          board_diff[square] = s2;
+        }
+        board[square] = s2;
+      });
+      this.set({ client: client, board: board, board_diff: board_diff });
+    }
   }
 });
 
 var ApplicationView = Backbone.View.extend({
-  model: new Application(),
   el: $("#tablearea"),
   initialize: function() {
-    _.bindAll(this, 'loadFen', 'addPiece');
+    _.bindAll(this, 'generateBoard', 'updateBoard', 'addPiece');
+    this.model.bind('change:board', this.updateBoard);
+    this.model.bind('change:board_diff', this.updateBoard);
     this.model.view = this;
+    this.generateBoard();
   },
-  loadFen: function(fen) {
-    fen = fen || 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
-    var rows = fen.split(' ')[0].split('/');
-    var cols = ['a','b','c','d','e','f','g','h'];
-    var row_num = 8;
-    var col_num;
-    for (var i in rows) {
-      col_num = 0;
-      row = rows[i].split('');
-      for (var j in row) {
-        if (row[j] >= 1) {
-          num_cols = parseInt(row[j]);
-          for (var k=0 ; k < num_cols; ++k) {
-            col_num++;
-          }
-        } else {
-          this.addPiece(row[j], cols[col_num++] + row_num);
+  generateBoard: function() {
+    this.$("#chessboard").html(function() {
+      var cols = ['8','7','6','5','4','3','2','1'];
+      var rows = ['a','b','c','d','e','f','g','h'];
+      var board_html = '';
+      var count = 0;
+      for (var i in cols) {
+        for (var j in rows) {
+          var position = rows[j]+cols[i];
+          board_html += '<div id="' + position + '" class="tile ' + ((count++ % 2 === 0) ? 'white':'black') + '"><div></div></div>';
         }
+        ++count;
       }
-      --row_num;
+      return(board_html);
+    });
+  },
+  updateBoard: function() {
+    var board_diff = this.model.get('board_diff');
+    var showChanges = function(pieces) {
+      _.each(pieces, function(v,k) {
+        if (v) {
+          var type = v.type;
+          if (v.color === 'w') {
+            type = type.toUpperCase();
+          }
+          this.$('#' + k + ' > div').removeClass().addClass('piece ' + type);
+        } else {
+          this.$('#' + k + ' > div').removeClass();
+        }
+      });
+    };
+    if (!_.isEmpty(board_diff)) {
+      showChanges(board_diff);
+      this.model.set({ board_diff: {} });
+    } else {
+      var board = this.model.get('board');
+      showChanges(board);
     }
+    console.log('Board updated!');
   },
   addPiece: function(position, type) {
     var piece = new ChessPiece({ type: type, position: position, board: this });
@@ -107,12 +152,29 @@ var ApplicationView = Backbone.View.extend({
   }
 });
 
-var a = new ApplicationView();
-a.addPiece('d3', 'K');
-a.addPiece('e3', 'k');
-a.removePiece('e3');
+var a = new ApplicationView({ model: new Application() });
+// a.addPiece('d3', 'K');
+a.model.loadFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq e3 0 0");
+// a.model.loadFen("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1");
 
-var Chessboard = function(options, player) {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+var hessboard = function(options, player) {
   var self = this;
   self.selected = null;
 
