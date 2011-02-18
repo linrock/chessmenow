@@ -6,6 +6,10 @@ var Application = Backbone.Model.extend({
       board[square] = '';
     }
     this.set({ socket: null, player: null, client: client, selected: null, board: board, board_diff: {} });
+    this.bind('change:board_diff', this.updateState);
+  },
+  selectColor: function(color) {
+
   },
   loadFen: function(fen) {
     fen = fen || 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
@@ -22,16 +26,16 @@ var Application = Backbone.Model.extend({
     var client = this.get('client');
     if (selected) {
       this.set({ selected: null });
-      this.view.toggleTileHighlight(selected, 'off');
+      this.view.highlightTile(selected, 'off');
       this.move({ from: selected, to: position, promotion: 'q' });
     } else if (client.get(position)) {
       if (!selected) {
         this.set({ selected: position });
-        this.view.toggleTileHighlight(position, 'on');
+        this.view.highlightTile(position, 'on');
       } else {
         this.set({ selected: position });
-        this.view.toggleTileHighlight(position, 'on');
-        this.view.toggleTileHighlight(selected, 'off');
+        this.view.highlightTile(position, 'on');
+        this.view.highlightTile(selected, 'off');
       }
     }
     console.log(position);
@@ -60,15 +64,35 @@ var Application = Backbone.Model.extend({
     } else {
       return false;
     }
+  },
+  updateState: function() {
+    var client = this.get('client');
+    var turn = client.turn();
+    var state = '';
+    if (client.in_checkmate()) {
+      if (turn === 'w') {
+        state = "Checkmate - Black wins!";
+      } else if (turn === 'b') {
+        state = "Checkmate - White wins!";
+      }
+    } else if (client.in_stalemate()) {
+      state = "Stalemate!";
+    } else if (client.in_draw() || client.in_threefold_repetition()) {
+      state = "Draw!";
+    } else if (client.in_check()) {
+      state = "Check!";
+    }
+    this.set({ state: state });
   }
 });
 
 var ApplicationView = Backbone.View.extend({
-  el: $("#tablearea"),
+  el: $("#content"),
   initialize: function() {
-    _.bindAll(this, 'generateBoard', 'updateBoard', 'addPiece');
-    this.model.bind('change:board_diff', this.updateBoard);
+    _.bindAll(this, 'generateBoard', 'updateBoard', 'updateState');
     this.model.view = this;
+    this.model.bind('change:board_diff', this.updateBoard);
+    this.model.bind('change:board_diff', this.updateState);
     this.generateBoard();
   },
   generateBoard: function() {
@@ -111,12 +135,16 @@ var ApplicationView = Backbone.View.extend({
     showChanges(board_diff);
     console.log('Board updated!');
   },
+  updateState: function() {
+    console.log('Updating state... ');
+    this.$("#info").text(this.model.get('state'));
+  },
   highlightMove: function(move) {
     this.$(".moved").removeClass('moved');
     this.$("#" + move.from).addClass('moved');
     this.$("#" + move.to).addClass('moved');
   },
-  toggleTileHighlight: function(position, s) {
+  highlightTile: function(position, s) {
     if (!s) {
       this.$('#' + position).toggleClass('selected');
     } else if (s === 'on') {
