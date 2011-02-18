@@ -57,7 +57,7 @@ var Application = Backbone.Model.extend({
     for (var square in client.SQUARES) {
       board[square] = '';
     }
-    this.set({ socket: null, player: null, client: client, board: board, board_diff: {} });
+    this.set({ socket: null, player: null, client: client, selected: null, board: board, board_diff: {} });
   },
   loadFen: function(fen) {
     fen = fen || 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
@@ -68,6 +68,25 @@ var Application = Backbone.Model.extend({
       board[square] = client.get(square);
     });
     this.set({ client: client, board: board, board_diff: board });
+  },
+  selectTile: function(position) {
+    var selected = this.get('selected');
+    var client = this.get('client');
+    if (client.get(position)) {
+      if (!selected) {
+        this.set({ selected: position });
+        this.view.toggleTileHighlight(position, 'on');
+      } else {
+        this.set({ selected: position });
+        this.view.toggleTileHighlight(position, 'on');
+        this.view.toggleTileHighlight(selected, 'off');
+      }
+    } else if (selected) {
+      this.set({ selected: null });
+      this.view.toggleTileHighlight(selected, 'off');
+      this.move({ from: selected, to: position });
+    }
+    console.log(position);
   },
   move: function(move) {
     var client = this.get('client');
@@ -87,6 +106,9 @@ var Application = Backbone.Model.extend({
         board[square] = s2;
       });
       this.set({ client: client, board: board, board_diff: board_diff });
+      return true;
+    } else {
+      return false;
     }
   }
 });
@@ -100,6 +122,8 @@ var ApplicationView = Backbone.View.extend({
     this.generateBoard();
   },
   generateBoard: function() {
+    var model = this.model;
+    var client = this.model.get('client');
     this.$("#chessboard").html(function() {
       var cols = ['8','7','6','5','4','3','2','1'];
       var rows = ['a','b','c','d','e','f','g','h'];
@@ -113,6 +137,10 @@ var ApplicationView = Backbone.View.extend({
         ++count;
       }
       return(board_html);
+    });
+    this.$(".tile").live('click', function() {
+      var position = $(this).attr('id');
+      model.selectTile(position);
     });
   },
   updateBoard: function() {
@@ -133,14 +161,14 @@ var ApplicationView = Backbone.View.extend({
     showChanges(board_diff);
     console.log('Board updated!');
   },
-  addPiece: function(position, type) {
-    var piece = new ChessPiece({ type: type, position: position, board: this });
-    var view = new ChessPieceView({ model: piece });
-    this.$('#' + position).html(view.render().el);
-    Pieces.add(piece);
-  },
-  removePiece: function(position) {
-    // Pieces.remove(Pieces.find(function(piece) { return piece.get('position') === position }));
+  toggleTileHighlight: function(position, s) {
+    if (!s) {
+      this.$('#' + position).toggleClass('selected');
+    } else if (s === 'on') {
+      this.$('#' + position).addClass('selected');
+    } else if (s === 'off') {
+      this.$('#' + position).removeClass('selected');
+    }
   }
 });
 
