@@ -1,48 +1,44 @@
-var express = require('express'),
-    redis = require('redis'),
-    uuid = require('node-uuid'),
-    io = require('socket.io'),
-    app = express.createServer();
+const express = require('express'),
+      redis = require('redis'),
+      uuid = require('node-uuid'),
+      io = require('socket.io');
 
+var server = express.createServer();
+var r_client = redis.createClient();
 
-r_client = redis.createClient();
 r_client.on('error', function(err) {
   console.log("Error: " + err);
 });
 
-app.configure(function() {
-  app.use(express.cookieDecoder());
-  // app.use(express.session());
-  app.set('views', __dirname + '/views');
-  app.set('view engine', 'jade');
-  app.dynamicHelpers({
-    session: function(req, res) {
-      return req.session;
-    }
+var host;
+server.configure(function() {
+  server.use(express.cookieDecoder());
+  server.set('views', __dirname + '/views');
+  server.set('view engine', 'jade');
+  server.configure('development', function() {
+    host = '127.0.0.1';
+  });
+  server.configure('production', function() {
+    host = 'chessmenow.com';
   });
 });
 
-var host;
-app.configure('development', function() {
-  host = '127.0.0.1';
-});
-app.configure('production', function() {
-  host = 'chessmenow.com';
-});
-
-app.get('/', function(req, res) {
-  var id;
+var getOrSetId = function(req, res, next) {
   if (!req.cookies.id) {
-    id = uuid();
-    res.cookie('id', id, { expires: new Date(Date.now() + 22118400000) });
+    req.uid = uuid();
+    res.cookie('id', req.uid, { expires: new Date(Date.now() + 22118400000) });
   } else {
-    id = req.cookies.id;
+    req.uid = req.cookies.id;
   }
-  console.log(id + ' has joined the party!');
+  next();
+};
+
+server.get('/', getOrSetId, function(req, res) {
+  console.log(req.uid + ' has joined the party!');
   res.render('index');
 });
 
-app.get('/new', function(req, res) {
+server.get('/new', function(req, res) {
   var generateId = function() {
     var chars = 'abcdefghijklmnopqrstuvwxyz';
     var length = 6;
@@ -65,16 +61,9 @@ app.get('/new', function(req, res) {
   getNewId();
 });
 
-app.get('/:game_id', function(req, res) {
+server.get('/:game_id', getOrSetId, function(req, res) {
   var color = null;
-  var id;
-  if (!req.cookies.id) {
-    id = uuid();
-    res.cookie('id', id, { expires: new Date(Date.now() + 22118400000) });
-  } else {
-    id = req.cookies.id;
-  }
-  console.log(id + ' has joined the party!');
+  console.log(req.uid + ' has joined the party!');
   r_client.get('game:' + req.params.game_id, function(err, reply) {
     if (!reply) {
       data = {
@@ -105,9 +94,9 @@ app.get('/:game_id', function(req, res) {
       });
     } else {
       data = JSON.parse(reply);
-      if (data.players.w.id === id) {
+      if (data.players.w.id === req.uid) {
         color = 'w';
-      } else if (data.players.b.id === id) {
+      } else if (data.players.b.id === req.uid) {
         color = 'b';
       }
     }
@@ -115,14 +104,14 @@ app.get('/:game_id', function(req, res) {
       locals: {
         host: host,
         game_state: JSON.stringify(data.game),
-        player_state: JSON.stringify({ id: id, color: color }),
+        player_state: JSON.stringify({ id: req.uid, color: color }),
         game_id: req.params.game_id
       }
     });
   });
 });
 
-var socket = io.listen(app);
+var socket = io.listen(server);
 socket.on('connection', function(client) {
   var subscriber = redis.createClient();
   var publisher = redis.createClient();
@@ -181,5 +170,5 @@ socket.on('connection', function(client) {
 });
 
 r_client.select(2, function() {
-  app.listen(3000);
+  server.listen(3000);
 });
