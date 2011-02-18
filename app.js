@@ -44,9 +44,9 @@ app.get('/', function(req, res) {
 app.get('/new', function(req, res) {
   var generateId = function() {
     var chars = 'abcdefghijklmnopqrstuvwxyz';
-    var length = 8;
+    var length = 6;
     var game_id = '';
-    for (var i=0; i < 8; ++i) {
+    for (var i=0; i < length; ++i) {
       game_id += chars[Math.floor(Math.random()*chars.length)];
     }
     return game_id;
@@ -55,9 +55,9 @@ app.get('/new', function(req, res) {
     game_id = generateId();
     r_client.get('game:' + game_id, function(err, reply) {
       if (!reply) {
-        res.redirect('/' + game_id)
+        res.redirect('/' + game_id);
       } else {
-        getNewId()
+        getNewId();
       }
     });
   }
@@ -65,7 +65,7 @@ app.get('/new', function(req, res) {
 });
 
 app.get('/:game_id', function(req, res) {
-  var color = '';
+  var color = null;
   var id;
   if (!req.cookies.id) {
     id = uuid();
@@ -77,26 +77,36 @@ app.get('/:game_id', function(req, res) {
   r_client.get('game:' + req.params.game_id, function(err, reply) {
     if (!reply) {
       data = {
-        game: {
-          started: false,
-          players: [],
+        timestamps: {
           created_at: Date.now(),
           started_at: null,
           ended_at: null
         },
-        colors: { w: '', b: '' }
+        players: {
+          w: {
+            id: null,
+            time: null,
+          },
+          b: {
+            id: null,
+            time: null
+          }
+        },
+        game: {
+          fen: '',
+          moves: [],
+          captured: []
+        }
       };
       r_client.set('game:' + req.params.game_id, JSON.stringify(data), function(err, reply) {
         r_client.send_command('expire', ['game:' + req.params.game_id, 600]); 
       });
     } else {
       data = JSON.parse(reply);
-      if (data.colors) {
-        if (data.colors.w === id) {
-          color = 'w';
-        } else if (data.colors.b === id) {
-          color = 'b';
-        }
+      if (data.players.w.id === id) {
+        color = 'w';
+      } else if (data.players.b.id === id) {
+        color = 'b';
       }
     }
     res.render('game', {
@@ -122,35 +132,42 @@ socket.on('connection', function(client) {
           message = JSON.parse(message);
           client.send(message);
         });
-        break
+        break;
       case 'moves':
         r_client.get(channel, function(err, reply) {
-          data = JSON.parse(reply);
+          var data = JSON.parse(reply);
+          var last_move = data.game.moves[data.game.moves.length-1];
+          if (last_move.length === 2) {
+            data.game.moves.push([message.move]);
+          } else {
+            last_move.push(message.move);
+            data.game.moves[data.game.moves.length-1] = last_move;
+          }
           data.game.fen = message.fen;
-          data.game.last_move = message.move;
           data.game.captured = message.captured;
           r_client.set(channel, JSON.stringify(data));
           publisher.publish(channel, JSON.stringify(message));
         });
-        break
+        break;
       case 'colors':
         r_client.get(channel, function(err, reply) {
           data = JSON.parse(reply);
-          if (!data.colors[message.color]) {
-            data.colors[message.color] = message.player_id;
-            data.game.players.push(message.color);
+          if (!data.players[message.color].id) {
+            data.players[message.color].id = message.player_id;
+            if (data.colors.w.id && data.colors.b.id) {
+              data.timestamps.started_at = Date.now();
+            }
+            r_client.set(channel, JSON.stringify(data));
+            publisher.publish(channel, JSON.stringify({
+              type: 'colors',
+              color: message.color,
+              started_at: data.timestamps.started_at
+            }));
+          } else {
+            console.log(message.player_id + ' selected an invalid color: ' + message.color);
           }
-          if (data.colors && (data.colors.w && data.colors.b)) {
-            data.game.started = true;
-          }
-          r_client.set(channel, JSON.stringify(data));
-          publisher.publish(channel, JSON.stringify({
-            type: 'colors',
-            color: message.color,
-            started: data.game.started
-          }));
         });
-        break
+        break;
     }
   });
   client.on('disconnect', function() {
