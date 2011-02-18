@@ -1,15 +1,52 @@
+var Player = Backbone.Model.extend({
+  initialize: function() {
+    var socket = (function() {
+      var s = new io.Socket('127.0.0.1', { port: 3000 });
+      s.connect();
+      s.on('connect', function() {
+        s.send({ type: 'auth', auth: document.cookie, game_id: game_id });
+      });
+      s.on('message', function(message) {
+        switch (message.type) {
+          case 'moves':
+            if (message.fen) {
+              self.state.captured = message.captured;
+              self.loadFen(message.fen);
+            }
+            self.showLastMoved(message.move);
+            break
+
+          case 'colors':
+            if (message.color === 'b') {
+              $(".black-player").html('Black');
+              $("#choose-black").remove();
+            } else if (message.color === 'w') {
+              $(".white-player").html('White');
+              $("#choose-white").remove();
+            }
+            if (message.started) {
+              self.state.started = true;
+              self.checkGameState();
+            }
+            break
+        }
+      });
+      s.on('disconnect', function() {
+        s.connect();
+      });
+      setInterval(function() {
+        s.send('ping');
+      }, 5000);
+      return s;
+    })();
+    this.set({ socket: socket });
+  }
+});
+
 var Application = Backbone.Model.extend({
   initialize: function() {
-    var client = new Chess();
-    var board = {};
-    for (var square in client.SQUARES) {
-      board[square] = '';
-    }
-    this.set({ socket: null, player: null, client: client, selected: null, board: board, board_diff: {} });
+    this.set({ client: new Chess(), selected: null });
     this.bind('change:board_diff', this.updateState);
-  },
-  selectColor: function(color) {
-
   },
   loadFen: function(fen) {
     fen = fen || 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
@@ -94,6 +131,10 @@ var ApplicationView = Backbone.View.extend({
     this.model.bind('change:board_diff', this.updateBoard);
     this.model.bind('change:board_diff', this.updateState);
     this.generateBoard();
+  },
+  selectColor: function(color) {
+    $("#choose-white").show();
+    $("#choose-black").show();
   },
   generateBoard: function() {
     var model = this.model;
