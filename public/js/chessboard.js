@@ -13,7 +13,14 @@ var ChessPieceCollection = Backbone.Collection.extend({
     return this.detect(function(piece) {
       return piece.get('selected');
     });
-  }
+  },
+  deselect: function() {
+    var selected = Pieces.getSelected();
+    if (selected) {
+      selected.set({ selected: false });
+      $(selected.view.el).parent().removeClass('selected');
+    }
+  },
 });
 var Pieces = new ChessPieceCollection();
 
@@ -52,7 +59,11 @@ var Application = Backbone.Model.extend({
     this.set({
       socket: null,
       player: null,
+      client: new Chess(),
     })
+  },
+  movePiece: function() {
+
   }
 });
 
@@ -85,7 +96,7 @@ var ApplicationView = Backbone.View.extend({
       --row_num;
     }
   },
-  addPiece: function(type, position) {
+  addPiece: function(position, type) {
     var piece = new ChessPiece({ type: type, position: position, board: this });
     var view = new ChessPieceView({ model: piece });
     this.$('#' + position).html(view.render().el);
@@ -97,8 +108,9 @@ var ApplicationView = Backbone.View.extend({
 });
 
 var a = new ApplicationView();
-a.addPiece('K', 'd3');
-a.addPiece('k', 'e3');
+a.addPiece('d3', 'K');
+a.addPiece('e3', 'k');
+a.removePiece('e3');
 
 var Chessboard = function(options, player) {
   var self = this;
