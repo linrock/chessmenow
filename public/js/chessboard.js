@@ -12,7 +12,7 @@ var Application = Backbone.Model.extend({
   },
   initializeSocket: function() {
     var self = this;
-    var s = new io.Socket('127.0.0.1', { port: 3000 });
+    var s = new io.Socket(host, { port: 3000 });
     s.connect();
     s.on('connect', function() {
       s.send({ type: 'auth', auth: document.cookie, game_id: game_id });

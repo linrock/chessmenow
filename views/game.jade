@@ -21,6 +21,7 @@
 
 script(type="text/javascript", src="/media/js/chessboard.js")
 :javascript
+  | var host = "#{host}";
   | var game_id = "#{game_id}";
   | var game_state = !{game_state};
   | var player_state = !{player_state};
