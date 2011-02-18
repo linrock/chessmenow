@@ -22,11 +22,12 @@ app.configure(function() {
   });
 });
 
+var host;
 app.configure('development', function() {
-
+  host = '127.0.0.1';
 });
 app.configure('production', function() {
-  
+  host = 'chessmenow.com';
 });
 
 app.get('/', function(req, res) {
@@ -112,6 +113,7 @@ app.get('/:game_id', function(req, res) {
     }
     res.render('game', {
       locals: {
+        host: host,
         game_state: JSON.stringify(data.game),
         player_state: JSON.stringify({ id: id, color: color }),
         game_id: req.params.game_id
@@ -148,8 +150,6 @@ socket.on('connection', function(client) {
           data.game.last_move = { from: message.data.move.from, to: message.data.move.to };
           data.game.captured = message.data.captured;
           r_client.set(channel, JSON.stringify(data));
-          console.log('Got move!');
-          console.log('Publishing... ' + JSON.stringify(message));
           publisher.publish(channel, JSON.stringify(message));
         });
         break;
@@ -181,5 +181,5 @@ socket.on('connection', function(client) {
 });
 
 r_client.select(2, function() {
-  app.listen(3000, '127.0.0.1');
+  app.listen(3000);
 });
