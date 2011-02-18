@@ -63,14 +63,17 @@ var Application = Backbone.Model.extend({
       this.set({ selected: null });
       this.view.highlightTile(selected, 'off');
       this.move({ from: selected, to: position, promotion: 'q' });
-    } else if (client.get(position)) {
-      if (!selected) {
-        this.set({ selected: position });
-        this.view.highlightTile(position, 'on');
-      } else {
-        this.set({ selected: position });
-        this.view.highlightTile(position, 'on');
-        this.view.highlightTile(selected, 'off');
+    } else {
+      var piece = client.get(position);
+      if (piece && piece.color === client.turn()) {
+        if (!selected) {
+          this.set({ selected: position });
+          this.view.highlightTile(position, 'on');
+        } else {
+          this.set({ selected: position });
+          this.view.highlightTile(position, 'on');
+          this.view.highlightTile(selected, 'off');
+        }
       }
     }
     console.log(position);
