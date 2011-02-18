@@ -1,55 +1,3 @@
-var ChessPiece = Backbone.Model.extend({
-  initialize: function(options) {
-    this.set(options);
-  },
-});
-
-var ChessPieceCollection = Backbone.Collection.extend({
-  model: ChessPiece,
-  getSelected: function() {
-    return this.detect(function(piece) {
-      return piece.get('selected');
-    });
-  },
-  deselect: function() {
-    var selected = Pieces.getSelected();
-    if (selected) {
-      selected.set({ selected: false });
-      $(selected.view.el).parent().removeClass('selected');
-    }
-  },
-  getPiece: function(position) {
-    return this.detect(function(piece) {
-      return piece.get('position') === position;
-    });
-  }
-});
-var Pieces = new ChessPieceCollection();
-
-var ChessPieceView = Backbone.View.extend({
-  tagName: 'div',
-  initialize: function() {
-    _.bindAll(this, 'render');
-    this.model.view = this;
-  },
-  events: {
-    'click': 'selectPiece',
-  },
-  selectPiece: function() {
-    var selected = Pieces.getSelected();
-    this.model.set({ selected: true });
-    $(this.el).parent().addClass('selected');
-    if (selected) {
-      selected.set({ selected: false });
-      $(selected.view.el).parent().removeClass('selected');
-    }
-  },
-  render: function() {
-    $(this.el).html('<div class="piece ' + this.model.get('type') + '"></div>');
-    return this;
-  },
-});
-
 var Application = Backbone.Model.extend({
   initialize: function() {
     var client = new Chess();
@@ -91,7 +39,8 @@ var Application = Backbone.Model.extend({
   move: function(move) {
     var client = this.get('client');
     var board = this.get('board');
-    if (client.move(move)) {
+    var move = client.move(move);
+    if (move) {
       var board_diff = {};
       _.each(client.SQUARES, function(square) {
         var s1 = board[square];
@@ -106,7 +55,8 @@ var Application = Backbone.Model.extend({
         board[square] = s2;
       });
       this.set({ client: client, board: board, board_diff: board_diff });
-      return true;
+      this.view.highlightMove(move);
+      return move;
     } else {
       return false;
     }
@@ -160,6 +110,11 @@ var ApplicationView = Backbone.View.extend({
     };
     showChanges(board_diff);
     console.log('Board updated!');
+  },
+  highlightMove: function(move) {
+    this.$(".moved").removeClass('moved');
+    this.$("#" + move.from).addClass('moved');
+    this.$("#" + move.to).addClass('moved');
   },
   toggleTileHighlight: function(position, s) {
     if (!s) {
