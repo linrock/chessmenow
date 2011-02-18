@@ -4,11 +4,12 @@ var Application = Backbone.Model.extend({
     this.set({
       client: new Chess(),
       selected: null,
-      captured: [],
+      captured: game_state.captured,
       player: player_state,
       socket: this.initializeSocket(),
     });
     this.bind('change:board_diff', this.updateState);
+    this.bind('change:captured', this.updateCaptured);
   },
   initializeSocket: function() {
     var self = this;
@@ -84,15 +85,15 @@ var Application = Backbone.Model.extend({
     var move = client.move(move);
     if (move) {
       if (move.captured) {
-        console.dir(move);
         var captured = this.get('captured');
         var piece = move.captured;
         if (move.color === 'w') {
           piece = piece.toUpperCase();
         }
         captured.push(piece);
+        this.set({ captured: [] });       // XXX WTF event doesn't fucking firing unless I do this... 
         this.set({ captured: captured });
-        console.log('captured a piece - ' + captured);
+        console.log('Captured...');
       }
       var board_diff = {};
       _.each(client.SQUARES, function(square) {
@@ -141,6 +142,9 @@ var Application = Backbone.Model.extend({
       state = "Check!";
     }
     this.set({ state: state });
+  },
+  updateCaptured: function() {
+    console.log('Oh dude, a new piece was captured!');
   }
 });
 

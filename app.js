@@ -135,9 +135,15 @@ socket.on('connection', function(client) {
             last_move.push(message.data.move.san);
             data.game.moves[data.game.moves.length-1] = last_move;
           }
+          if (message.data.move.captured) {
+            var piece = message.data.move.captured;
+            if (message.data.move.captured.color === 'w') {
+              piece = piece.toUpperCase();
+            }
+            data.game.captured.push(piece);
+          }
           data.game.fen = message.data.fen;
           data.game.last_move = { from: message.data.move.from, to: message.data.move.to };
-          data.game.captured = message.data.captured;
           r_client.set(channel, JSON.stringify(data));
           publisher.publish(channel, JSON.stringify(message));
         });
