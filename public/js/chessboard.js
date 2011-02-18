@@ -1,49 +1,50 @@
 var Application = Backbone.Model.extend({
   initialize: function() {
+    _.bindAll(this, 'initializeSocket', 'loadFen');
     this.set({
       client: new Chess(),
       selected: null,
       player: player_state,
-      socket: (function() {
-        var s = new io.Socket('127.0.0.1', { port: 3000 });
-        s.connect();
-        s.on('connect', function() {
-          s.send({ type: 'auth', auth: document.cookie, game_id: game_id });
-        });
-        s.on('message', function(message) {
-          switch (message.type) {
-            case 'moves':
-              if (message.fen) {
-                self.state.captured = message.captured;
-                self.loadFen(message.fen);
-              }
-              self.showLastMoved(message.move);
-              break;
-            case 'colors':
-              if (message.color === 'b') {
-                $(".black-player").html('Black');
-                $("#choose-black").remove();
-              } else if (message.color === 'w') {
-                $(".white-player").html('White');
-                $("#choose-white").remove();
-              }
-              if (message.started) {
-                self.state.started = true;
-                self.checkGameState();
-              }
-              break;
-          }
-        });
-        s.on('disconnect', function() {
-          s.connect();
-        });
-        setInterval(function() {
-          s.send('ping');
-        }, 5000);
-        return s;
-      })()
+      socket: this.initializeSocket(),
     });
     this.bind('change:board_diff', this.updateState);
+  },
+  initializeSocket: function() {
+    var self = this;
+    var s = new io.Socket('127.0.0.1', { port: 3000 });
+    s.connect();
+    s.on('connect', function() {
+      s.send({ type: 'auth', auth: document.cookie, game_id: game_id });
+    });
+    s.on('message', function(message) {
+      switch (message.type) {
+        case 'move':
+          if (message.data.fen) {
+            self.loadFen(message.data.fen);
+          }
+          break;
+        case 'colors':
+          if (message.color === 'b') {
+            $(".black-player").html('Black');
+            $("#choose-black").remove();
+          } else if (message.color === 'w') {
+            $(".white-player").html('White');
+            $("#choose-white").remove();
+          }
+          if (message.started) {
+            self.state.started = true;
+            self.checkGameState();
+          }
+          break;
+      }
+    });
+    s.on('disconnect', function() {
+      s.connect();
+    });
+    setInterval(function() {
+      s.send('ping');
+    }, 5000);
+    return s;
   },
   loadFen: function(fen) {
     fen = fen || 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';

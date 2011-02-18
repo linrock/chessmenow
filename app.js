@@ -137,7 +137,6 @@ socket.on('connection', function(client) {
       case 'move':
         r_client.get(channel, function(err, reply) {
           var data = JSON.parse(reply);
-          console.dir(data);
           var last_move = data.game.moves[data.game.moves.length-1];
           if (!last_move || last_move.length === 2) {
             data.game.moves.push([message.data.move.san]);
@@ -148,8 +147,9 @@ socket.on('connection', function(client) {
           data.game.fen = message.data.fen;
           data.game.last_move = { from: message.data.move.from, to: message.data.move.to };
           data.game.captured = message.data.captured;
-          console.dir(message);
           r_client.set(channel, JSON.stringify(data));
+          console.log('Got move!');
+          console.log('Publishing... ' + JSON.stringify(message));
           publisher.publish(channel, JSON.stringify(message));
         });
         break;
