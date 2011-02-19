@@ -147,6 +147,7 @@ socket.on('connection', function(client) {
             }
             data.game.captured.push(piece);
           }
+          console.log('Got a move: ' + message.data.move.san);
           data.game.fen = message.data.fen;
           data.game.last_move = { from: message.data.move.from, to: message.data.move.to };
           r_client.set(channel, JSON.stringify(data));
