@@ -1,8 +1,10 @@
 var Application = Backbone.Model.extend({
   initialize: function() {
     _.bindAll(this, 'initializeSocket', 'loadFen');
+    var moves = new MoveList();
     this.set({
       client: new Chess(),
+      moves: moves,
       selected: null,
       captured: game_state.captured,
       player: player_state,
@@ -67,12 +69,9 @@ var Application = Backbone.Model.extend({
     } else {
       var piece = client.get(position);
       if (piece && piece.color === client.turn()) {
-        if (!selected) {
-          this.set({ selected: position });
-          this.view.highlightTile(position, 'on');
-        } else {
-          this.set({ selected: position });
-          this.view.highlightTile(position, 'on');
+        this.view.highlightTile(position, 'on');
+        this.set({ selected: position });
+        if (selected) {
           this.view.highlightTile(selected, 'off');
         }
       }
@@ -118,6 +117,7 @@ var Application = Backbone.Model.extend({
           move: move,
         }
       });
+      this.get('moves').addMove(move); // XXX - should be an event... but it's not firing.
       return move;
     } else {
       return false;
@@ -156,6 +156,7 @@ var ApplicationView = Backbone.View.extend({
     this.generateBoard();
     this.displayColorChoosers();
     this.displayNames();
+    this.displayMoves();
     this.updateCaptured();
     this.$(".tile").live('click', function() {
       var position = $(this).attr('id');
@@ -222,6 +223,14 @@ var ApplicationView = Backbone.View.extend({
       $(".b-player").text('Black');
     }
   },
+  displayMoves: function() {
+    // XXX - use move models/views in the future?
+    $("#move-list").html(function() {
+      for (move in game_state.moves) {
+        
+      }
+    });
+  },
   updateBoard: function() {
     var board_diff = this.model.get('board_diff');
     var showChanges = function(pieces) {
@@ -278,6 +287,26 @@ var ApplicationView = Backbone.View.extend({
       $("#bottom-captured").html(b_captured);
     }
   },
+  updateMoveList: function(move) {
+    var move_html = '';
+    var move_list = $("#move-list > ul");
+    var new_move;
+    if (move.color === 'w') {
+      var move_num = move_list.length+1;
+      move_html += '<ul>';
+      move_html += '<li class="move-num">' + move_num + '</li>';
+      move_html += '<li class="move">' + move.san + '</li>';
+      move_html += '</ul>';
+      move_list.last().append(move_html);
+    } else {
+      move_list.last().append('<li class="move">' + move.san + '</li>');
+    }
+    $("#move-list").append('<ul><li class="move-num">1.</li><li class="move">e4</li><li class="move">e5</li></ul>');
+  },
+  renderMoveList: function() {
+    MoveList;
+    this.$("#move-list").html();
+  },
   highlightMove: function(move) {
     this.$(".moved").removeClass('moved');
     this.$("#" + move.from).addClass('moved');
@@ -291,5 +320,56 @@ var ApplicationView = Backbone.View.extend({
     } else if (s === 'off') {
       this.$('#' + position).removeClass('selected');
     }
+  }
+});
+
+var Move = Backbone.Model.extend({
+  events: {
+    'click': this.goToMove
+  },
+  goToMove: function() {
+    alert('oh hi, you clicked me!');
+  },
+});
+
+var MoveList = Backbone.Collection.extend({
+  model: Move,
+  nextMoveNum: function() {
+    if (!this.length) {
+      return 1;
+    }
+    return this.last().get('order') + 1;
+  },
+  addMove: function(move) {
+    console.log('Adding a move!!!');
+    var attrs = {};
+    var m;
+    if (move.color === 'w') {
+      m = new Move({
+        move_num: this.nextMoveNum(),
+        white: move.san,
+        black: null
+      });
+      this.add(m);
+    } else if (move.color === 'b') {
+      m = this.last();
+      m.set({
+        black: move.san
+      });
+    }
+    m.view.render();
+  }
+});
+
+var MoveView = Backbone.Model.extend({
+  tagName: 'ul',
+  template: _.template('<ul><li class="move-num"><%= move_num %></li><li class="move"><%= black %></li><li class="move"><%= white %></li></ul>'),
+  initialize: function() {
+    _.bindAll(this, 'render');
+    this.model.view = this;
+  },
+  render: function() {
+    console.log('Rendering move...');
+    $(this.el).html(this.template(this.model.toJSON()));
   }
 });
