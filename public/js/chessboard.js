@@ -183,6 +183,48 @@ var ApplicationView = Backbone.View.extend({
     });
   },
   displayColorChoosers: function() {
+
+
+                          /*
+  if ($.inArray('b', self.state.players) === -1) {
+    $("#choose-black").show().click(function() {
+      self.player.color = 'b';
+      self.state.players.push('b');
+      self.generateBoard();
+      self.loadFen(self.state.fen);
+      self.socket.send({
+        type: 'colors',
+        game_id: game_id,
+        player_id: self.player.id,
+        color: 'b'
+      });
+      $(".black-player").insertAfter("#bottom-name").html('Black');
+      $(".white-player").insertAfter("#top-name");
+      $(this).hide();
+    });
+  } else {
+    $(".black-player").html('Black');
+  }
+  */
+    var model = this.model;
+    var client = model.get('client');
+    var player = model.get('player');
+    _.each(['w','b'], function(c) {
+      if (!_.include(chosen_colors, c)) {
+        this.$("#choose-" + c).show().click(function() {
+          player.color = c;
+          model.get('socket').send({
+            type: 'colors',
+            game_id: game_id,
+            player_id: player.id,
+            color: c
+          });
+          $(".black-player").insertAfter("#bottom-name").html('You');
+          model.set({ player: player });
+          $(this).hide();
+        });
+      }
+    });
   },
   updateBoard: function() {
     var board_diff = this.model.get('board_diff');

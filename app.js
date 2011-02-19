@@ -161,7 +161,7 @@ socket.on('connection', function(client) {
           data = JSON.parse(reply);
           if (!data.players[message.color].id) {
             data.players[message.color].id = message.player_id;
-            if (data.colors.w.id && data.colors.b.id) {
+            if (data.players.w.id && data.players.b.id) {
               data.timestamps.started_at = Date.now();
             }
             r_client.set(channel, JSON.stringify(data));
