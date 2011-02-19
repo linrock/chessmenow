@@ -250,7 +250,7 @@ var ApplicationView = Backbone.View.extend({
       }
     });
     // if (this.player && this.player.color == 'b') {
-    if (true) {
+    if (this.model.get('player').color === 'w') {
       $("#top-captured").html(b_captured);
       $("#bottom-captured").html(w_captured);
     } else {
