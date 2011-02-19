@@ -63,6 +63,7 @@ server.get('/new', function(req, res) {
 
 server.get('/:game_id', getOrSetId, function(req, res) {
   var color = null;
+  var chosen_colors = [];
   console.log(req.uid + ' has joined the party!');
   r_client.get('game:' + req.params.game_id, function(err, reply) {
     if (!reply) {
@@ -99,13 +100,20 @@ server.get('/:game_id', getOrSetId, function(req, res) {
       } else if (data.players.b.id === req.uid) {
         color = 'b';
       }
+      if (data.players.w.id) {
+        chosen_colors.push('w');
+      } else if (data.players.b.id) {
+        chosen_colors.push('b');
+      }
     }
+    console.dir(chosen_colors);
     res.render('game', {
       locals: {
         host: host,
+        game_id: req.params.game_id,
+        chosen_colors: JSON.stringify(chosen_colors),
         game_state: JSON.stringify(data.game),
         player_state: JSON.stringify({ id: req.uid, color: color }),
-        game_id: req.params.game_id
       }
     });
   });

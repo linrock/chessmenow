@@ -152,8 +152,9 @@ var ApplicationView = Backbone.View.extend({
     this.model.bind('change:board_diff', this.updateBoard);
     this.model.bind('change:board_diff', this.updateState);
     this.model.bind('change:captured', this.updateCaptured);
-    this.updateCaptured();
     this.generateBoard();
+    this.displayColorChoosers();
+    this.updateCaptured();
   },
   selectColor: function(color) {
     $("#choose-white").show();
@@ -180,6 +181,8 @@ var ApplicationView = Backbone.View.extend({
       var position = $(this).attr('id');
       model.selectTile(position);
     });
+  },
+  displayColorChoosers: function() {
   },
   updateBoard: function() {
     var board_diff = this.model.get('board_diff');
