@@ -5,16 +5,28 @@
     button#choose-b.choose Black
     // #turn
   #infoarea
-    #top-side.color-info
-      #top-name
-        .b-player
-      .clear
-      #top-captured
-    #bottom-side.color-info
-      #bottom-captured
-      .clear
-      #bottom-name
-        .w-player
+    #top-side
+      .color-info
+        #top-name
+          .b-player
+        #top-captured
+    .clear
+    #move-list
+      - for (var move in game_state.moves)
+        .move-row
+          span.move-num #{parseInt(move)+1}.
+          span.move= game_state.moves[move][0]
+          - if (game_state.moves[move][1])
+            span.move= game_state.moves[move][1]
+        .clear
+    .clear
+    #bottom-side
+      .color-info
+        #bottom-captured
+        .clear
+        #bottom-name
+          .w-player
+    .clear
 .clear
 #announcement-area
   h2#info
@@ -23,9 +35,9 @@ script(type="text/javascript", src="/media/js/chessboard.js")
 :javascript
   | var host = "#{host}";
   | var game_id = "#{game_id}";
-  | var chosen_colors = !{chosen_colors};
-  | var game_state = !{game_state};
-  | var player_state = !{player_state};
+  | var chosen_colors = !{JSON.stringify(chosen_colors)};
+  | var game_state = !{JSON.stringify(game_state)};
+  | var player_state = !{JSON.stringify(player_state)};
 
   | var a = new ApplicationView({ model: new Application() });
   | a.model.loadFen(game_state.fen);

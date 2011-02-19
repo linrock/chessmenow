@@ -105,11 +105,12 @@ server.get('/:game_id', getOrSetId, function(req, res) {
     }
     res.render('game', {
       locals: {
-        host: host,
-        game_id: req.params.game_id,
-        chosen_colors: JSON.stringify(chosen_colors),
-        game_state: JSON.stringify(data.game),
-        player_state: JSON.stringify({ id: req.uid, color: color }),
+        host:           host,
+        game_id:        req.params.game_id,
+        moves:          data.game.moves,
+        chosen_colors:  chosen_colors,
+        game_state:     data.game,
+        player_state:   { id: req.uid, color: color },
       }
     });
   });

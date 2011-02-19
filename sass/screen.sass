@@ -91,21 +91,30 @@
       #infoarea
         +column(11, true)
         height: 8*$tile-size + 8px
-        position: relative
         #top-side
-          position: absolute
-          top: 0px
-          #top-name
+          +float-left
+          height: 1.5*$tile-size
+        #move-list
+          +float-left
+          height: 5*$tile-size + 8px - 20px
+          border: 2px solid gray
+          margin: 10px 0
+          width: 150px
+          overflow: auto
+          .move-row
             +float-left
-          #top-captured
-            +float-left
+            span
+              +float-left
+              &.move
+                width: 40px
+              &.move-num
+                font-weight: bold
+                text-align: right
+                margin-right: 10px
+                width: 20px
         #bottom-side
-          position: absolute
-          bottom: 0px
-          #bottom-name
-            +float-left
-          #bottom-captured
-            +float-left
+          +float-left
+          height: 1.5*$tile-size
         .current-turn
           color: orange
           font-weight: bold
