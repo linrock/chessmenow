@@ -23,7 +23,7 @@ var Application = Backbone.Model.extend({
       switch (message.type) {
         case 'move':
           if (message.data.move) {
-            self.move(message.data.move);
+            self.move(message.data.move, false);
           }
           break;
         case 'colors':
@@ -43,7 +43,6 @@ var Application = Backbone.Model.extend({
     });
     s.on('disconnect', function() {
       s.connect();
-      self.updateState();
     });
     setInterval(function() {
       s.send('ping');
@@ -66,7 +65,7 @@ var Application = Backbone.Model.extend({
     if (selected) {
       this.set({ selected: null });
       this.view.highlightTile(selected, 'off');
-      this.move({ from: selected, to: position, promotion: 'q' });
+      this.move({ from: selected, to: position, promotion: 'q' }, true);
     } else {
       var piece = client.get(position);
       if (piece && piece.color === client.turn()) {
@@ -78,7 +77,7 @@ var Application = Backbone.Model.extend({
       }
     }
   },
-  move: function(move) {
+  move: function(move, remote) {
     var client = this.get('client');
     var board = this.get('board');
     var move = client.move(move);
@@ -104,18 +103,20 @@ var Application = Backbone.Model.extend({
         } else if (s1 || s2) {
           board_diff[square] = s2;
         }
-        board[square] = s2;
-      });
+        board[square] = s2; });
       this.set({ client: client, board: board, board_diff: board_diff });
       this.view.highlightMove(move);
-      this.get('socket').send({
-        type: 'move',
-        game_id: game_id,
-        data: {
-          fen: client.fen(),
-          move: move,
-        }
-      });
+      console.log('Making a move! - ' + move.san)
+      if (remote) {
+        this.get('socket').send({
+          type: 'move',
+          game_id: game_id,
+          data: {
+            fen: client.fen(),
+            move: move,
+          }
+        });
+      }
       // this.get('moves').addMove(move);
       return move;
     } else {
