@@ -26,11 +26,11 @@ var Application = Backbone.Model.extend({
           break;
         case 'colors':
           if (message.color === 'b') {
-            $(".black-player").html('Black');
-            $("#choose-black").remove();
+            $(".b-player").html('Black');
+            $("#choose-b").remove();
           } else if (message.color === 'w') {
-            $(".white-player").html('White');
-            $("#choose-white").remove();
+            $(".w-player").html('White');
+            $("#choose-w").remove();
           }
           if (message.started) {
             self.state.started = true;
@@ -166,6 +166,15 @@ var ApplicationView = Backbone.View.extend({
     this.$("#chessboard").html(function() {
       var cols = ['8','7','6','5','4','3','2','1'];
       var rows = ['a','b','c','d','e','f','g','h'];
+      if (player_state.color === 'b') {
+        cols = cols.reverse();
+        rows = rows.reverse();
+        $(".black-player").insertAfter("#bottom-name");
+        $(".white-player").insertAfter("#top-name");
+      } else {
+        $(".white-player").insertAfter("#bottom-name");
+        $(".black-player").insertAfter("#top-name");
+      }
       var board_html = '';
       var count = 0;
       for (var i in cols) {
@@ -183,44 +192,25 @@ var ApplicationView = Backbone.View.extend({
     });
   },
   displayColorChoosers: function() {
-
-
-                          /*
-  if ($.inArray('b', self.state.players) === -1) {
-    $("#choose-black").show().click(function() {
-      self.player.color = 'b';
-      self.state.players.push('b');
-      self.generateBoard();
-      self.loadFen(self.state.fen);
-      self.socket.send({
-        type: 'colors',
-        game_id: game_id,
-        player_id: self.player.id,
-        color: 'b'
-      });
-      $(".black-player").insertAfter("#bottom-name").html('Black');
-      $(".white-player").insertAfter("#top-name");
-      $(this).hide();
-    });
-  } else {
-    $(".black-player").html('Black');
-  }
-  */
-    var model = this.model;
-    var client = model.get('client');
-    var player = model.get('player');
+    var self = this;
+    var client = self.model.get('client');
+    var player = self.model.get('player');
     _.each(['w','b'], function(c) {
       if (!_.include(chosen_colors, c)) {
-        this.$("#choose-" + c).show().click(function() {
+        $("#choose-" + c).show().click(function() {
           player.color = c;
-          model.get('socket').send({
+          self.model.get('socket').send({
             type: 'colors',
             game_id: game_id,
             player_id: player.id,
             color: c
           });
-          $(".black-player").insertAfter("#bottom-name").html('You');
-          model.set({ player: player });
+          if (c === 'b') {
+            self.generateBoard('b');
+            self.updateBoard();
+          }
+          $("." + c + "-player").html('You');
+          self.model.set({ player: player });
           $(this).hide();
         });
       }

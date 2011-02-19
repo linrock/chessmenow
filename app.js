@@ -100,11 +100,8 @@ server.get('/:game_id', getOrSetId, function(req, res) {
       } else if (data.players.b.id === req.uid) {
         color = 'b';
       }
-      if (data.players.w.id) {
-        chosen_colors.push('w');
-      } else if (data.players.b.id) {
-        chosen_colors.push('b');
-      }
+      if (data.players.w.id) { chosen_colors.push('w'); }
+      if (data.players.b.id) { chosen_colors.push('b'); }
     }
     console.dir(chosen_colors);
     res.render('game', {
