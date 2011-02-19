@@ -103,7 +103,6 @@ server.get('/:game_id', getOrSetId, function(req, res) {
       if (data.players.w.id) { chosen_colors.push('w'); }
       if (data.players.b.id) { chosen_colors.push('b'); }
     }
-    console.dir(chosen_colors);
     res.render('game', {
       locals: {
         host: host,
