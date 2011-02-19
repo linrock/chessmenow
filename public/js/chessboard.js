@@ -43,6 +43,7 @@ var Application = Backbone.Model.extend({
     });
     s.on('disconnect', function() {
       s.connect();
+      self.updateState();
     });
     setInterval(function() {
       s.send('ping');
@@ -76,7 +77,6 @@ var Application = Backbone.Model.extend({
         }
       }
     }
-    console.log('Selected: ' + this.get('selected'));
   },
   move: function(move) {
     var client = this.get('client');
@@ -92,7 +92,6 @@ var Application = Backbone.Model.extend({
         captured.push(piece);
         this.set({ captured: [] }); // XXX - Fucking event doesn't fire unless this is here.
         this.set({ captured: captured });
-        console.log('Captured...');
       }
       var board_diff = {};
       _.each(client.SQUARES, function(square) {
@@ -117,7 +116,7 @@ var Application = Backbone.Model.extend({
           move: move,
         }
       });
-      this.get('moves').addMove(move); // XXX - should be an event... but it's not firing.
+      // this.get('moves').addMove(move);
       return move;
     } else {
       return false;
@@ -231,6 +230,22 @@ var ApplicationView = Backbone.View.extend({
       }
     });
   },
+  updateMoveList: function(move) {
+    var move_html = '';
+    var move_list = $("#move-list > ul");
+    var new_move;
+    if (move.color === 'w') {
+      var move_num = move_list.length+1;
+      move_html += '<ul>';
+      move_html += '<li class="move-num">' + move_num + '</li>';
+      move_html += '<li class="move">' + move.san + '</li>';
+      move_html += '</ul>';
+      move_list.last().append(move_html);
+    } else {
+      move_list.last().append('<li class="move">' + move.san + '</li>');
+    }
+    $("#move-list").append('<ul><li class="move-num">1.</li><li class="move">e4</li><li class="move">e5</li></ul>');
+  },
   updateBoard: function() {
     var board_diff = this.model.get('board_diff');
     var showChanges = function(pieces) {
@@ -247,10 +262,8 @@ var ApplicationView = Backbone.View.extend({
       });
     };
     showChanges(board_diff);
-    console.log('Board updated!');
   },
   updateState: function() {
-    console.log('Updating state... ');
     this.$("#info").text(this.model.get('state'));
     var client = this.model.get('client');
     var turn = this.model.get('client').turn();
@@ -268,7 +281,6 @@ var ApplicationView = Backbone.View.extend({
     }
   },
   updateCaptured: function() {
-    console.log('Updating captured...');
     // XXX - Clean this shit up.
     var w_captured = '';
     var b_captured = '';
@@ -302,10 +314,6 @@ var ApplicationView = Backbone.View.extend({
       move_list.last().append('<li class="move">' + move.san + '</li>');
     }
     $("#move-list").append('<ul><li class="move-num">1.</li><li class="move">e4</li><li class="move">e5</li></ul>');
-  },
-  renderMoveList: function() {
-    MoveList;
-    this.$("#move-list").html();
   },
   highlightMove: function(move) {
     this.$(".moved").removeClass('moved');
@@ -341,7 +349,6 @@ var MoveList = Backbone.Collection.extend({
     return this.last().get('order') + 1;
   },
   addMove: function(move) {
-    console.log('Adding a move!!!');
     var attrs = {};
     var m;
     if (move.color === 'w') {
@@ -357,7 +364,6 @@ var MoveList = Backbone.Collection.extend({
         black: move.san
       });
     }
-    m.view.render();
   }
 });
 
@@ -369,7 +375,6 @@ var MoveView = Backbone.Model.extend({
     this.model.view = this;
   },
   render: function() {
-    console.log('Rendering move...');
     $(this.el).html(this.template(this.model.toJSON()));
   }
 });
