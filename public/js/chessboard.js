@@ -154,11 +154,8 @@ var ApplicationView = Backbone.View.extend({
     this.model.bind('change:captured', this.updateCaptured);
     this.generateBoard();
     this.displayColorChoosers();
+    this.displayNames();
     this.updateCaptured();
-  },
-  selectColor: function(color) {
-    $("#choose-white").show();
-    $("#choose-black").show();
   },
   generateBoard: function() {
     var model = this.model;
@@ -169,11 +166,11 @@ var ApplicationView = Backbone.View.extend({
       if (player_state.color === 'b') {
         cols = cols.reverse();
         rows = rows.reverse();
-        $(".black-player").insertAfter("#bottom-name");
-        $(".white-player").insertAfter("#top-name");
+        $(".b-player").insertAfter("#bottom-name");
+        $(".w-player").insertAfter("#top-name");
       } else {
-        $(".white-player").insertAfter("#bottom-name");
-        $(".black-player").insertAfter("#top-name");
+        $(".w-player").insertAfter("#bottom-name");
+        $(".b-player").insertAfter("#top-name");
       }
       var board_html = '';
       var count = 0;
@@ -215,6 +212,14 @@ var ApplicationView = Backbone.View.extend({
         });
       }
     });
+  },
+  displayNames: function() {
+    if (_.include(chosen_colors, 'w')) {
+      $(".w-player").text('White');
+    }
+    if (_.include(chosen_colors, 'b')) {
+      $(".b-player").text('Black');
+    }
   },
   updateBoard: function() {
     var board_diff = this.model.get('board_diff');
