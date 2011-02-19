@@ -61,10 +61,14 @@ server.get('/new', function(req, res) {
   getNewId();
 });
 
-server.get('/:game_id', getOrSetId, function(req, res) {
-  var color = null;
+// server.get('/:game_id', getOrSetId, function(req, res) {
+server.get(/^\/(?:(\w+))(?:\/(\d+))?/, getOrSetId, function(req, res) {
+  console.dir(req.params)
+  req.params.game_id = req.params[0];
+  var time_control = req.params[1];
   var chosen_colors = [];
-  console.log(req.uid + ' has joined the party!');
+  var color = null;
+  console.log(req.uid + ' has joined the party! (game: ' + req.params.game_id + ')');
   r_client.get('game:' + req.params.game_id, function(err, reply) {
     if (!reply) {
       data = {
@@ -76,11 +80,13 @@ server.get('/:game_id', getOrSetId, function(req, res) {
         players: {
           w: {
             id: null,
-            time: null,
+            time_remaining: null,
+            last_move_at: null
           },
           b: {
             id: null,
-            time: null
+            time_remaining: null,
+            last_move_at: null
           }
         },
         game: {
