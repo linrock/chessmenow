@@ -243,6 +243,14 @@ var ApplicationView = Backbone.View.extend({
   updateState: function() {
     console.log('Updating state... ');
     this.$("#info").text(this.model.get('state'));
+    var turn = this.model.get('client').turn();
+    if (turn === 'w') {
+      this.$(".w-player").addClass('current-turn');
+      this.$(".b-player").removeClass('current-turn');
+    } else {
+      this.$(".b-player").addClass('current-turn');
+      this.$(".w-player").removeClass('current-turn');
+    }
   },
   updateCaptured: function() {
     console.log('Updating captured...');
