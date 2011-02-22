@@ -43,31 +43,46 @@
       +fancy-button($button-color1)
       border: 3px solid black
       font-size: 16pt
-      // behavior: url(/media/PIE.htc)
     #tablearea
+      height: 8*$tile-size + 2*$chessboard-border-width
       .color-info
-        +column(22, true)
+        +column(20, true)
         font-size: 16pt
+      button.resign
+        +fancy-button($button-color1)
+        border: 2px solid black
+        font-size: 1em
+        width: 100px
+      button.draw
+        +fancy-button($button-color1)
+        border: 2px solid black
+        font-size: 1em
+        width: 100px
+      button.rematch
+        +fancy-button($button-color1)
+        position: absolute
+        border: 2px solid black
+        bottom: 0px
+        font-size: 2em
       #boardarea
         +column(10)
         position: relative
+        height: 8*$tile-size + 2*$chessboard-border-width
         #chessboard
           +float-left
           width: 8*$tile-size
           height: 8*$tile-size
-          border: 4px solid black
+          border: $chessboard-border-width solid black
           .tile
             +float-left
-            width: $tile-size - 4
-            height: $tile-size - 4
+            width: $tile-size - $chessboard-border-width
+            height: $tile-size - $chessboard-border-width
           .white
             background-color: #FFCE9E
             border: 2px solid #FFCE9E
-            // background-color: #ffc675
           .black
             background-color: #D18B47
             border: 2px solid #D18B47
-            // background-color: #c2410a
           .selected
             background-color: yellow !important
             border: 2px solid yellow
@@ -79,28 +94,26 @@
           height: $tile-size
           width: 4*$tile-size
           border: 3px solid black
-          font-size: 16pt
+          font-size: 1.6em
         #choose-w
           position: absolute
-          top: 3*$tile-size + 4px
-          left: 2*$tile-size + 4px
+          top: 3*$tile-size + $chessboard-border-width
+          left: 2*$tile-size + $chessboard-border-width
         #choose-b
           position: absolute
-          top: 4*$tile-size + 4px
-          left: 2*$tile-size + 4px
+          top: 4*$tile-size + $chessboard-border-width
+          left: 2*$tile-size + $chessboard-border-width
       #infoarea
-        +column(11, true)
-        height: 8*$tile-size + 8px
-        #top-side
-          +float-left
-          height: 1.5*$tile-size
+        +column(10, true)
+        position: relative
+        height: 8*$tile-size + 2*$chessboard-border-width
         #move-list
           +float-left
           height: 5*$tile-size + 8px - 20px
           border: 2px solid black
-          margin: 10px 0
+          margin-bottom: 20px
           width: 160px
-          visibility: hidden
+          // visibility: hidden
           overflow: auto
           .move-row
             +float-left
@@ -115,12 +128,17 @@
                 text-align: right
                 margin-right: 10px
                 width: 20px
-        #bottom-side
-          +float-left
-          height: 1.5*$tile-size
-        .current-turn
-          color: orange
-          font-weight: bold
+              &.last-move
+                background-color: yellow
+      .current-turn
+        color: orange
+        font-weight: bold
+      #top-side
+        +float-left
+        height: 1.5*$tile-size
+      #bottom-side
+        +float-left
+        height: 1.5*$tile-size
     #announcement-area
       +column(24, true)
       #info

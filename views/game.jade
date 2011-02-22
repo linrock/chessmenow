@@ -1,16 +1,15 @@
 #tablearea
+  #top-side
+    .color-info
+      #top-name
+        .b-player
+      #top-captured
+  .clear
   #boardarea
     #chessboard
     button#choose-w.choose White
     button#choose-b.choose Black
-    // #turn
   #infoarea
-    #top-side
-      .color-info
-        #top-name
-          .b-player
-        #top-captured
-    .clear
     #move-list
       - for (var move in game_state.moves)
         .move-row
@@ -18,15 +17,20 @@
           span.move= game_state.moves[move][0]
           - if (game_state.moves[move][1])
             span.move= game_state.moves[move][1]
-        .clear
     .clear
-    #bottom-side
-      .color-info
-        #bottom-captured
-        .clear
-        #bottom-name
-          .w-player
+    button.resign Resign
     .clear
+    button.draw Draw
+    .clear
+    button.rematch Rematch
+    .clear
+  .clear
+  #bottom-side
+    .color-info
+      #bottom-captured
+      .clear
+      #bottom-name
+        .w-player
 .clear
 #announcement-area
   h2#info
