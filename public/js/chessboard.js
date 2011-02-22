@@ -286,11 +286,10 @@ var ApplicationView = Backbone.View.extend({
     }
   },
   updateMoveList: function(move) {
-    var move_html = '';
     var move_list = $("#move-list > .move-row");
-    var new_move;
     if (move.color === 'w') {
       var move_num = move_list.length+1;
+      var move_html = '';
       move_html += '<div class="move-row">';
       move_html += '<span class="move-num">' + move_num + '.</span>';
       move_html += '<span class="move">' + move.san + '</span>';
@@ -299,6 +298,7 @@ var ApplicationView = Backbone.View.extend({
     } else if (move.color === 'b') {
       move_list.last().append('<span class="move">' + move.san + '</div>');
     }
+    $("#move-list").attr({ scrollTop: $('#move-list').attr('scrollHeight') });
   },
   highlightMove: function(move) {
     this.$(".moved").removeClass('moved');
