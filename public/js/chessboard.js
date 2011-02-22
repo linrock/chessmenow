@@ -298,6 +298,8 @@ var ApplicationView = Backbone.View.extend({
     } else if (move.color === 'b') {
       move_list.last().append('<span class="move">' + move.san + '</div>');
     }
+    $("#move-list > .move-row > .move").removeClass('last-move');
+    $("#move-list > .move-row > .move").last().addClass('last-move');
     $("#move-list").attr({ scrollTop: $('#move-list').attr('scrollHeight') });
   },
   highlightMove: function(move) {
