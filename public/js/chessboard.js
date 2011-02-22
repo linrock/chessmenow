@@ -106,6 +106,7 @@ var Application = Backbone.Model.extend({
         board[square] = s2; });
       this.set({ client: client, board: board, board_diff: board_diff });
       this.view.highlightMove(move);
+      this.view.updateMoveList(move);
       console.log('Making a move! - ' + move.san)
       if (remote) {
         this.get('socket').send({
@@ -231,22 +232,6 @@ var ApplicationView = Backbone.View.extend({
       }
     });
   },
-  updateMoveList: function(move) {
-    var move_html = '';
-    var move_list = $("#move-list > ul");
-    var new_move;
-    if (move.color === 'w') {
-      var move_num = move_list.length+1;
-      move_html += '<ul>';
-      move_html += '<li class="move-num">' + move_num + '</li>';
-      move_html += '<li class="move">' + move.san + '</li>';
-      move_html += '</ul>';
-      move_list.last().append(move_html);
-    } else {
-      move_list.last().append('<li class="move">' + move.san + '</li>');
-    }
-    $("#move-list").append('<ul><li class="move-num">1.</li><li class="move">e4</li><li class="move">e5</li></ul>');
-  },
   updateBoard: function() {
     var board_diff = this.model.get('board_diff');
     var showChanges = function(pieces) {
@@ -301,20 +286,21 @@ var ApplicationView = Backbone.View.extend({
     }
   },
   updateMoveList: function(move) {
-    var move_html = '';
-    var move_list = $("#move-list > ul");
-    var new_move;
+    var move_list = $("#move-list > .move-row");
     if (move.color === 'w') {
       var move_num = move_list.length+1;
-      move_html += '<ul>';
-      move_html += '<li class="move-num">' + move_num + '</li>';
-      move_html += '<li class="move">' + move.san + '</li>';
-      move_html += '</ul>';
-      move_list.last().append(move_html);
-    } else {
-      move_list.last().append('<li class="move">' + move.san + '</li>');
+      var move_html = '';
+      move_html += '<div class="move-row">';
+      move_html += '<span class="move-num">' + move_num + '.</span>';
+      move_html += '<span class="move">' + move.san + '</span>';
+      move_html += '</div>';
+      move_list.last().after(move_html);
+    } else if (move.color === 'b') {
+      move_list.last().append('<span class="move">' + move.san + '</div>');
     }
-    $("#move-list").append('<ul><li class="move-num">1.</li><li class="move">e4</li><li class="move">e5</li></ul>');
+    $("#move-list > .move-row > .move").removeClass('last-move');
+    $("#move-list > .move-row > .move").last().addClass('last-move');
+    $("#move-list").attr({ scrollTop: $('#move-list').attr('scrollHeight') });
   },
   highlightMove: function(move) {
     this.$(".moved").removeClass('moved');
