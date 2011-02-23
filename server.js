@@ -189,6 +189,10 @@ socket.on('connection', function(client) {
           }
         });
         break;
+      case 'opponent':
+        break;
+      case 'chat':
+        break;
     }
   });
   client.on('disconnect', function() {

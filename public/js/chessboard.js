@@ -104,7 +104,7 @@ var Application = Backbone.Model.extend({
           board_diff[square] = s2;
         }
         board[square] = s2; });
-      thisjset({ client: client, board: board, board_diff: board_diff });
+      this.set({ client: client, board: board, board_diff: board_diff });
       this.view.highlightMove(move);
       this.view.updateMoveList(move);
       console.log('Making a move! - ' + move.san)
@@ -117,13 +117,12 @@ var Application = Backbone.Model.extend({
             move: move,
           }
         });
-      }
-      if (client.game_over()) {
-        this.get('socket').send({
-          type: 'end',
-          game_id: game_id,
-        });
-        this.view.$(".tile").die('click');
+        if (client.game_over()) {
+          this.get('socket').send({
+            type: 'end',
+            game_id: game_id,
+          });
+        }
       }
       return move;
     } else {
@@ -273,6 +272,9 @@ var ApplicationView = Backbone.View.extend({
     if (client.game_over()) {
       this.$(".w-player").removeClass('current-turn');
       this.$(".b-player").removeClass('current-turn');
+      this.$(".tile").die('click');
+      this.$("#resign").die('click').hide();
+      this.$("#draw").die('click').hide();
     } else {
       if (client.turn() === 'w') {
         this.$(".w-player").addClass('current-turn');
@@ -314,14 +316,16 @@ var ApplicationView = Backbone.View.extend({
     } else if (move.color === 'b') {
       move_list.last().append('<span class="move">' + move.san + '</div>');
     }
-    $("#move-list > .move-row > .move").removeClass('last-move');
-    $("#move-list > .move-row > .move").last().addClass('last-move');
-    $("#move-list").attr({ scrollTop: $('#move-list').attr('scrollHeight') });
+    this.$("#move-list > .move-row > .move").removeClass('last-move');
+    this.$("#move-list > .move-row > .move").last().addClass('last-move');
+    this.$("#move-list").attr({ scrollTop: $('#move-list').attr('scrollHeight') });
   },
   highlightMove: function(move) {
     this.$(".moved").removeClass('moved');
     this.$("#" + move.from).addClass('moved');
     this.$("#" + move.to).addClass('moved');
+    this.$("#move-list > .move-row > .move").removeClass('last-move');
+    this.$("#move-list > .move-row > .move").last().addClass('last-move');
   },
   highlightTile: function(position, s) {
     if (!s) {
