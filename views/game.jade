@@ -25,8 +25,8 @@
     .clear
     button#draw Draw
     .clear
-    // button#rematch Rematch
-    // .clear
+    button#rematch Rematch
+    .clear
   .clear
   #bottom-side
     .color-info
@@ -40,6 +40,7 @@ script(type="text/javascript", src="/media/js/chessboard.js")
 :javascript
   | var host = "#{host}";
   | var game_id = "#{game_id}";
+  | var state = "#{state}";
   | var chosen_colors = !{JSON.stringify(chosen_colors)};
   | var game_state = !{JSON.stringify(game_state)};
   | var player_state = !{JSON.stringify(player_state)};

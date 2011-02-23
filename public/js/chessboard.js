@@ -9,8 +9,9 @@ var Application = Backbone.Model.extend({
       captured: game_state.captured,
       player: player_state,
       socket: this.initializeSocket(),
+      state: state
     });
-    this.bind('change:board_diff', this.updateState);
+    this.bind('change:board_diff', this.updateBoardState);
   },
   initializeSocket: function() {
     var self = this;
@@ -28,15 +29,16 @@ var Application = Backbone.Model.extend({
           break;
         case 'colors':
           if (message.color === 'b') {
-            $(".b-player").html('Black');
+            $(".b-player").css('visibility', 'visible');
             $("#choose-b").remove();
+            console.log('black');
           } else if (message.color === 'w') {
-            $(".w-player").html('White');
+            $(".w-player").css('visibility', 'visible');
             $("#choose-w").remove();
+            console.log('white');
           }
-          if (message.started) {
-            self.state.started = true;
-            self.checkGameState();
+          if (message.started_at) {
+            self.set({ state: 'started' });
           }
           break;
       }
@@ -129,7 +131,7 @@ var Application = Backbone.Model.extend({
       return false;
     }
   },
-  updateState: function() {
+  updateBoardState: function() {
     var client = this.get('client');
     var turn = client.turn();
     var state = '';
@@ -146,39 +148,23 @@ var Application = Backbone.Model.extend({
     } else if (client.in_check()) {
       state = "Check!";
     }
-    this.set({ state: state });
+    this.set({ board_state: state });
   }
 });
 
 var ApplicationView = Backbone.View.extend({
   el: $("#content"),
   initialize: function() {
-    _.bindAll(this, 'generateBoard', 'updateBoard', 'updateState', 'updateCaptured');
+    _.bindAll(this, 'generateBoard', 'onStateChange', 'updateBoard', 'updateViewState', 'updateCaptured');
     var model = this.model;
     model.view = this;
     model.bind('change:board_diff', this.updateBoard);
-    model.bind('change:board_diff', this.updateState);
+    model.bind('change:board_diff', this.updateViewState);
     model.bind('change:captured', this.updateCaptured);
+    model.bind('change:state', this.onStateChange);
     this.generateBoard();
-    this.displayColorChoosers();
+    this.onStateChange();
     this.displayNames();
-    this.updateCaptured();
-    this.$(".tile").live('click', function() {
-      var position = $(this).attr('id');
-      model.selectTile(position);
-    });
-    this.$("#resign").live('click', function() {
-      var position = $(this).attr('id');
-      model.selectTile(position);
-    });
-    this.$("#draw").live('click', function() {
-      var position = $(this).attr('id');
-      model.selectTile(position);
-    });
-    this.$("#rematch").live('click', function() {
-      var position = $(this).attr('id');
-      model.selectTile(position);
-    });
   },
   generateBoard: function() {
     var client = this.model.get('client');
@@ -206,6 +192,49 @@ var ApplicationView = Backbone.View.extend({
       return(board_html);
     });
   },
+  onStateChange: function() {
+    var state = this.model.get('state');
+    console.log('STATE CHANGE!');
+    switch (state) {
+      case 'new':
+        this.displayColorChoosers();
+        this.$(".w-player").css('visibility', 'hidden');
+        this.$(".b-player").css('visibility', 'hidden');
+        this.$("#move-list").css('visibility', 'hidden');
+        break;
+
+      case 'started':
+        var model = this.model;
+        this.updateViewState();
+        this.updateCaptured();
+        this.$("#move-list").css('visibility', 'visible');
+        this.$(".tile").live('click', function() {
+          var position = $(this).attr('id');
+          model.selectTile(position);
+        });
+        this.$("#resign").live('click', function() {
+          var position = $(this).attr('id');
+          model.selectTile(position);
+        });
+        this.$("#draw").live('click', function() {
+          var position = $(this).attr('id');
+          model.selectTile(position);
+        });
+        this.$("#rematch").live('click', function() {
+          var position = $(this).attr('id');
+          model.selectTile(position);
+        });
+        break;
+
+      case 'ended':
+        this.$(".w-player").removeClass('current-turn');
+        this.$(".b-player").removeClass('current-turn');
+        this.$(".tile").die('click');
+        this.$("#resign").die('click').hide();
+        this.$("#draw").die('click').hide();
+        break;
+    }
+  },
   displayColorChoosers: function() {
     var self = this;
     var client = self.model.get('client');
@@ -224,7 +253,7 @@ var ApplicationView = Backbone.View.extend({
             self.generateBoard('b');
             self.updateBoard();
           }
-          $("." + c + "-player").html('You');
+          // $("." + c + "-player").html('You');
           self.model.set({ player: player });
           $(this).hide();
         });
@@ -256,16 +285,10 @@ var ApplicationView = Backbone.View.extend({
     };
     showChanges(board_diff);
   },
-  updateState: function() {
-    this.$("#info").text(this.model.get('state'));
+  updateViewState: function() {
+    this.$("#info").text(this.model.get('board_state'));
     var client = this.model.get('client');
-    if (client.game_over()) {
-      this.$(".w-player").removeClass('current-turn');
-      this.$(".b-player").removeClass('current-turn');
-      this.$(".tile").die('click');
-      this.$("#resign").die('click').hide();
-      this.$("#draw").die('click').hide();
-    } else {
+    if (this.model.get('state') === 'started') {
       if (client.turn() === 'w') {
         this.$(".w-player").addClass('current-turn');
         this.$(".b-player").removeClass('current-turn');
@@ -276,7 +299,6 @@ var ApplicationView = Backbone.View.extend({
     }
   },
   updateCaptured: function() {
-    // XXX - Clean this shit up.
     var w_captured = '';
     var b_captured = '';
     _.each(this.model.get('captured'), function(piece) {

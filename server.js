@@ -109,9 +109,19 @@ server.get(/^\/(?:(\w+))(?:\/(\d+))?/, getOrSetId, function(req, res) {
       if (data.players.w.id) { chosen_colors.push('w'); }
       if (data.players.b.id) { chosen_colors.push('b'); }
     }
+    var state = (function() {
+      if (!data.timestamps.started_at) {
+        return 'new';
+      } else if (data.timestamps.ended_at) {
+        return 'ended';
+      } else if (data.timestamps.started_at) {
+        return 'started';
+      }
+    })();
     res.render('game', {
       locals: {
         host:           host,
+        state:          state,
         game_id:        req.params.game_id,
         moves:          data.game.moves,
         chosen_colors:  chosen_colors,
