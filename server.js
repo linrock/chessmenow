@@ -139,24 +139,26 @@ socket.on('connection', function(client) {
       case 'move':
         r_client.get(channel, function(err, reply) {
           var data = JSON.parse(reply);
-          var last_move = data.game.moves[data.game.moves.length-1];
-          if (!last_move || last_move.length === 2) {
-            data.game.moves.push([message.data.move.san]);
-          } else {
-            last_move.push(message.data.move.san);
-            data.game.moves[data.game.moves.length-1] = last_move;
-          }
-          if (message.data.move.captured) {
-            var piece = message.data.move.captured;
-            if (message.data.move.color === 'b') {
-              piece = piece.toUpperCase();
+          if (!data.timestamps.ended_at) {
+            var last_move = data.game.moves[data.game.moves.length-1];
+            if (!last_move || last_move.length === 2) {
+              data.game.moves.push([message.data.move.san]);
+            } else {
+              last_move.push(message.data.move.san);
+              data.game.moves[data.game.moves.length-1] = last_move;
             }
-            data.game.captured.push(piece);
+            if (message.data.move.captured) {
+              var piece = message.data.move.captured;
+              if (message.data.move.color === 'b') {
+                piece = piece.toUpperCase();
+              }
+              data.game.captured.push(piece);
+            }
+            data.game.fen = message.data.fen;
+            data.game.last_move = { from: message.data.move.from, to: message.data.move.to };
+            r_client.set(channel, JSON.stringify(data));
+            publisher.publish(channel, JSON.stringify(message));
           }
-          data.game.fen = message.data.fen;
-          data.game.last_move = { from: message.data.move.from, to: message.data.move.to };
-          r_client.set(channel, JSON.stringify(data));
-          publisher.publish(channel, JSON.stringify(message));
         });
         break;
       case 'colors':
@@ -175,6 +177,15 @@ socket.on('connection', function(client) {
             }));
           } else {
             console.log(message.player_id + ' selected an invalid color: ' + message.color);
+          }
+        });
+        break;
+      case 'end':
+        r_client.get(channel, function(err, reply) {
+          data = JSON.parse(reply);
+          if (!data.timestamps.ended_at) {
+            data.timestamps.ended_at = Date.now();
+            r_client.set(channel, JSON.stringify(data));
           }
         });
         break;

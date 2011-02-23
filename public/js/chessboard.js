@@ -81,7 +81,7 @@ var Application = Backbone.Model.extend({
     var client = this.get('client');
     var board = this.get('board');
     var move = client.move(move);
-    if (move) {
+    if (move && !client.game_over()) {
       if (move.captured) {
         var captured = this.get('captured');
         var piece = move.captured;
@@ -104,7 +104,7 @@ var Application = Backbone.Model.extend({
           board_diff[square] = s2;
         }
         board[square] = s2; });
-      this.set({ client: client, board: board, board_diff: board_diff });
+      thisjset({ client: client, board: board, board_diff: board_diff });
       this.view.highlightMove(move);
       this.view.updateMoveList(move);
       console.log('Making a move! - ' + move.san)
@@ -118,7 +118,13 @@ var Application = Backbone.Model.extend({
           }
         });
       }
-      // this.get('moves').addMove(move);
+      if (client.game_over()) {
+        this.get('socket').send({
+          type: 'end',
+          game_id: game_id,
+        });
+        this.view.$(".tile").die('click');
+      }
       return move;
     } else {
       return false;
@@ -160,6 +166,18 @@ var ApplicationView = Backbone.View.extend({
     this.displayMoves();
     this.updateCaptured();
     this.$(".tile").live('click', function() {
+      var position = $(this).attr('id');
+      model.selectTile(position);
+    });
+    this.$("#resign").live('click', function() {
+      var position = $(this).attr('id');
+      model.selectTile(position);
+    });
+    this.$("#draw").live('click', function() {
+      var position = $(this).attr('id');
+      model.selectTile(position);
+    });
+    this.$("#rematch").live('click', function() {
       var position = $(this).attr('id');
       model.selectTile(position);
     });
