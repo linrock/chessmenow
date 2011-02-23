@@ -81,7 +81,7 @@ var Application = Backbone.Model.extend({
     var client = this.get('client');
     var board = this.get('board');
     var move = client.move(move);
-    if (move && !client.game_over()) {
+    if (move) {
       if (move.captured) {
         var captured = this.get('captured');
         var piece = move.captured;
