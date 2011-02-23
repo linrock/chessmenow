@@ -2,8 +2,7 @@
   #top-side
     .color-info
       #top-name
-        .b-player
-      #top-captured
+        .b-player Black
   .clear
   #boardarea
     #chessboard
@@ -18,19 +17,21 @@
           - if (game_state.moves[move][1])
             span.move= game_state.moves[move][1]
     .clear
+    #captured-white-pieces
+    .clear
+    #captured-black-pieces
+    .clear
     button.resign Resign
     .clear
     button.draw Draw
     .clear
-    button.rematch Rematch
-    .clear
+    // button.rematch Rematch
+    // .clear
   .clear
   #bottom-side
     .color-info
-      #bottom-captured
-      .clear
       #bottom-name
-        .w-player
+        .w-player White
 .clear
 #announcement-area
   h2#info

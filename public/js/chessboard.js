@@ -165,7 +165,6 @@ var ApplicationView = Backbone.View.extend({
     });
   },
   generateBoard: function() {
-    var model = this.model;
     var client = this.model.get('client');
     this.$("#chessboard").html(function() {
       var cols = ['8','7','6','5','4','3','2','1'];
@@ -277,13 +276,8 @@ var ApplicationView = Backbone.View.extend({
         w_captured += '<div class="piece-small ' + piece + '-small" style="float: left"></div>';
       }
     });
-    if (this.model.get('player').color === 'w') {
-      $("#top-captured").html(b_captured);
-      $("#bottom-captured").html(w_captured);
-    } else {
-      $("#top-captured").html(w_captured);
-      $("#bottom-captured").html(b_captured);
-    }
+    $("#captured-black-pieces").html(w_captured);
+    $("#captured-white-pieces").html(b_captured);
   },
   updateMoveList: function(move) {
     var move_list = $("#move-list > .move-row");
