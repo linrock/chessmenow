@@ -46,7 +46,7 @@ var Application = Backbone.Model.extend({
     });
     setInterval(function() {
       s.send('ping');
-    }, 5000);
+    }, 10000);
     return s;
   },
   loadFen: function(fen) {
@@ -162,7 +162,6 @@ var ApplicationView = Backbone.View.extend({
     this.generateBoard();
     this.displayColorChoosers();
     this.displayNames();
-    this.displayMoves();
     this.updateCaptured();
     this.$(".tile").live('click', function() {
       var position = $(this).attr('id');
@@ -240,14 +239,6 @@ var ApplicationView = Backbone.View.extend({
       $(".b-player").text('Black');
     }
   },
-  displayMoves: function() {
-    // XXX - use move models/views in the future?
-    $("#move-list").html(function() {
-      for (move in game_state.moves) {
-        
-      }
-    });
-  },
   updateBoard: function() {
     var board_diff = this.model.get('board_diff');
     var showChanges = function(pieces) {
@@ -268,7 +259,6 @@ var ApplicationView = Backbone.View.extend({
   updateState: function() {
     this.$("#info").text(this.model.get('state'));
     var client = this.model.get('client');
-    var turn = this.model.get('client').turn();
     if (client.game_over()) {
       this.$(".w-player").removeClass('current-turn');
       this.$(".b-player").removeClass('current-turn');
