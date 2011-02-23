@@ -288,7 +288,11 @@ var ApplicationView = Backbone.View.extend({
       move_html += '<span class="move-num">' + move_num + '.</span>';
       move_html += '<span class="move">' + move.san + '</span>';
       move_html += '</div>';
-      move_list.last().after(move_html);
+      if (move_num === 1) {
+        $("#move-list").append(move_html);
+      } else {
+        move_list.last().after(move_html);
+      }
     } else if (move.color === 'b') {
       move_list.last().append('<span class="move">' + move.san + '</div>');
     }
