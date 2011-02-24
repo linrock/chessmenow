@@ -4,12 +4,12 @@
       #top-name
         .b-player Black
   .clear
-  #boardarea
+  #container-chessboard
     #chessboard
     button#choose-w.choose White
     button#choose-b.choose Black
-  #infoarea
-    #move-list-area
+  #container-info
+    #container-move-list
       #move-list
         - for (var move in game_state.moves)
           .move-row
@@ -17,10 +17,10 @@
             span.move= game_state.moves[move][0]
             - if (game_state.moves[move][1])
               span.move= game_state.moves[move][1]
-    #misc-area
+    #container-misc
       #captured-white-pieces
       #captured-black-pieces
-      #button-area
+      #container-buttons
         button#resign Resign
         button#draw Draw
         button#rematch Rematch

@@ -68,9 +68,10 @@
         +fancy-button($button-color1)
         display: none
         border: 2px solid black
+        width: 160px
         bottom: 0px
         font-size: 2em
-      #boardarea
+      #container-chessboard
         +column(10)
         position: relative
         height: 8*$tile-size + 2*$chessboard-border-width
@@ -109,10 +110,10 @@
           position: absolute
           top: 4*$tile-size + $chessboard-border-width
           left: 2*$tile-size + $chessboard-border-width
-      #infoarea
+      #container-info
         +column(10, true)
         height: 8*$tile-size + 2*$chessboard-border-width
-        #move-list-area
+        #container-move-list
           +column(5)
           #move-list
             border: 2px solid black
@@ -136,7 +137,7 @@
                   width: 20px
                 &.last-move
                   background-color: yellow
-        #misc-area
+        #container-misc
           +column(5, true)
           position: relative
           height: 3*$tile-size + 8px
@@ -144,8 +145,8 @@
             +column(5, true)
           #captured-white-pieces
             +column(5, true)
-          #button-area
-            +column(4, true)
+          #container-buttons
+            +column(5, true)
             border: 1px solid green
             position: absolute
             left: 0px
