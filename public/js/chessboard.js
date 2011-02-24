@@ -350,6 +350,20 @@ var ApplicationView = Backbone.View.extend({
     } else if (s === 'off') {
       this.$('#' + position).removeClass('selected');
     }
+  },
+  appendToChat: function(message) {
+    var chat_html = '';
+    chat_html += '<div class="chat-row">';
+    switch (message.type) {
+      case 'chat':
+        chat_html += '<span class="chat-name">' + message.from +  ': </span>';
+        chat_html += '<span class="chat-text">' + message.text + '</span>';
+        chat_html += '</div>';
+        this.$("#chat-window").append(chat_html);
+        break;
+      case 'announcement':
+        break;
+    }
   }
 });
 
