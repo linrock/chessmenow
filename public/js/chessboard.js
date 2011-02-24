@@ -31,10 +31,18 @@ var Application = Backbone.Model.extend({
           if (message.color === 'b') {
             $(".b-player").css('visibility', 'visible');
             $("#choose-b").remove();
+            self.view.appendToChat({
+              type: 'announcement',
+              text: 'Black has been picked!'
+            });
             console.log('black');
           } else if (message.color === 'w') {
             $(".w-player").css('visibility', 'visible');
             $("#choose-w").remove();
+            self.view.appendToChat({
+              type: 'announcement',
+              text: 'White has been picked!'
+            });
             console.log('white');
           }
           if (message.started_at) {
@@ -379,11 +387,13 @@ var ApplicationView = Backbone.View.extend({
         chat_html += '<span class="chat-name">' + message.from +  ': </span>';
         chat_html += '<span class="chat-text">' + message.text + '</span>';
         chat_html += '</div>';
-        this.$("#chat-window").append(chat_html);
         break;
       case 'announcement':
+        chat_html += '<span class="chat-announcement">' + message.text + '</span>';
+        chat_html += '</div>';
         break;
     }
+    this.$("#chat-window").append(chat_html);
   }
 });
 
