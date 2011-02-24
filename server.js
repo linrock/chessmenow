@@ -145,6 +145,11 @@ socket.on('connection', function(client) {
           message = JSON.parse(message);
           client.send(message);
         });
+        console.log('User has connected!');
+        publisher.publish(channel, JSON.stringify({
+          type: 'announcement',
+          text: 'Someone has connected to the game!'
+        }));
         break;
       case 'move':
         r_client.get(channel, function(err, reply) {

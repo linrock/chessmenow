@@ -53,6 +53,7 @@ var Application = Backbone.Model.extend({
           self.view.appendToChat(message);
           break;
         case 'announcement':
+          self.view.appendToChat(message);
           break;
       }
     });
