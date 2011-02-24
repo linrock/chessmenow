@@ -244,16 +244,25 @@ var ApplicationView = Backbone.View.extend({
           model.selectTile(position);
         });
         this.$("#resign").live('click', function() {
-          var position = $(this).attr('id');
-          model.selectTile(position);
+          this.model.get('socket').send({
+            type: 'announcement',
+            game_id: game_id,
+            text: 'resign'
+          });
         });
         this.$("#draw").live('click', function() {
-          var position = $(this).attr('id');
-          model.selectTile(position);
+          this.model.get('socket').send({
+            type: 'announcement',
+            game_id: game_id,
+            text: 'draw'
+          });
         });
         this.$("#rematch").live('click', function() {
-          var position = $(this).attr('id');
-          model.selectTile(position);
+          this.model.get('socket').send({
+            type: 'announcement',
+            game_id: game_id,
+            text: 'rematch'
+          });
         });
         break;
 
