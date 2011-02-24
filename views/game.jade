@@ -9,24 +9,27 @@
     button#choose-w.choose White
     button#choose-b.choose Black
   #infoarea
-    #move-list
-      - for (var move in game_state.moves)
-        .move-row
-          span.move-num #{parseInt(move)+1}.
-          span.move= game_state.moves[move][0]
-          - if (game_state.moves[move][1])
-            span.move= game_state.moves[move][1]
+    #move-list-area
+      #move-list
+        - for (var move in game_state.moves)
+          .move-row
+            span.move-num #{parseInt(move)+1}.
+            span.move= game_state.moves[move][0]
+            - if (game_state.moves[move][1])
+              span.move= game_state.moves[move][1]
+    #misc-area
+      #captured-white-pieces
+      #captured-black-pieces
+      #button-area
+        button#resign Resign
+        button#draw Draw
+        button#rematch Rematch
     .clear
-    #captured-white-pieces
-    .clear
-    #captured-black-pieces
-    .clear
-    button#resign Resign
-    .clear
-    button#draw Draw
-    .clear
-    button#rematch Rematch
-    .clear
+    #container-chat
+      #chat-window
+      form#chat
+        input(type="text")
+        input(type="submit", value="Send")
   .clear
   #bottom-side
     .color-info

@@ -41,6 +41,9 @@ var Application = Backbone.Model.extend({
             self.set({ state: 'started' });
           }
           break;
+        case 'chat':
+          alert('new message!');
+          break;
       }
     });
     s.on('disconnect', function() {
