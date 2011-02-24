@@ -189,11 +189,11 @@ var ApplicationView = Backbone.View.extend({
       if (player_state.color === 'b') {  // XXX need to use color argument
         cols = cols.reverse();
         rows = rows.reverse();
-        $(".b-player").insertAfter("#bottom-name");
-        $(".w-player").insertAfter("#top-name");
+        $("#bottom-name").append($(".b-player"));
+        $("#top-name").append($(".w-player"));
       } else {
-        $(".w-player").insertAfter("#bottom-name");
-        $(".b-player").insertAfter("#top-name");
+        $("#bottom-name").append($(".w-player"));
+        $("#top-name").append($(".b-player"));
       }
       var board_html = '';
       var count = 0;

@@ -46,8 +46,15 @@
     #tablearea
       height: 8*$tile-size + 2*$chessboard-border-width
       .color-info
-        +column(20, true)
-        font-size: 16pt
+        width: 8*$tile-size + 2*$chessboard-border-width
+        font-size: 2em
+        span.w-player
+          +float-left
+        span.b-player
+          +float-left
+        span.time-left
+          +float-right
+          display: none
       button#resign
         +fancy-button($button-color1)
         // display: none
