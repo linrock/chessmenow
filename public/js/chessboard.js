@@ -158,7 +158,7 @@ var Application = Backbone.Model.extend({
 var ApplicationView = Backbone.View.extend({
   el: $("#content"),
   initialize: function() {
-    _.bindAll(this, 'generateBoard', 'onStateChange', 'updateBoard', 'updateViewState', 'updateCaptured');
+    _.bindAll(this, 'generateBoard', 'onStateChange', 'updateBoard', 'updateViewState', 'updateCaptured', 'initializeChat');
     var model = this.model;
     model.view = this;
     model.bind('change:board_diff', this.updateBoard);
@@ -168,6 +168,7 @@ var ApplicationView = Backbone.View.extend({
     this.generateBoard();
     this.onStateChange();
     this.displayNames();
+    this.initializeChat();
   },
   generateBoard: function() {
     var client = this.model.get('client');
@@ -193,6 +194,26 @@ var ApplicationView = Backbone.View.extend({
         ++count;
       }
       return(board_html);
+    });
+  },
+  initializeChat: function() {
+    var self = this;
+    this.$("form#chat").submit(function(event) {
+      event.preventDefault();
+      var input = $("#chat-input");
+      var text = input.val();
+      if (text > '') {
+        console.log('message sent!');
+        input.val('');
+        self.model.get('socket').send({
+          type: 'chat'
+        });
+        self.appendToChat({
+          type: 'chat',
+          from: 'You',
+          text: text
+        });
+      }
     });
   },
   onStateChange: function() {
