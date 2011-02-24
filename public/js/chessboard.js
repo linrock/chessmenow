@@ -174,7 +174,7 @@ var ApplicationView = Backbone.View.extend({
     this.$("#chessboard").html(function() {
       var cols = ['8','7','6','5','4','3','2','1'];
       var rows = ['a','b','c','d','e','f','g','h'];
-      if (player_state.color === 'b') {
+      if (player_state.color === 'b') {  // XXX need to use color argument
         cols = cols.reverse();
         rows = rows.reverse();
         $(".b-player").insertAfter("#bottom-name");
