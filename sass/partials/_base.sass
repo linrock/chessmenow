@@ -5,13 +5,22 @@ $blueprint-grid-columns : 24
 $blueprint-grid-width   : 30px
 $blueprint-grid-margin  : 10px
 
+
 // If you change your grid column dimensions
 // you can make a new grid background image from the command line like this:
 // compass grid-img 30+10x16
 
-
 $tile-size: 45px
 $chessboard-border-width: 4px
+
+$move-list-border-width: 2px
+$move-list-margin-bottom: 10px
+$move-list-height: 3*$tile-size + 2*$chessboard-border-width
+
+$container-chat-border-width: 1px
+$container-chat-padding: 3px
+$container-chat-height: 5*$tile-size - $move-list-margin-bottom - 2*$container-chat-padding - 2*$move-list-border-width - 2*$container-chat-border-width
+
 
 // Color Palette
 

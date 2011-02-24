@@ -116,9 +116,9 @@
         #container-move-list
           +column(5)
           #move-list
-            border: 2px solid black
-            margin-bottom: 10px
-            height: 3*$tile-size + 8px
+            border: $move-list-border-width solid black
+            margin-bottom: $move-list-margin-bottom
+            height: $move-list-height
             width: 170px
             overflow-x: hidden
             overflow-y: scroll
@@ -140,7 +140,7 @@
         #container-misc
           +column(5, true)
           position: relative
-          height: 3*$tile-size + 8px
+          height: $move-list-height
           #captured-black-pieces
             +column(5, true)
           #captured-white-pieces
@@ -156,9 +156,9 @@
         color: orange
         font-weight: bold
     #container-chat
-      border: 1px solid black
-      padding: 3px
-      height: 4*$tile-size
+      border: $container-chat-border-width solid black
+      padding: $container-chat-padding
+      height: $container-chat-height
       position: relative
       #chat-window
         height: 3*$tile-size
