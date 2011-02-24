@@ -202,6 +202,12 @@ socket.on('connection', function(client) {
       case 'opponent':
         break;
       case 'chat':
+        console.log('Chat message received!');
+        console.dir(message);
+        publisher.publish(channel, JSON.stringify({
+          type: 'chat',
+          text: message.text
+        }));
         break;
     }
   });

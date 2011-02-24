@@ -42,7 +42,7 @@ var Application = Backbone.Model.extend({
           }
           break;
         case 'chat':
-          alert('new message!');
+          self.view.appendToChat(message);
           break;
       }
     });
@@ -206,11 +206,8 @@ var ApplicationView = Backbone.View.extend({
         console.log('message sent!');
         input.val('');
         self.model.get('socket').send({
-          type: 'chat'
-        });
-        self.appendToChat({
           type: 'chat',
-          from: 'You',
+          game_id: game_id,
           text: text
         });
       }
