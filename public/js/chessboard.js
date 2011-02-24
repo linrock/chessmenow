@@ -44,6 +44,8 @@ var Application = Backbone.Model.extend({
         case 'chat':
           self.view.appendToChat(message);
           break;
+        case 'announcement':
+          break;
       }
     });
     s.on('disconnect', function() {

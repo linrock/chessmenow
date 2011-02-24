@@ -209,6 +209,16 @@ socket.on('connection', function(client) {
           text: message.text
         }));
         break;
+      case 'announcement':
+        console.log('Announcement received!');
+        console.dir(message);
+        publisher.publish(channel, JSON.stringify({
+          type: 'announcement',
+          text: ' has offered a draw!',
+          text: ' has resigned!',
+          text: ' has joined the game!'
+        }));
+        break;
     }
   });
   client.on('disconnect', function() {
