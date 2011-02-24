@@ -391,6 +391,7 @@ var ApplicationView = Backbone.View.extend({
   },
   appendToChat: function(message) {
     var chat_html = '';
+    var chat_window = this.$("#chat-window");
     chat_html += '<div class="chat-row">';
     switch (message.type) {
       case 'chat':
@@ -403,7 +404,8 @@ var ApplicationView = Backbone.View.extend({
         chat_html += '</div>';
         break;
     }
-    this.$("#chat-window").append(chat_html);
+    chat_window.append(chat_html);
+    chat_window.attr({ scrollTop: chat_window.attr('scrollHeight') });
   }
 });
 
