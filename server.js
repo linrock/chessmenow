@@ -10,16 +10,18 @@ r_client.on('error', function(err) {
   console.log("Error: " + err);
 });
 
-var host;
+var env, host;
 server.configure(function() {
   server.use(express.cookieDecoder());
   server.set('views', __dirname + '/views');
   server.set('view engine', 'jade');
   server.configure('development', function() {
     host = '127.0.0.1';
+    env = 'development';
   });
   server.configure('production', function() {
     host = 'chessmenow.com';
+    env = 'production';
   });
 });
 
@@ -35,7 +37,11 @@ var getOrSetId = function(req, res, next) {
 
 server.get('/', getOrSetId, function(req, res) {
   console.log(req.uid + ' has joined the party! (home)');
-  res.render('index');
+  res.render('index', {
+    locals: {
+      env: env
+    }
+  });
 });
 
 server.get('/new', function(req, res) {
@@ -121,6 +127,7 @@ server.get(/^\/(?:(\w+))(?:\/(\d+))?/, getOrSetId, function(req, res) {
     res.render('game', {
       locals: {
         host:           host,
+        env:            env,
         state:          state,
         game_id:        req.params.game_id,
         moves:          data.game.moves,
