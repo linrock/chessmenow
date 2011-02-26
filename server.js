@@ -61,10 +61,10 @@ server.get('/new', function(req, res) {
   getNewId();
 });
 
-// server.get('/:game_id', getOrSetId, function(req, res) {
-server.get(/^\/(?:(\w+))(?:\/(\d+))?/, getOrSetId, function(req, res) {
-  console.dir(req.params)
-  req.params.game_id = req.params[0];
+// server.get(/^\/(?:(\w+))(?:\/(\d+))?/, getOrSetId, function(req, res) {
+server.get('/:game_id', getOrSetId, function(req, res) {
+  // console.dir(req.params)
+  // req.params.game_id = req.params[0];
   var time_control = req.params[1];
   var chosen_colors = [];
   var color = null;
@@ -130,6 +130,19 @@ server.get(/^\/(?:(\w+))(?:\/(\d+))?/, getOrSetId, function(req, res) {
       }
     });
   });
+});
+
+server.get('/:game_id/xhr-polling', function(req, res) {
+  var subscriber = redis.createClient();
+  var channel = 'game:' + req.params.game_id;
+  subscriber.subscribe(channel);
+  subscriber.on('message', function(channel, message) {
+    res.send('DUDE', {'Content-Type': 'application/json'});
+  });
+});
+
+server.post('/:game_id/ping', function(req, res) {
+  res.send('1', {'Content-Type': 'application/json'});
 });
 
 var socket = io.listen(server);
@@ -231,6 +244,7 @@ socket.on('connection', function(client) {
     publisher.quit();
   });
 });
+
 
 r_client.select(2, function() {
   server.listen(3000);

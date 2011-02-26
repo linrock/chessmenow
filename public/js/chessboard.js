@@ -2,6 +2,8 @@ var Application = Backbone.Model.extend({
   initialize: function() {
     _.bindAll(this, 'initializeSocket', 'loadFen');
     var moves = new MoveList();
+    this.pingForever();
+    this.pollForever();
     this.set({
       client: new Chess(),
       moves: moves,
@@ -12,6 +14,27 @@ var Application = Backbone.Model.extend({
       state: state
     });
     this.bind('change:board_diff', this.updateBoardState);
+  },
+  pingForever: function() {
+    setInterval(function() {
+      $.ajax({
+        url: '/' + game_id + '/ping',
+        type: 'POST'
+      });
+    }, 5000);
+  },
+  pollForever: function() {
+    var self = this;
+    $.ajax({
+      url: '/' + game_id + '/xhr-polling',
+      success: function(data) {
+        console.dir(data);
+        self.pollForever();
+      },
+      error: function() {
+        self.pollForever();
+      }
+    });
   },
   initializeSocket: function() {
     var self = this;
