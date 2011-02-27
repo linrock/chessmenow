@@ -148,6 +148,7 @@ var Application = Backbone.Model.extend({
       this.view.updateMoveList(move);
       console.log('Making a move! - ' + move.san)
       if (remote) {
+        /*
         this.get('socket').send({
           type: 'move',
           game_id: game_id,
@@ -155,6 +156,11 @@ var Application = Backbone.Model.extend({
             fen: client.fen(),
             move: move,
           }
+        });
+        */
+        var data = { fen: client.fen(), move: move };
+        $.post('/' + game_id + '/move', data, function(data) {
+          console.dir(data);
         });
         if (client.game_over()) {
           this.get('socket').send({

@@ -159,7 +159,7 @@ server.post('/:game_id/color', function(req, res) {
   var color = req.body.color;
   console.log(req.cookies.id);
   console.dir(req.body);
-  r_client.get(channel, function(err, reply) {
+  r_client.get(channel, function(e, reply) {
     data = JSON.parse(reply);
     if ((color === 'w' || color === 'b') && !data.players[color].id) {
       data.players[color].id = req.cookies.id;
@@ -167,7 +167,7 @@ server.post('/:game_id/color', function(req, res) {
         data.timestamps.started_at = Date.now();
       }
       r_client.set(channel, JSON.stringify(data));
-      publisher.publish(channel, JSON.stringify({
+      r_client.publish(channel, JSON.stringify({
         type: 'colors',
         color: color,
         started_at: data.timestamps.started_at
@@ -181,8 +181,31 @@ server.post('/:game_id/color', function(req, res) {
 
 server.post('/:game_id/move', function(req, res) {
   var channel = 'game:' + req.params.game_id;
-  console.log(req.cookies.id);
-  res.send('1', { 'Content-Type': 'application/json' });
+  console.dir(req.body);
+  r_client.get(channel, function(e, reply) {
+    var data = JSON.parse(reply);
+    if (!data.timestamps.ended_at) {
+      var last_move = data.game.moves[data.game.moves.length-1];
+      if (!last_move || last_move.length === 2) {
+        data.game.moves.push([req.body.move.san]);
+      } else {
+        last_move.push(req.body.move.san);
+        data.game.moves[data.game.moves.length-1] = last_move;
+      }
+      if (req.body.move.captured) {
+        var piece = req.body.move.captured;
+        if (req.body.move.color === 'b') {
+          piece = piece.toUpperCase();
+        }
+        data.game.captured.push(piece);
+      }
+      data.game.fen = req.body.fen;
+      data.game.last_move = { from: req.body.move.from, to: req.body.move.to };
+      r_client.set(channel, JSON.stringify(data));
+      r_client.publish(channel, JSON.stringify(req.body.fen));
+      res.send('1', { 'Content-Type': 'application/json' });
+    }
+  });
 });
 
 server.post('/:game_id/announcement', function(req, res) {
@@ -215,31 +238,6 @@ socket.on('connection', function(client) {
           text: 'Someone has connected to the game!'
         }));
         break;
-      case 'move':
-        r_client.get(channel, function(err, reply) {
-          var data = JSON.parse(reply);
-          if (!data.timestamps.ended_at) {
-            var last_move = data.game.moves[data.game.moves.length-1];
-            if (!last_move || last_move.length === 2) {
-              data.game.moves.push([message.data.move.san]);
-            } else {
-              last_move.push(message.data.move.san);
-              data.game.moves[data.game.moves.length-1] = last_move;
-            }
-            if (message.data.move.captured) {
-              var piece = message.data.move.captured;
-              if (message.data.move.color === 'b') {
-                piece = piece.toUpperCase();
-              }
-              data.game.captured.push(piece);
-            }
-            data.game.fen = message.data.fen;
-            data.game.last_move = { from: message.data.move.from, to: message.data.move.to };
-            r_client.set(channel, JSON.stringify(data));
-            publisher.publish(channel, JSON.stringify(message));
-          }
-        });
-        break;
       case 'end':
         r_client.get(channel, function(err, reply) {
           data = JSON.parse(reply);
@@ -248,8 +246,6 @@ socket.on('connection', function(client) {
             r_client.set(channel, JSON.stringify(data));
           }
         });
-        break;
-      case 'opponent':
         break;
       case 'chat':
         console.log('Chat message received!');
