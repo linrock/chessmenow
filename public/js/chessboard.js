@@ -273,9 +273,10 @@ var ApplicationView = Backbone.View.extend({
           player.color = c;
           $.post('/' + game_id + '/color', { color: c }, function(response) {
             if (response == 0) {
+              var color = (c === 'w') ? 'White': 'Black';
               self.appendToChat({
                 type: 'error',
-                text: 'That color has already been picked!'
+                text: color + ' has already been picked!'
               });
             }
           });
