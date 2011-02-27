@@ -35,7 +35,7 @@ var Application = Backbone.Model.extend({
               $("#choose-b").remove();
               self.view.appendToChat({
                 type: 'announcement',
-                text: 'Black has been picked!'
+                text: data.user + ' has picked black!'
               });
               console.log('black');
             } else if (data.color === 'w') {
@@ -43,7 +43,7 @@ var Application = Backbone.Model.extend({
               $("#choose-w").remove();
               self.view.appendToChat({
                 type: 'announcement',
-                text: 'White has been picked!'
+                text: data.user + ' has picked white!'
               });
               console.log('white');
             }

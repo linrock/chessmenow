@@ -200,7 +200,7 @@ server.post('/:game_id/ping', getOrSetUser, function(req, res) {
   res.send('1', { 'Content-Type': 'application/json' });
 });
 
-server.post('/:game_id/color', function(req, res) {
+server.post('/:game_id/color', getOrSetUser, function(req, res) {
   var channel = 'game:' + req.params.game_id;
   var color = req.body.color;
   // console.log(req.cookies.id);
@@ -208,7 +208,7 @@ server.post('/:game_id/color', function(req, res) {
   r_client.get(channel, function(e, reply) {
     data = JSON.parse(reply);
     if ((color === 'w' || color === 'b') && !data.players[color].id) {
-      data.players[color].id = req.cookies.id;
+      data.players[color].id = req.uid;
       if (data.players.w.id && data.players.b.id) {
         data.timestamps.started_at = Date.now();
       }
@@ -216,6 +216,7 @@ server.post('/:game_id/color', function(req, res) {
       r_client.publish(channel, JSON.stringify({
         type: 'color',
         color: color,
+        user: req.nickname,
         started_at: data.timestamps.started_at
       }));
       res.send('1', { 'Content-Type': 'application/json' });
