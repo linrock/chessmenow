@@ -66,9 +66,17 @@ var Application = Backbone.Model.extend({
         }
         self.pollForever();
       },
-      error: function() {
+      error: function(xhr) {
         console.log('ERROR');
-        setTimeout(self.pollForever(), 100);
+        if (xhr.status === 502) {
+          self.view.appendToChat({
+            type: 'announcement',
+            text: 'An error has occured. Please refresh the page.'
+          });
+        } else {
+          console.dir(xhr);
+          self.pollForever();
+        }
       }
     });
   },
