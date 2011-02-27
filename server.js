@@ -1,6 +1,6 @@
 const express = require('express'),
       redis = require('redis'),
-      uuid = require('node-uuid'),
+      uuid = require('node-uuid');
 
 var server = express.createServer();
 var r_client = redis.createClient();
