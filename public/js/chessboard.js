@@ -253,6 +253,7 @@ var ApplicationView = Backbone.View.extend({
         break;
 
       case 'ended':
+        this.updateCaptured();
         this.$(".w-player").css('visibility', 'visible').removeClass('current-turn');
         this.$(".b-player").css('visibility', 'visible').removeClass('current-turn');
         this.$("#move-list").css('visibility', 'visible').fadeIn('fast');
