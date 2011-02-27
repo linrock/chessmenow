@@ -55,6 +55,16 @@ function getOrSetUserId(req, res, next) {
   console.log('User ID: ' + req.cookies.id);
 };
 
+function generateGameId(callback) {
+  var chars = 'abcdefghijklmnopqrstuvwxyz';
+  var length = 6;
+  var game_id = '';
+  for (var i=0; i < length; ++i) {
+    game_id += chars[Math.floor(Math.random()*chars.length)];
+  }
+  callback(game_id);
+};
+
 
 server.get('/', getOrSetUserId, function(req, res) {
   console.log(req.uid + ' has joined the party! (home)');
@@ -66,26 +76,18 @@ server.get('/', getOrSetUserId, function(req, res) {
 });
 
 server.get('/new', function(req, res) {
-  var generateGameId = function() {
-    var chars = 'abcdefghijklmnopqrstuvwxyz';
-    var length = 6;
-    var game_id = '';
-    for (var i=0; i < length; ++i) {
-      game_id += chars[Math.floor(Math.random()*chars.length)];
-    }
-    return game_id;
-  };
   var getNewGameId = function() {
-    game_id = generateGameId();
-    r_client.get('game:' + game_id, function(err, reply) {
-      if (!reply) {
-        res.redirect('/' + game_id);
-      } else {
-        getNewId();
-      }
+    generateGameId(function(game_id) {
+      r_client.get('game:' + game_id, function(err, reply) {
+        if (!reply) {
+          res.redirect('/' + game_id);
+        } else {
+          getNewGameId();
+        }
+      });
     });
-  }
-  getGameNewId();
+  };
+  getNewGameId();
 });
 
 // server.get(/^\/(?:(\w+))(?:\/(\d+))?/, getOrSetId, function(req, res) {
