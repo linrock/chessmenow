@@ -68,7 +68,7 @@ var Application = Backbone.Model.extend({
       },
       error: function() {
         console.log('ERROR');
-        self.pollForever();
+        setTimeout(self.pollForever(), 100);
       }
     });
   },
