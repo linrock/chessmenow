@@ -180,6 +180,7 @@ var ApplicationView = Backbone.View.extend({
     this.onStateChange();
     this.displayNames();
     this.initializeChat();
+    this.$("#move-list").scrollTop($('#move-list').attr('scrollHeight'));
   },
   generateBoard: function() {
     var client = this.model.get('client');
@@ -354,7 +355,7 @@ var ApplicationView = Backbone.View.extend({
     }
     this.$("#move-list > .move-row > .move").removeClass('last-move');
     this.$("#move-list > .move-row > .move").last().addClass('last-move');
-    this.$("#move-list").attr({ scrollTop: $('#move-list').attr('scrollHeight') });
+    this.$("#move-list").scrollTop($('#move-list').attr('scrollHeight'));
   },
   highlightMove: function(move) {
     this.$(".moved").removeClass('moved');
