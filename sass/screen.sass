@@ -50,8 +50,10 @@
         font-size: 2em
         span.w-player
           +float-left
+          visibility: hidden
         span.b-player
           +float-left
+          visibility: hidden
         span.time-left
           +float-right
           display: none
@@ -127,22 +129,26 @@
             margin-bottom: $move-list-margin-bottom
             height: $move-list-height
             width: 170px
+            visibility: hidden
             overflow-x: hidden
             overflow-y: scroll
             .move-row
               +float-left
-              padding: 1px
               margin-left: 5px
               span
                 +float-left
                 &.move
-                  width: 50px
+                  border: 1px solid white
+                  padding-left: 10px
+                  width: 45px
                 &.move-num
+                  border: 1px solid white
                   font-weight: bold
                   text-align: right
-                  margin-right: 20px
-                  width: 20px
+                  margin-right: 10px
+                  width: 15px
                 &.last-move
+                  border: 1px solid orange !important
                   background-color: yellow
         #container-misc
           +column(5, true)
@@ -163,12 +169,13 @@
         color: orange
         font-weight: bold
     #container-chat
+      +column(10, true)
       border: $container-chat-border-width solid black
-      padding: $container-chat-padding
       height: $container-chat-height
       position: relative
       #chat-window
-        height: 3*$tile-size
+        height: $chat-window-height
+        padding: $container-chat-padding
         overflow-x: hidden
         overflow-y: scroll
         white-space: pre-wrap
@@ -182,13 +189,18 @@
           span.chat-text
           span.chat-announcement
             font-weight: bold
+          span.chat-error
+            font-weight: bold
+            color: #E00000
       form#chat
-        border: 1px solid black
         position: absolute
-        bottom: 3px
-      button.send-message
-        +fancy-button($button-color1)
-        font-size: 8pt
+        bottom: 0px
+        padding: 3px
+        input
+          width: 390px - 6px - 8px
+          height: $chat-input-height
+          margin: 0px
+          padding: 3px
     #announcement-area
       +column(24, true)
       #info
@@ -203,52 +215,48 @@
     .P
       background-position: 0px 0px
     .N
-      background-position: -45px 0px
+      background-position: -$tile-size 0px
     .B
-      background-position: -90px 0px
+      background-position: -2*$tile-size 0px
     .R
-      background-position: -135px 0px
+      background-position: -3*$tile-size 0px
     .Q
-      background-position: -180px 0px
+      background-position: -4*$tile-size 0px
     .K
-      background-position: -225px 0px
+      background-position: -5*$tile-size 0px
     .p
-      background-position: 0px 45px
+      background-position: 0px $tile-size
     .n
-      background-position: -45px 45px
+      background-position: -$tile-size $tile-size
     .b
-      background-position: -90px 45px
+      background-position: -2*$tile-size $tile-size
     .r
-      background-position: -135px 45px
+      background-position: -3*$tile-size $tile-size
     .q
-      background-position: -180px 45px
+      background-position: -4*$tile-size $tile-size
     .k
-      background-position: -225px 45px
+      background-position: -5*$tile-size $tile-size
     .piece-small
-      background: url('/media/img/chesspieces_small.gif')
-      height: 20px
-      width: 20px
+      background: url('/media/img/chesspieces_small.png')
+      height: $small-tile-size
+      width: $small-tile-size
     .P-small
       background-position: 0px 0px
     .N-small
-      background-position: -20px 0px
+      background-position: -$small-tile-size 0px
     .B-small
-      background-position: -40px 0px
+      background-position: -2*$small-tile-size 0px
     .R-small
-      background-position: -60px 0px
+      background-position: -3*$small-tile-size 0px
     .Q-small
-      background-position: -80px 0px
-    .K-small
-      background-position: -100px 0px
+      background-position: -4*$small-tile-size 0px
     .p-small
-      background-position: 0px 20px
+      background-position: 0px $small-tile-size
     .n-small
-      background-position: -20px 20px
+      background-position: -$small-tile-size $small-tile-size
     .b-small
-      background-position: -40px 20px
+      background-position: -2*$small-tile-size $small-tile-size
     .r-small
-      background-position: -60px 20px
+      background-position: -3*$small-tile-size $small-tile-size
     .q-small
-      background-position: -80px 20px
-    .k-small
-      background-position: -100px 20px
+      background-position: -4*$small-tile-size $small-tile-size

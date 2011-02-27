@@ -1,69 +1,78 @@
 var Application = Backbone.Model.extend({
   initialize: function() {
-    _.bindAll(this, 'initializeSocket', 'loadFen');
+    _.bindAll(this, 'loadFen');
     var moves = new MoveList();
+    this.pingForever();
+    this.pollForever();
     this.set({
       client: new Chess(),
       moves: moves,
       selected: null,
       captured: game_state.captured,
       player: player_state,
-      socket: this.initializeSocket(),
       state: state
     });
     this.bind('change:board_diff', this.updateBoardState);
   },
-  initializeSocket: function() {
-    var self = this;
-    var s = new io.Socket(host, { port: 3000 });
-    s.connect();
-    s.on('connect', function() {
-      s.send({ type: 'auth', auth: document.cookie, game_id: game_id });
+  pingForever: function() {
+    $(function() {
+      $.ajax({ url: '/' + game_id + '/ping', type: 'POST' });
+      setInterval(function() {
+        $.ajax({ url: '/' + game_id + '/ping', type: 'POST' });
+      }, 5000);
     });
-    s.on('message', function(message) {
-      switch (message.type) {
-        case 'move':
-          if (message.data.move) {
-            self.move(message.data.move, false);
-          }
-          break;
-        case 'colors':
-          if (message.color === 'b') {
-            $(".b-player").css('visibility', 'visible');
-            $("#choose-b").remove();
-            self.view.appendToChat({
-              type: 'announcement',
-              text: 'Black has been picked!'
-            });
-            console.log('black');
-          } else if (message.color === 'w') {
-            $(".w-player").css('visibility', 'visible');
-            $("#choose-w").remove();
-            self.view.appendToChat({
-              type: 'announcement',
-              text: 'White has been picked!'
-            });
-            console.log('white');
-          }
-          if (message.started_at) {
-            self.set({ state: 'started' });
-          }
-          break;
-        case 'chat':
-          self.view.appendToChat(message);
-          break;
-        case 'announcement':
-          self.view.appendToChat(message);
-          break;
+  },
+  pollForever: function() {
+    var self = this;
+    $.ajax({
+      url: '/' + game_id + '/xhr-polling',
+      success: function(data) {
+        switch (data.type) {
+          case 'color':
+            if (data.color === 'b') {
+              $(".b-player").css('visibility', 'visible');
+              $("#choose-b").remove();
+              self.view.appendToChat({
+                type: 'announcement',
+                text: data.user + ' has picked black!'
+              });
+            } else if (data.color === 'w') {
+              $(".w-player").css('visibility', 'visible');
+              $("#choose-w").remove();
+              self.view.appendToChat({
+                type: 'announcement',
+                text: data.user + ' has picked white!'
+              });
+            }
+            if (data.started_at) {
+              self.set({ state: 'started' });
+            }
+            break;
+          case 'move':
+            if (data.move) {
+              self.move(data.move, false);
+            }
+            break;
+          case 'chat':
+            self.view.appendToChat(data);
+            break;
+          case 'announcement':
+            self.view.appendToChat(data);
+            break;
+        }
+        self.pollForever();
+      },
+      error: function(xhr) {
+        if (xhr.status === 502) {
+          self.view.appendToChat({
+            type: 'error',
+            text: 'An error has occured. Please refresh the page.'
+          });
+        } else {
+          self.pollForever();
+        }
       }
     });
-    s.on('disconnect', function() {
-      s.connect();
-    });
-    setInterval(function() {
-      s.send('ping');
-    }, 10000);
-    return s;
   },
   loadFen: function(fen) {
     fen = fen || 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
@@ -123,21 +132,13 @@ var Application = Backbone.Model.extend({
       this.set({ client: client, board: board, board_diff: board_diff });
       this.view.highlightMove(move);
       this.view.updateMoveList(move);
-      console.log('Making a move! - ' + move.san)
       if (remote) {
-        this.get('socket').send({
-          type: 'move',
-          game_id: game_id,
-          data: {
-            fen: client.fen(),
-            move: move,
-          }
+        var data = { fen: client.fen(), move: move };
+        $.post('/' + game_id + '/move', data, function(response) {
+          if (response == 0) {}
         });
         if (client.game_over()) {
-          this.get('socket').send({
-            type: 'end',
-            game_id: game_id,
-          });
+          $.post('/' + game_id + '/end', function(response) { });
         }
       }
       return move;
@@ -180,20 +181,21 @@ var ApplicationView = Backbone.View.extend({
     this.onStateChange();
     this.displayNames();
     this.initializeChat();
+    this.$("#move-list").scrollTop($('#move-list').attr('scrollHeight'));
   },
-  generateBoard: function() {
+  generateBoard: function(color) {
     var client = this.model.get('client');
     this.$("#chessboard").html(function() {
       var cols = ['8','7','6','5','4','3','2','1'];
       var rows = ['a','b','c','d','e','f','g','h'];
-      if (player_state.color === 'b') {  // XXX need to use color argument
+      if (color === 'b') {
         cols = cols.reverse();
         rows = rows.reverse();
-        $("#bottom-name").append($(".b-player"));
-        $("#top-name").append($(".w-player"));
+        $("#bottom-side").append($(".b-player"));
+        $("#top-side").append($(".w-player"));
       } else {
-        $("#bottom-name").append($(".w-player"));
-        $("#top-name").append($(".b-player"));
+        $("#bottom-side").append($(".w-player"));
+        $("#top-side").append($(".b-player"));
       }
       var board_html = '';
       var count = 0;
@@ -214,62 +216,46 @@ var ApplicationView = Backbone.View.extend({
       var input = $("#chat-input");
       var text = input.val();
       if (text > '') {
-        console.log('message sent!');
         input.val('');
-        self.model.get('socket').send({
-          type: 'chat',
-          game_id: game_id,
-          text: text
+        $.post('/' + game_id + '/chat', { text: text }, function(response) {
+          if (response != 1) {}
         });
       }
     });
   },
   onStateChange: function() {
     var state = this.model.get('state');
-    console.log('STATE CHANGE!');
     switch (state) {
       case 'new':
         this.displayColorChoosers();
-        this.$(".w-player").css('visibility', 'hidden');
-        this.$(".b-player").css('visibility', 'hidden');
-        this.$("#move-list").css('visibility', 'hidden');
         break;
 
       case 'started':
         var model = this.model;
         this.updateViewState();
         this.updateCaptured();
+        this.$(".w-player").css('visibility', 'visible');
+        this.$(".b-player").css('visibility', 'visible');
         this.$("#move-list").css('visibility', 'visible');
         this.$(".tile").live('click', function() {
           var position = $(this).attr('id');
           model.selectTile(position);
         });
         this.$("#resign").live('click', function() {
-          this.model.get('socket').send({
-            type: 'announcement',
-            game_id: game_id,
-            text: 'resign'
-          });
+          $.post('/' + game_id + '/announcement', { text: 'resign' });
         });
         this.$("#draw").live('click', function() {
-          this.model.get('socket').send({
-            type: 'announcement',
-            game_id: game_id,
-            text: 'draw'
-          });
+          $.post('/' + game_id + '/announcement', { text: 'draw' });
         });
         this.$("#rematch").live('click', function() {
-          this.model.get('socket').send({
-            type: 'announcement',
-            game_id: game_id,
-            text: 'rematch'
-          });
+          $.post('/' + game_id + '/announcement', { text: 'rematch' });
         });
         break;
 
       case 'ended':
-        this.$(".w-player").removeClass('current-turn');
-        this.$(".b-player").removeClass('current-turn');
+        this.$(".w-player").css('visibility', 'visible').removeClass('current-turn');
+        this.$(".b-player").css('visibility', 'visible').removeClass('current-turn');
+        this.$("#move-list").css('visibility', 'visible').fadeIn('fast');
         this.$(".tile").die('click');
         this.$("#resign").die('click').hide();
         this.$("#draw").die('click').hide();
@@ -284,11 +270,13 @@ var ApplicationView = Backbone.View.extend({
       if (!_.include(chosen_colors, c)) {
         $("#choose-" + c).show().click(function() {
           player.color = c;
-          self.model.get('socket').send({
-            type: 'colors',
-            game_id: game_id,
-            player_id: player.id,
-            color: c
+          $.post('/' + game_id + '/color', { color: c }, function(response) {
+            if (response == 0) {
+              self.appendToChat({
+                type: 'error',
+                text: 'That color has already been picked!'
+              });
+            }
           });
           if (c === 'b') {
             self.generateBoard('b');
@@ -371,7 +359,7 @@ var ApplicationView = Backbone.View.extend({
     }
     this.$("#move-list > .move-row > .move").removeClass('last-move');
     this.$("#move-list > .move-row > .move").last().addClass('last-move');
-    this.$("#move-list").attr({ scrollTop: $('#move-list').attr('scrollHeight') });
+    this.$("#move-list").scrollTop($('#move-list').attr('scrollHeight'));
   },
   highlightMove: function(move) {
     this.$(".moved").removeClass('moved');
@@ -395,7 +383,7 @@ var ApplicationView = Backbone.View.extend({
     chat_html += '<div class="chat-row">';
     switch (message.type) {
       case 'chat':
-        chat_html += '<span class="chat-name">' + message.from +  ': </span>';
+        chat_html += '<span class="chat-name">' + message.user +  ': </span>';
         chat_html += '<span class="chat-text">' + message.text + '</span>';
         chat_html += '</div>';
         break;
@@ -403,9 +391,13 @@ var ApplicationView = Backbone.View.extend({
         chat_html += '<span class="chat-announcement">' + message.text + '</span>';
         chat_html += '</div>';
         break;
+      case 'error':
+        chat_html += '<span class="chat-error">' + message.text + '</span>';
+        chat_html += '</div>';
+        break;
     }
-    chat_window.append(chat_html);
-    chat_window.attr({ scrollTop: chat_window.attr('scrollHeight') });
+    chat_window.append($(chat_html).fadeIn('fast'));
+    chat_window.scrollTop(chat_window.attr('scrollHeight'));
   }
 });
 
