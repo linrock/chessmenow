@@ -50,8 +50,10 @@
         font-size: 2em
         span.w-player
           +float-left
+          visibility: hidden
         span.b-player
           +float-left
+          visibility: hidden
         span.time-left
           +float-right
           display: none
@@ -127,6 +129,7 @@
             margin-bottom: $move-list-margin-bottom
             height: $move-list-height
             width: 170px
+            visibility: hidden
             overflow-x: hidden
             overflow-y: scroll
             .move-row

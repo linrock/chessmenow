@@ -237,15 +237,14 @@ var ApplicationView = Backbone.View.extend({
     switch (state) {
       case 'new':
         this.displayColorChoosers();
-        this.$(".w-player").css('visibility', 'hidden');
-        this.$(".b-player").css('visibility', 'hidden');
-        this.$("#move-list").css('visibility', 'hidden');
         break;
 
       case 'started':
         var model = this.model;
         this.updateViewState();
         this.updateCaptured();
+        this.$(".w-player").css('visibility', 'visible');
+        this.$(".b-player").css('visibility', 'visible');
         this.$("#move-list").css('visibility', 'visible');
         this.$(".tile").live('click', function() {
           var position = $(this).attr('id');
@@ -263,8 +262,9 @@ var ApplicationView = Backbone.View.extend({
         break;
 
       case 'ended':
-        this.$(".w-player").removeClass('current-turn');
-        this.$(".b-player").removeClass('current-turn');
+        this.$(".w-player").css('visibility', 'visible').removeClass('current-turn');
+        this.$(".b-player").css('visibility', 'visible').removeClass('current-turn');
+        this.$("#move-list").css('visibility', 'visible').fadeIn('fast');
         this.$(".tile").die('click');
         this.$("#resign").die('click').hide();
         this.$("#draw").die('click').hide();
