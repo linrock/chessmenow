@@ -1,7 +1,6 @@
 const express = require('express'),
       redis = require('redis'),
       uuid = require('node-uuid'),
-      io = require('socket.io');
 
 var server = express.createServer();
 var r_client = redis.createClient();
@@ -230,59 +229,32 @@ server.post('/:game_id/chat', function(req, res) {
 server.post('/:game_id/announcement', function(req, res) {
   var channel = 'game:' + req.params.game_id;
   console.log(req.cookies.id);
+  console.log('Announcement received!');
+  console.dir(req.body);
+  publisher.publish(channel, JSON.stringify({
+    type: 'announcement',
+    text: ' has offered a draw!',
+    text: ' has resigned!',
+    text: ' has joined the game!'
+  }));
   res.send('1', { 'Content-Type': 'application/json' });
 });
 
-var publisher = redis.createClient();
+server.post('/:game_id/end', function(req, res) {
+  var channel = 'game:' + req.params.game_id;
+  r_client.get(channel, function(err, reply) {
+    data = JSON.parse(reply);
+    if (!data.timestamps.ended_at) {
+      data.timestamps.ended_at = Date.now();
+      r_client.set(channel, JSON.stringify(data));
+    }
+  });
+});
+
+
 var reaper = setInterval(function() {
   // console.log('hay man');
 }, 10000);
-
-var socket = io.listen(server);
-socket.on('connection', function(client) {
-  var subscriber = redis.createClient();
-  var publisher = redis.createClient();
-  client.on('message', function(message) {
-    var channel = 'game:' + message.game_id;
-    switch (message.type) {
-      case 'auth':
-        subscriber.subscribe(channel);
-        subscriber.on('message', function(channel, message) {
-          message = JSON.parse(message);
-          client.send(message);
-        });
-        console.log('User has connected!');
-        publisher.publish(channel, JSON.stringify({
-          type: 'announcement',
-          text: 'Someone has connected to the game!'
-        }));
-        break;
-      case 'end':
-        r_client.get(channel, function(err, reply) {
-          data = JSON.parse(reply);
-          if (!data.timestamps.ended_at) {
-            data.timestamps.ended_at = Date.now();
-            r_client.set(channel, JSON.stringify(data));
-          }
-        });
-        break;
-      case 'announcement':
-        console.log('Announcement received!');
-        console.dir(message);
-        publisher.publish(channel, JSON.stringify({
-          type: 'announcement',
-          text: ' has offered a draw!',
-          text: ' has resigned!',
-          text: ' has joined the game!'
-        }));
-        break;
-    }
-  });
-  client.on('disconnect', function() {
-    subscriber.quit();
-    publisher.quit();
-  });
-});
 
 
 r_client.select(2, function() {

@@ -137,10 +137,7 @@ var Application = Backbone.Model.extend({
           console.dir(data);
         });
         if (client.game_over()) {
-          this.get('socket').send({
-            type: 'end',
-            game_id: game_id,
-          });
+          $.post('/' + game_id + '/end', function(data) { });
         }
       }
       return move;
@@ -246,25 +243,13 @@ var ApplicationView = Backbone.View.extend({
           model.selectTile(position);
         });
         this.$("#resign").live('click', function() {
-          this.model.get('socket').send({
-            type: 'announcement',
-            game_id: game_id,
-            text: 'resign'
-          });
+          $.post('/' + game_id + '/announcement', { text: 'resign' });
         });
         this.$("#draw").live('click', function() {
-          this.model.get('socket').send({
-            type: 'announcement',
-            game_id: game_id,
-            text: 'draw'
-          });
+          $.post('/' + game_id + '/announcement', { text: 'draw' });
         });
         this.$("#rematch").live('click', function() {
-          this.model.get('socket').send({
-            type: 'announcement',
-            game_id: game_id,
-            text: 'rematch'
-          });
+          $.post('/' + game_id + '/announcement', { text: 'rematch' });
         });
         break;
 
