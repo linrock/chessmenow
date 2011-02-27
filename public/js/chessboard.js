@@ -15,12 +15,12 @@ var Application = Backbone.Model.extend({
     this.bind('change:board_diff', this.updateBoardState);
   },
   pingForever: function() {
-    setInterval(function() {
-      $.ajax({
-        url: '/' + game_id + '/ping',
-        type: 'POST'
-      });
-    }, 5000);
+    $(function() {
+      $.ajax({ url: '/' + game_id + '/ping', type: 'POST' });
+      setInterval(function() {
+        $.ajax({ url: '/' + game_id + '/ping', type: 'POST' });
+      }, 5000);
+    });
   },
   pollForever: function() {
     var self = this;
