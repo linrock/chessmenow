@@ -153,7 +153,7 @@ server.get('/:game_id/xhr-polling', function(req, res) {
       case 'chat': break;
       case 'announcement': break;
     }
-    res.send('DUDE', { 'Content-Type': 'application/json' });
+    res.send(message, { 'Content-Type': 'application/json' });
   });
 });
 
@@ -209,7 +209,8 @@ server.post('/:game_id/move', function(req, res) {
       data.game.fen = req.body.fen;
       data.game.last_move = { from: req.body.move.from, to: req.body.move.to };
       r_client.set(channel, JSON.stringify(data));
-      r_client.publish(channel, JSON.stringify(req.body.fen));
+      req.body.type = 'move';
+      r_client.publish(channel, JSON.stringify(req.body));
       res.send('1', { 'Content-Type': 'application/json' });
     }
   });
@@ -219,7 +220,7 @@ server.post('/:game_id/chat', function(req, res) {
   var channel = 'game:' + req.params.game_id;
   console.log(req.cookies.id);
   console.log('Chat message received!');
-  publisher.publish(channel, JSON.stringify({
+  r_client.publish(channel, JSON.stringify({
     type: 'chat',
     text: req.body.text
   }));

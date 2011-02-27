@@ -29,9 +29,18 @@ var Application = Backbone.Model.extend({
       url: '/' + game_id + '/xhr-polling',
       success: function(data) {
         console.dir(data);
+        switch (data.type) {
+          case 'move':
+            console.log('move was made!');
+            if (data.move) {
+              self.move(data.move, false);
+            }
+            break;
+        }
         self.pollForever();
       },
       error: function() {
+        console.log('ERROR');
         self.pollForever();
       }
     });
