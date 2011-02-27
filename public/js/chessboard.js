@@ -58,6 +58,12 @@ var Application = Backbone.Model.extend({
               self.move(data.move, false);
             }
             break;
+          case 'chat':
+            self.view.appendToChat(message);
+            break;
+          case 'announcement':
+            self.view.appendToChat(message);
+            break;
         }
         self.pollForever();
       },
@@ -76,33 +82,6 @@ var Application = Backbone.Model.extend({
     });
     s.on('message', function(message) {
       switch (message.type) {
-        case 'move':
-          if (message.data.move) {
-            self.move(message.data.move, false);
-          }
-          break;
-        case 'colors':
-          if (message.color === 'b') {
-            $(".b-player").css('visibility', 'visible');
-            $("#choose-b").remove();
-            self.view.appendToChat({
-              type: 'announcement',
-              text: 'Black has been picked!'
-            });
-            console.log('black');
-          } else if (message.color === 'w') {
-            $(".w-player").css('visibility', 'visible');
-            $("#choose-w").remove();
-            self.view.appendToChat({
-              type: 'announcement',
-              text: 'White has been picked!'
-            });
-            console.log('white');
-          }
-          if (message.started_at) {
-            self.set({ state: 'started' });
-          }
-          break;
         case 'chat':
           self.view.appendToChat(message);
           break;
