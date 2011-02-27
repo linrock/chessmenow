@@ -279,8 +279,13 @@ var ApplicationView = Backbone.View.extend({
       if (!_.include(chosen_colors, c)) {
         $("#choose-" + c).show().click(function() {
           player.color = c;
-          $.post('/' + game_id + '/color', { color: c }, function(data) {
-            console.dir(data);
+          $.post('/' + game_id + '/color', { color: c }, function(response) {
+            if (response == 0) {
+              self.appendToChat({
+                type: 'error',
+                text: 'That color has already been picked!'
+              });
+            }
           });
           if (c === 'b') {
             self.generateBoard('b');

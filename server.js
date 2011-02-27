@@ -191,7 +191,7 @@ server.post('/:game_id/ping', getOrSetUser, function(req, res) {
       r_client.publish(channel, JSON.stringify({
         type: 'announcement',
         user: req.nickname,
-        text: 'Someone has joined the game!'
+        text: req.nickname + ' has joined the game!'
       }));
     } else {
       r_client.expire(channel_user, 10);
