@@ -25,23 +25,38 @@ server.configure(function() {
   });
 });
 
-var getOrSetId = function(req, res, next) {
-  if (!req.cookies.id) {
-    req.uid = uuid();
-    res.cookie('id', req.uid, { expires: new Date(Date.now() + 22118400000) });
-  } else {
-    req.uid = req.cookies.id;
-  }
-  next();
-};
-
-var getNickname = function() {
+function getNickname() {
     var adjectives = ['Fuzzy', 'Nerd', 'Crazy', 'Psycho', 'Noob', 'Magical', 'Flying', 'Evil', 'Happy', 'Cool', 'Hax'];
     var nouns = ['Pickles', 'Rage', 'Person', 'Noob', 'Narwhal', 'Bacon', 'Walrus', 'Santa', 'Cat', 'Jabroni', 'Ninja'];
     return adjectives[Math.floor(Math.random()*adjectives.length)] + nouns[Math.floor(Math.random()*nouns.length)];
 }
 
-server.get('/', getOrSetId, function(req, res) {
+function getOrSetUserId(req, res, next) {
+  if (!req.cookies.id) {
+    req.uid = uuid();
+    req.nickname = getNickname();
+    res.cookie('id', req.uid, { expires: new Date(Date.now() + 22118400000) });
+    r_client.set('user:' + req.uid, req.nickname);
+    r_client.expire('user:' + req.uid, 86400);
+    next();
+  } else {
+    req.uid = req.cookies.id;
+    r_client.get('user:' + req.uid, function(e, reply) {
+      if (!reply) {
+        req.nickname = getNickname();
+        r_client.set('user:' + req.uid, req.nickname);
+        r_client.expire('user:' + req.uid, 86400);
+      } else {
+        req.nickname = reply;
+      }
+      next();
+    });
+  }
+  console.log('User ID: ' + req.cookies.id);
+};
+
+
+server.get('/', getOrSetUserId, function(req, res) {
   console.log(req.uid + ' has joined the party! (home)');
   res.render('index', {
     locals: {
@@ -51,7 +66,7 @@ server.get('/', getOrSetId, function(req, res) {
 });
 
 server.get('/new', function(req, res) {
-  var generateId = function() {
+  var generateGameId = function() {
     var chars = 'abcdefghijklmnopqrstuvwxyz';
     var length = 6;
     var game_id = '';
@@ -60,8 +75,8 @@ server.get('/new', function(req, res) {
     }
     return game_id;
   };
-  var getNewId = function() {
-    game_id = generateId();
+  var getNewGameId = function() {
+    game_id = generateGameId();
     r_client.get('game:' + game_id, function(err, reply) {
       if (!reply) {
         res.redirect('/' + game_id);
@@ -70,11 +85,11 @@ server.get('/new', function(req, res) {
       }
     });
   }
-  getNewId();
+  getGameNewId();
 });
 
 // server.get(/^\/(?:(\w+))(?:\/(\d+))?/, getOrSetId, function(req, res) {
-server.get('/:game_id', getOrSetId, function(req, res) {
+server.get('/:game_id', getOrSetUserId, function(req, res) {
   // console.dir(req.params)
   // req.params.game_id = req.params[0];
   // var time_control = req.params[1];
@@ -162,8 +177,6 @@ server.post('/:game_id/ping', function(req, res) {
   var user = 'user:' + req.cookies.id;
   var channel_user = channel + ':' + user;
   r_client.exists(channel_user, function(e, reply) {
-    console.log('Ping reply:');
-    console.dir(reply);
     if (reply === 0) {
       r_client.set(channel_user, 1);
       r_client.publish(channel, JSON.stringify({
