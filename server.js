@@ -173,7 +173,6 @@ server.get('/:game_id/xhr-polling', function(req, res) {
       if (!reply) {
         console.log('Invalid user - ' + reply);
       } else {
-        // message.user = reply;
         res.send(message, { 'Content-Type': 'application/json' });
         subscriber.quit();
       }
@@ -203,8 +202,6 @@ server.post('/:game_id/ping', getOrSetUser, function(req, res) {
 server.post('/:game_id/color', getOrSetUser, function(req, res) {
   var channel = 'game:' + req.params.game_id;
   var color = req.body.color;
-  // console.log(req.cookies.id);
-  // console.dir(req.body);
   r_client.get(channel, function(e, reply) {
     data = JSON.parse(reply);
     if ((color === 'w' || color === 'b') && !data.players[color].id) {
@@ -228,7 +225,6 @@ server.post('/:game_id/color', getOrSetUser, function(req, res) {
 
 server.post('/:game_id/move', function(req, res) {
   var channel = 'game:' + req.params.game_id;
-  // console.dir(req.body);
   r_client.get(channel, function(e, reply) {
     var data = JSON.parse(reply);
     if (!data.timestamps.ended_at) {
@@ -269,9 +265,6 @@ server.post('/:game_id/chat', getOrSetUser, function(req, res) {
 
 server.post('/:game_id/announcement', function(req, res) {
   var channel = 'game:' + req.params.game_id;
-  // console.log(req.cookies.id);
-  // console.log('Announcement received!');
-  // console.dir(req.body);
   publisher.publish(channel, JSON.stringify({
     type: 'announcement',
     text: ' has offered a draw!',
@@ -294,7 +287,6 @@ server.post('/:game_id/end', function(req, res) {
 
 
 var reaper = setInterval(function() {
-  // console.log('hay man');
 }, 10000);
 
 
