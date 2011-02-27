@@ -183,19 +183,19 @@ var ApplicationView = Backbone.View.extend({
     this.initializeChat();
     this.$("#move-list").scrollTop($('#move-list').attr('scrollHeight'));
   },
-  generateBoard: function() {
+  generateBoard: function(color) {
     var client = this.model.get('client');
     this.$("#chessboard").html(function() {
       var cols = ['8','7','6','5','4','3','2','1'];
       var rows = ['a','b','c','d','e','f','g','h'];
-      if (player_state.color === 'b') {  // XXX need to use color argument
+      if (color === 'b') {
         cols = cols.reverse();
         rows = rows.reverse();
-        $("#bottom-name").append($(".b-player"));
-        $("#top-name").append($(".w-player"));
+        $("#bottom-side").append($(".b-player"));
+        $("#top-side").append($(".w-player"));
       } else {
-        $("#bottom-name").append($(".w-player"));
-        $("#top-name").append($(".b-player"));
+        $("#bottom-side").append($(".w-player"));
+        $("#top-side").append($(".b-player"));
       }
       var board_html = '';
       var count = 0;
