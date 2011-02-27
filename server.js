@@ -36,9 +36,9 @@ var getOrSetId = function(req, res, next) {
 };
 
 var getNickname = function() {
-    var adjectives = ['Fuzzy', 'Nerd', 'Crazy', 'Psycho', 'Noob', 'Magical', 'Flying', 'Evil', 'Happy', 'Cool', 'Hax']
-    var nouns = ['Pickles', 'Rage', 'Person', 'Noob', 'Narwhal', 'Bacon', 'Walrus', 'Santa', 'Cat', 'Jabroni', 'Ninja']
-    return adjectives[Math.floor(Math.random()*adjectives.length)] + nouns[Math.floor(Math.random()*nouns.length)]
+    var adjectives = ['Fuzzy', 'Nerd', 'Crazy', 'Psycho', 'Noob', 'Magical', 'Flying', 'Evil', 'Happy', 'Cool', 'Hax'];
+    var nouns = ['Pickles', 'Rage', 'Person', 'Noob', 'Narwhal', 'Bacon', 'Walrus', 'Santa', 'Cat', 'Jabroni', 'Ninja'];
+    return adjectives[Math.floor(Math.random()*adjectives.length)] + nouns[Math.floor(Math.random()*nouns.length)];
 }
 
 server.get('/', getOrSetId, function(req, res) {

@@ -397,7 +397,7 @@ var ApplicationView = Backbone.View.extend({
         break;
     }
     chat_window.append($(chat_html).fadeIn('fast'));
-    chat_window.attr({ scrollTop: chat_window.attr('scrollHeight') });
+    chat_window.scrollTop(chat_window.attr('scrollHeight'));
   }
 });
 
