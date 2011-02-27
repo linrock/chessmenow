@@ -245,10 +245,17 @@ var ApplicationView = Backbone.View.extend({
       if (text > '') {
         console.log('message sent!');
         input.val('');
+
+        /*
         self.model.get('socket').send({
           type: 'chat',
           game_id: game_id,
           text: text
+        });
+        */
+
+        $.post('/' + game_id + '/chat', { text: text }, function(data) {
+          console.dir(data);
         });
       }
     });

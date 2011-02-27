@@ -208,6 +208,17 @@ server.post('/:game_id/move', function(req, res) {
   });
 });
 
+server.post('/:game_id/chat', function(req, res) {
+  var channel = 'game:' + req.params.game_id;
+  console.log(req.cookies.id);
+  console.log('Chat message received!');
+  publisher.publish(channel, JSON.stringify({
+    type: 'chat',
+    text: req.body.text
+  }));
+  res.send('1', { 'Content-Type': 'application/json' });
+});
+
 server.post('/:game_id/announcement', function(req, res) {
   var channel = 'game:' + req.params.game_id;
   console.log(req.cookies.id);
@@ -246,14 +257,6 @@ socket.on('connection', function(client) {
             r_client.set(channel, JSON.stringify(data));
           }
         });
-        break;
-      case 'chat':
-        console.log('Chat message received!');
-        console.dir(message);
-        publisher.publish(channel, JSON.stringify({
-          type: 'chat',
-          text: message.text
-        }));
         break;
       case 'announcement':
         console.log('Announcement received!');
