@@ -1,13 +1,18 @@
 !!! 5
 html
   head
-    // link(href='http://fonts.googleapis.com/css?family=Yanone+Kaffeesatz', rel='stylesheet', type='text/css')
+    //- link(href='http://fonts.googleapis.com/css?family=Yanone+Kaffeesatz', rel='stylesheet', type='text/css')
     link(href="/media/css/screen.css", rel="stylesheet", type="text/css")
     script(type="text/javascript", src="/media/js/json2.js")
-    script(type="text/javascript", src="/media/js/jquery-1.5.js")
+    - if (env === 'development')
+      script(type="text/javascript", src="/media/js/jquery-1.5.js")
+      script(type="text/javascript", src="/media/js/underscore.js")
+      script(type="text/javascript", src="/media/js/backbone.js")
+    - else
+      script(type="text/javascript", src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js")
+      script(type="text/javascript", src="/media/js/underscore.min.js")
+      script(type="text/javascript", src="/media/js/backbone.min.js")
     script(type="text/javascript", src="/media/js/socket.io.js")
-    script(type="text/javascript", src="/media/js/underscore.js")
-    script(type="text/javascript", src="/media/js/backbone.js")
     script(type="text/javascript", src="/media/js/chess.js")
     title Chess Me Now
   body
