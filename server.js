@@ -158,6 +158,19 @@ server.get('/:game_id/xhr-polling', function(req, res) {
 });
 
 server.post('/:game_id/ping', function(req, res) {
+  var channel = 'game:' + req.params.game_id;
+  var user = 'user:' + req.cookies.id;
+  var channel_user = channel + ':' + user;
+  r_client.exists(channel_user, function(e, reply) {
+    console.log('Ping reply:');
+    console.dir(reply);
+    if (reply === 0) {
+      r_client.set(channel_user, 1);
+      r_client.publish(channel, 'Dude has joined the game!');
+    } else {
+      r_client.expire(channel_user, 10);
+    }
+  });
   res.send('1', { 'Content-Type': 'application/json' });
 });
 
