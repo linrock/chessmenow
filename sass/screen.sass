@@ -168,39 +168,35 @@
       .current-turn
         color: orange
         font-weight: bold
-    #container-chat
-      +column(10, true)
-      border: $container-chat-border-width solid black
-      height: $container-chat-height
-      position: relative
-      #chat-window
-        height: $chat-window-height
-        padding: $container-chat-padding
-        overflow-x: hidden
-        overflow-y: scroll
-        white-space: pre-wrap
-        white-space: -moz-pre-wrap
-        white-space -pre-wrap
-        white-space -o-pre-wrap
-        word-wrap: break-word
-        .chat-row
-          span.chat-name
-            font-weight: bold
-          span.chat-text
-          span.chat-announcement
-            font-weight: bold
-          span.chat-error
-            font-weight: bold
-            color: #E00000
-      form#chat
-        position: absolute
-        bottom: 0px
-        padding: 3px
-        input
-          width: 390px - 6px - 8px
-          height: $chat-input-height
-          margin: 0px
-          padding: 3px
+      #container-chat
+        #chat-window
+          +column(10, true)
+          border: $chat-window-border-width solid black
+          height: $chat-window-height
+          padding: $chat-window-padding
+          margin-bottom: $chat-window-margin-bottom
+          overflow-x: hidden
+          overflow-y: scroll
+          white-space: pre-wrap
+          white-space: -moz-pre-wrap
+          white-space -pre-wrap
+          white-space -o-pre-wrap
+          word-wrap: break-word
+          .chat-row
+            span.chat-name
+              font-weight: bold
+            span.chat-text
+            span.chat-announcement
+              font-weight: bold
+            span.chat-error
+              font-weight: bold
+              color: #E00000
+        form#chat
+          input
+            +column(10, true)
+            height: $chat-input-height
+            margin: 0px
+            padding: 3px
     #announcement-area
       +column(24, true)
       #info
