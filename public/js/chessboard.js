@@ -70,7 +70,7 @@ var Application = Backbone.Model.extend({
         console.log('ERROR');
         if (xhr.status === 502) {
           self.view.appendToChat({
-            type: 'announcement',
+            type: 'error',
             text: 'An error has occured. Please refresh the page.'
           });
         } else {
@@ -393,6 +393,10 @@ var ApplicationView = Backbone.View.extend({
         break;
       case 'announcement':
         chat_html += '<span class="chat-announcement">' + message.text + '</span>';
+        chat_html += '</div>';
+        break;
+      case 'error':
+        chat_html += '<span class="chat-error">' + message.text + '</span>';
         chat_html += '</div>';
         break;
     }
