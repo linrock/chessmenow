@@ -177,7 +177,7 @@ var ApplicationView = Backbone.View.extend({
     model.bind('change:board_diff', this.updateViewState);
     model.bind('change:captured', this.updateCaptured);
     model.bind('change:state', this.onStateChange);
-    this.generateBoard();
+    this.generateBoard(player_state.color);
     this.onStateChange();
     this.displayNames();
     this.initializeChat();
