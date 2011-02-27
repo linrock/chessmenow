@@ -12,6 +12,7 @@ r_client.on('error', function(err) {
 
 var host;
 server.configure(function() {
+  server.use(express.bodyDecoder());
   server.use(express.cookieDecoder());
   server.set('views', __dirname + '/views');
   server.set('view engine', 'jade');
@@ -137,13 +138,63 @@ server.get('/:game_id/xhr-polling', function(req, res) {
   var channel = 'game:' + req.params.game_id;
   subscriber.subscribe(channel);
   subscriber.on('message', function(channel, message) {
-    res.send('DUDE', {'Content-Type': 'application/json'});
+    switch (message.type) {
+      case 'auth': break;
+      case 'move': break;
+      case 'colors': break;
+      case 'end': break;
+      case 'chat': break;
+      case 'announcement': break;
+    }
+    res.send('DUDE', { 'Content-Type': 'application/json' });
   });
 });
 
 server.post('/:game_id/ping', function(req, res) {
-  res.send('1', {'Content-Type': 'application/json'});
+  res.send('1', { 'Content-Type': 'application/json' });
 });
+
+server.post('/:game_id/color', function(req, res) {
+  var channel = 'game:' + req.params.game_id;
+  var color = req.body.color;
+  console.log(req.cookies.id);
+  console.dir(req.body);
+  r_client.get(channel, function(err, reply) {
+    data = JSON.parse(reply);
+    if ((color === 'w' || color === 'b') && !data.players[color].id) {
+      data.players[color].id = req.cookies.id;
+      if (data.players.w.id && data.players.b.id) {
+        data.timestamps.started_at = Date.now();
+      }
+      r_client.set(channel, JSON.stringify(data));
+      publisher.publish(channel, JSON.stringify({
+        type: 'colors',
+        color: color,
+        started_at: data.timestamps.started_at
+      }));
+      res.send('1', { 'Content-Type': 'application/json' });
+    } else {
+      res.send('0', { 'Content-Type': 'application/json' });
+    }
+  });
+});
+
+server.post('/:game_id/move', function(req, res) {
+  var channel = 'game:' + req.params.game_id;
+  console.log(req.cookies.id);
+  res.send('1', { 'Content-Type': 'application/json' });
+});
+
+server.post('/:game_id/announcement', function(req, res) {
+  var channel = 'game:' + req.params.game_id;
+  console.log(req.cookies.id);
+  res.send('1', { 'Content-Type': 'application/json' });
+});
+
+var publisher = redis.createClient();
+var reaper = setInterval(function() {
+  // console.log('hay man');
+}, 10000);
 
 var socket = io.listen(server);
 socket.on('connection', function(client) {
@@ -186,25 +237,6 @@ socket.on('connection', function(client) {
             data.game.last_move = { from: message.data.move.from, to: message.data.move.to };
             r_client.set(channel, JSON.stringify(data));
             publisher.publish(channel, JSON.stringify(message));
-          }
-        });
-        break;
-      case 'colors':
-        r_client.get(channel, function(err, reply) {
-          data = JSON.parse(reply);
-          if (!data.players[message.color].id) {
-            data.players[message.color].id = message.player_id;
-            if (data.players.w.id && data.players.b.id) {
-              data.timestamps.started_at = Date.now();
-            }
-            r_client.set(channel, JSON.stringify(data));
-            publisher.publish(channel, JSON.stringify({
-              type: 'colors',
-              color: message.color,
-              started_at: data.timestamps.started_at
-            }));
-          } else {
-            console.log(message.player_id + ' selected an invalid color: ' + message.color);
           }
         });
         break;

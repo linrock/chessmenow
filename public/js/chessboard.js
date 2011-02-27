@@ -307,11 +307,16 @@ var ApplicationView = Backbone.View.extend({
       if (!_.include(chosen_colors, c)) {
         $("#choose-" + c).show().click(function() {
           player.color = c;
+          /*
           self.model.get('socket').send({
             type: 'colors',
             game_id: game_id,
             player_id: player.id,
             color: c
+          });
+          */
+          $.post('/' + game_id + '/color', { color: c }, function(data) {
+            console.dir(data);
           });
           if (c === 'b') {
             self.generateBoard('b');
