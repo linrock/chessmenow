@@ -30,6 +30,28 @@ var Application = Backbone.Model.extend({
       success: function(data) {
         console.dir(data);
         switch (data.type) {
+          case 'color':
+            if (data.color === 'b') {
+              $(".b-player").css('visibility', 'visible');
+              $("#choose-b").remove();
+              self.view.appendToChat({
+                type: 'announcement',
+                text: 'Black has been picked!'
+              });
+              console.log('black');
+            } else if (data.color === 'w') {
+              $(".w-player").css('visibility', 'visible');
+              $("#choose-w").remove();
+              self.view.appendToChat({
+                type: 'announcement',
+                text: 'White has been picked!'
+              });
+              console.log('white');
+            }
+            if (data.started_at) {
+              self.set({ state: 'started' });
+            }
+            break;
           case 'move':
             console.log('move was made!');
             if (data.move) {
