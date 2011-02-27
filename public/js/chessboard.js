@@ -352,12 +352,12 @@ var ApplicationView = Backbone.View.extend({
       move_html += '<span class="move">' + move.san + '</span>';
       move_html += '</div>';
       if (move_num === 1) {
-        $("#move-list").append(move_html);
+        $("#move-list").append($(move_html).fadeIn('fast'));
       } else {
-        move_list.last().after(move_html);
+        move_list.last().after($(move_html).fadeIn('fast'));
       }
     } else if (move.color === 'b') {
-      move_list.last().append('<span class="move">' + move.san + '</div>');
+      move_list.last().append($('<span class="move">' + move.san + '</div>').fadeIn('fast'));
     }
     this.$("#move-list > .move-row > .move").removeClass('last-move');
     this.$("#move-list > .move-row > .move").last().addClass('last-move');
