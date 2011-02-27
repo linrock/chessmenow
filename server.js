@@ -71,11 +71,12 @@ server.get('/new', function(req, res) {
 server.get('/:game_id', getOrSetId, function(req, res) {
   // console.dir(req.params)
   // req.params.game_id = req.params[0];
-  var time_control = req.params[1];
+  // var time_control = req.params[1];
   var chosen_colors = [];
   var color = null;
+  var channel = 'game:' + req.params.game_id;
   console.log(req.uid + ' has joined the party! (game: ' + req.params.game_id + ')');
-  r_client.get('game:' + req.params.game_id, function(err, reply) {
+  r_client.get(channel, function(err, reply) {
     if (!reply) {
       data = {
         timestamps: {
@@ -102,7 +103,7 @@ server.get('/:game_id', getOrSetId, function(req, res) {
           captured: []
         }
       };
-      r_client.set('game:' + req.params.game_id, JSON.stringify(data), function(err, reply) {
+      r_client.set(channel, JSON.stringify(data), function(err, reply) {
         r_client.send_command('expire', ['game:' + req.params.game_id, 600]); 
       });
     } else {
@@ -139,20 +140,14 @@ server.get('/:game_id', getOrSetId, function(req, res) {
   });
 });
 
+// XXX should use single subscriber per game.
 server.get('/:game_id/xhr-polling', function(req, res) {
   var subscriber = redis.createClient();
   var channel = 'game:' + req.params.game_id;
   subscriber.subscribe(channel);
   subscriber.on('message', function(channel, message) {
-    switch (message.type) {
-      case 'auth': break;
-      case 'move': break;
-      case 'colors': break;
-      case 'end': break;
-      case 'chat': break;
-      case 'announcement': break;
-    }
     res.send(message, { 'Content-Type': 'application/json' });
+    subscriber.quit();
   });
 });
 
@@ -163,8 +158,8 @@ server.post('/:game_id/ping', function(req, res) {
 server.post('/:game_id/color', function(req, res) {
   var channel = 'game:' + req.params.game_id;
   var color = req.body.color;
-  console.log(req.cookies.id);
-  console.dir(req.body);
+  // console.log(req.cookies.id);
+  // console.dir(req.body);
   r_client.get(channel, function(e, reply) {
     data = JSON.parse(reply);
     if ((color === 'w' || color === 'b') && !data.players[color].id) {
@@ -187,7 +182,7 @@ server.post('/:game_id/color', function(req, res) {
 
 server.post('/:game_id/move', function(req, res) {
   var channel = 'game:' + req.params.game_id;
-  console.dir(req.body);
+  // console.dir(req.body);
   r_client.get(channel, function(e, reply) {
     var data = JSON.parse(reply);
     if (!data.timestamps.ended_at) {
@@ -217,8 +212,8 @@ server.post('/:game_id/move', function(req, res) {
 
 server.post('/:game_id/chat', function(req, res) {
   var channel = 'game:' + req.params.game_id;
-  console.log(req.cookies.id);
-  console.log('Chat message received!');
+  // console.log(req.cookies.id);
+  // console.log('Chat message received!');
   r_client.publish(channel, JSON.stringify({
     type: 'chat',
     text: req.body.text
@@ -228,9 +223,9 @@ server.post('/:game_id/chat', function(req, res) {
 
 server.post('/:game_id/announcement', function(req, res) {
   var channel = 'game:' + req.params.game_id;
-  console.log(req.cookies.id);
-  console.log('Announcement received!');
-  console.dir(req.body);
+  // console.log(req.cookies.id);
+  // console.log('Announcement received!');
+  // console.dir(req.body);
   publisher.publish(channel, JSON.stringify({
     type: 'announcement',
     text: ' has offered a draw!',
