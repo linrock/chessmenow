@@ -29,9 +29,9 @@ function getNickname() {
     var adjectives = ['Fuzzy', 'Nerd', 'Crazy', 'Psycho', 'Noob', 'Magical', 'Flying', 'Evil', 'Happy', 'Cool', 'Hax'];
     var nouns = ['Pickles', 'Rage', 'Person', 'Noob', 'Narwhal', 'Bacon', 'Walrus', 'Santa', 'Cat', 'Jabroni', 'Ninja'];
     return adjectives[Math.floor(Math.random()*adjectives.length)] + nouns[Math.floor(Math.random()*nouns.length)];
-}
+};
 
-function getOrSetUserId(req, res, next) {
+function getOrSetUser(req, res, next) {
   if (!req.cookies.id) {
     req.uid = uuid();
     req.nickname = getNickname();
@@ -65,7 +65,7 @@ function generateGameId(callback) {
 };
 
 
-server.get('/', getOrSetUserId, function(req, res) {
+server.get('/', getOrSetUser, function(req, res) {
   console.log(req.uid + ' has joined the party! (home)');
   res.render('index', {
     locals: {
@@ -90,7 +90,7 @@ server.get('/new', function(req, res) {
 });
 
 // server.get(/^\/(?:(\w+))(?:\/(\d+))?/, getOrSetId, function(req, res) {
-server.get('/:game_id', getOrSetUserId, function(req, res) {
+server.get('/:game_id', getOrSetUser, function(req, res) {
   // console.dir(req.params)
   // req.params.game_id = req.params[0];
   // var time_control = req.params[1];
@@ -181,29 +181,23 @@ server.get('/:game_id/xhr-polling', function(req, res) {
   });
 });
 
-server.post('/:game_id/ping', function(req, res) {
+server.post('/:game_id/ping', getOrSetUser, function(req, res) {
   var channel = 'game:' + req.params.game_id;
   var user = 'user:' + req.cookies.id;
   var channel_user = channel + ':' + user;
-  r_client.get(user, function(e, username) {
-    if (!username) {
-      console.log('Invalid user - ' + username);
+  r_client.exists(channel_user, function(e, exists) {
+    if (exists === 0) {
+      r_client.set(channel_user, 1);
+      r_client.publish(channel, JSON.stringify({
+        type: 'announcement',
+        user: req.nickname,
+        text: 'Someone has joined the game!'
+      }));
     } else {
-      r_client.exists(channel_user, function(e, exists) {
-        if (exists === 0) {
-          r_client.set(channel_user, 1);
-          r_client.publish(channel, JSON.stringify({
-            type: 'announcement',
-            user: username,
-            text: 'Someone has joined the game!'
-          }));
-        } else {
-          r_client.expire(channel_user, 10);
-        }
-      });
-      res.send('1', { 'Content-Type': 'application/json' });
+      r_client.expire(channel_user, 10);
     }
   });
+  res.send('1', { 'Content-Type': 'application/json' });
 });
 
 server.post('/:game_id/color', function(req, res) {
@@ -261,11 +255,12 @@ server.post('/:game_id/move', function(req, res) {
   });
 });
 
-server.post('/:game_id/chat', function(req, res) {
+server.post('/:game_id/chat', getOrSetUser, function(req, res) {
   var channel = 'game:' + req.params.game_id;
   var message = req.body.text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
   r_client.publish(channel, JSON.stringify({
     type: 'chat',
+    user: req.nickname,
     text: message
   }));
   res.send('1', { 'Content-Type': 'application/json' });
