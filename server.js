@@ -175,7 +175,7 @@ server.post('/:game_id/color', function(req, res) {
       }
       r_client.set(channel, JSON.stringify(data));
       r_client.publish(channel, JSON.stringify({
-        type: 'colors',
+        type: 'color',
         color: color,
         started_at: data.timestamps.started_at
       }));

@@ -1,6 +1,6 @@
 var Application = Backbone.Model.extend({
   initialize: function() {
-    _.bindAll(this, 'initializeSocket', 'loadFen');
+    _.bindAll(this, 'loadFen');
     var moves = new MoveList();
     this.pingForever();
     this.pollForever();
@@ -10,7 +10,6 @@ var Application = Backbone.Model.extend({
       selected: null,
       captured: game_state.captured,
       player: player_state,
-      socket: this.initializeSocket(),
       state: state
     });
     this.bind('change:board_diff', this.updateBoardState);
@@ -59,10 +58,10 @@ var Application = Backbone.Model.extend({
             }
             break;
           case 'chat':
-            self.view.appendToChat(message);
+            self.view.appendToChat(data);
             break;
           case 'announcement':
-            self.view.appendToChat(message);
+            self.view.appendToChat(data);
             break;
         }
         self.pollForever();
@@ -72,31 +71,6 @@ var Application = Backbone.Model.extend({
         self.pollForever();
       }
     });
-  },
-  initializeSocket: function() {
-    var self = this;
-    var s = new io.Socket(host, { port: 3000 });
-    s.connect();
-    s.on('connect', function() {
-      s.send({ type: 'auth', auth: document.cookie, game_id: game_id });
-    });
-    s.on('message', function(message) {
-      switch (message.type) {
-        case 'chat':
-          self.view.appendToChat(message);
-          break;
-        case 'announcement':
-          self.view.appendToChat(message);
-          break;
-      }
-    });
-    s.on('disconnect', function() {
-      s.connect();
-    });
-    setInterval(function() {
-      s.send('ping');
-    }, 10000);
-    return s;
   },
   loadFen: function(fen) {
     fen = fen || 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
@@ -158,16 +132,6 @@ var Application = Backbone.Model.extend({
       this.view.updateMoveList(move);
       console.log('Making a move! - ' + move.san)
       if (remote) {
-        /*
-        this.get('socket').send({
-          type: 'move',
-          game_id: game_id,
-          data: {
-            fen: client.fen(),
-            move: move,
-          }
-        });
-        */
         var data = { fen: client.fen(), move: move };
         $.post('/' + game_id + '/move', data, function(data) {
           console.dir(data);
@@ -255,15 +219,6 @@ var ApplicationView = Backbone.View.extend({
       if (text > '') {
         console.log('message sent!');
         input.val('');
-
-        /*
-        self.model.get('socket').send({
-          type: 'chat',
-          game_id: game_id,
-          text: text
-        });
-        */
-
         $.post('/' + game_id + '/chat', { text: text }, function(data) {
           console.dir(data);
         });
@@ -330,14 +285,6 @@ var ApplicationView = Backbone.View.extend({
       if (!_.include(chosen_colors, c)) {
         $("#choose-" + c).show().click(function() {
           player.color = c;
-          /*
-          self.model.get('socket').send({
-            type: 'colors',
-            game_id: game_id,
-            player_id: player.id,
-            color: c
-          });
-          */
           $.post('/' + game_id + '/color', { color: c }, function(data) {
             console.dir(data);
           });
