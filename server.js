@@ -234,11 +234,10 @@ server.post('/:game_id/move', function(req, res) {
 
 server.post('/:game_id/chat', function(req, res) {
   var channel = 'game:' + req.params.game_id;
-  // console.log(req.cookies.id);
-  // console.log('Chat message received!');
+  var message = req.body.text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
   r_client.publish(channel, JSON.stringify({
     type: 'chat',
-    text: req.body.text
+    text: message
   }));
   res.send('1', { 'Content-Type': 'application/json' });
 });
