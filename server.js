@@ -52,7 +52,6 @@ function getOrSetUserId(req, res, next) {
       next();
     });
   }
-  console.log('User ID: ' + req.cookies.id);
 };
 
 function generateGameId(callback) {
@@ -167,10 +166,18 @@ server.get('/:game_id', getOrSetUserId, function(req, res) {
 server.get('/:game_id/xhr-polling', function(req, res) {
   var subscriber = redis.createClient();
   var channel = 'game:' + req.params.game_id;
+  var user = 'user:' + req.cookies.id;
   subscriber.subscribe(channel);
   subscriber.on('message', function(channel, message) {
-    res.send(message, { 'Content-Type': 'application/json' });
-    subscriber.quit();
+    r_client.get(user, function(e, reply) {
+      if (!reply) {
+        console.log('Invalid user - ' + reply);
+      } else {
+        // message.user = reply;
+        res.send(message, { 'Content-Type': 'application/json' });
+        subscriber.quit();
+      }
+    });
   });
 });
 
@@ -178,18 +185,25 @@ server.post('/:game_id/ping', function(req, res) {
   var channel = 'game:' + req.params.game_id;
   var user = 'user:' + req.cookies.id;
   var channel_user = channel + ':' + user;
-  r_client.exists(channel_user, function(e, reply) {
-    if (reply === 0) {
-      r_client.set(channel_user, 1);
-      r_client.publish(channel, JSON.stringify({
-        type: 'announcement',
-        text: 'Someone has joined the game!'
-      }));
+  r_client.get(user, function(e, username) {
+    if (!username) {
+      console.log('Invalid user - ' + username);
     } else {
-      r_client.expire(channel_user, 10);
+      r_client.exists(channel_user, function(e, exists) {
+        if (exists === 0) {
+          r_client.set(channel_user, 1);
+          r_client.publish(channel, JSON.stringify({
+            type: 'announcement',
+            user: username,
+            text: 'Someone has joined the game!'
+          }));
+        } else {
+          r_client.expire(channel_user, 10);
+        }
+      });
+      res.send('1', { 'Content-Type': 'application/json' });
     }
   });
-  res.send('1', { 'Content-Type': 'application/json' });
 });
 
 server.post('/:game_id/color', function(req, res) {
