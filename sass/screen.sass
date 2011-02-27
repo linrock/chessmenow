@@ -131,18 +131,21 @@
             overflow-y: scroll
             .move-row
               +float-left
-              padding: 1px
               margin-left: 5px
               span
                 +float-left
                 &.move
-                  width: 50px
+                  border: 1px solid white
+                  padding-left: 10px
+                  width: 40px
                 &.move-num
+                  border: 1px solid white
                   font-weight: bold
                   text-align: right
-                  margin-right: 20px
-                  width: 20px
+                  margin-right: 10px
+                  width: 15px
                 &.last-move
+                  border: 1px solid orange !important
                   background-color: yellow
         #container-misc
           +column(5, true)
