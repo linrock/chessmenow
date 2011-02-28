@@ -56,6 +56,9 @@ var Application = Backbone.Model.extend({
           case 'announcement':
           case 'game':
             self.view.appendToChat(data);
+            if (data.state === 'ended') {
+              self.set({ state: 'ended' });
+            }
             break;
         }
         self.pollForever();
