@@ -64,6 +64,12 @@ function generateGameId(callback) {
   callback(game_id);
 };
 
+function publishMessage(game_id, message) {
+  var channel = 'game:' + game_id;
+  var message = JSON.stringify(message);
+  r_client.rpush(channel + ':messages', message);
+  r_client.publish(channel, message);
+};
 
 server.get('/', getOrSetUser, function(req, res) {
   console.log(req.uid + ' has joined the party! (home)');
@@ -187,11 +193,11 @@ server.post('/:game_id/ping', getOrSetUser, function(req, res) {
   r_client.exists(channel_user, function(e, exists) {
     if (exists === 0) {
       r_client.set(channel_user, 1);
-      r_client.publish(channel, JSON.stringify({
+      publishMessage(req.params.game_id, {
         type: 'announcement',
         user: req.nickname,
         text: req.nickname + ' has joined the game!'
-      }));
+      });
     } else {
       r_client.expire(channel_user, 10);
     }
@@ -210,12 +216,12 @@ server.post('/:game_id/color', getOrSetUser, function(req, res) {
         data.timestamps.started_at = Date.now();
       }
       r_client.set(channel, JSON.stringify(data));
-      r_client.publish(channel, JSON.stringify({
+      publishMessage(req.params.game_id, {
         type: 'color',
         color: color,
         user: req.nickname,
         started_at: data.timestamps.started_at
-      }));
+      });
       res.send('1', { 'Content-Type': 'application/json' });
     } else {
       res.send('0', { 'Content-Type': 'application/json' });
@@ -246,7 +252,7 @@ server.post('/:game_id/move', function(req, res) {
       data.game.last_move = { from: req.body.move.from, to: req.body.move.to };
       r_client.set(channel, JSON.stringify(data));
       req.body.type = 'move';
-      r_client.publish(channel, JSON.stringify(req.body));
+      publishMessage(req.params.game_id, req.body);
       res.send('1', { 'Content-Type': 'application/json' });
     }
   });
@@ -255,22 +261,22 @@ server.post('/:game_id/move', function(req, res) {
 server.post('/:game_id/chat', getOrSetUser, function(req, res) {
   var channel = 'game:' + req.params.game_id;
   var message = req.body.text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  r_client.publish(channel, JSON.stringify({
+  publishMessage(req.params.game_id, {
     type: 'chat',
     user: req.nickname,
     text: message
-  }));
+  });
   res.send('1', { 'Content-Type': 'application/json' });
 });
 
 server.post('/:game_id/announcement', function(req, res) {
   var channel = 'game:' + req.params.game_id;
-  r_client.publish(channel, JSON.stringify({
+  publishMessage(req.params.game_id, {
     type: 'announcement',
     text: ' has offered a draw!',
     text: ' has resigned!',
     text: ' has joined the game!'
-  }));
+  });
   res.send('1', { 'Content-Type': 'application/json' });
 });
 
@@ -281,12 +287,12 @@ server.post('/:game_id/resign', getOrSetUser, function(req, res) {
     data = JSON.parse(reply);
     if ((color === 'w' || color === 'b') && !data.timestamps.ended_at && data.players[color].id === req.uid) {
       var winner = (color === 'w') ? 'Black' : 'White';
-      r_client.publish(channel, JSON.stringify({
+      publishMessage(req.params.game_id, {
         type: 'game',
         state: 'ended',
         user: req.nickname,
         text: winner + ' wins - ' + req.nickname + ' has resigned!'
-      }));
+      });
       res.send('1', { 'Content-Type': 'application/json' });
     } else {
       res.send('0', { 'Content-Type': 'application/json' });
