@@ -41,13 +41,13 @@ function getOrSetUser(req, res, next) {
     next();
   } else {
     req.uid = req.cookies.id;
-    r_client.get('user:' + req.uid, function(e, reply) {
-      if (!reply) {
+    r_client.get('user:' + req.uid, function(e, nickname) {
+      if (!nickname) {
         req.nickname = getNickname();
         r_client.set('user:' + req.uid, req.nickname);
         r_client.expire('user:' + req.uid, 86400);
       } else {
-        req.nickname = reply;
+        req.nickname = nickname;
       }
       next();
     });
