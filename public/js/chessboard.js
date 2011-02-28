@@ -8,7 +8,8 @@ var Application = Backbone.Model.extend({
       selected: null,
       captured: game_state.captured,
       player: player_state,
-      state: state
+      state: state,
+      error_count: 0
     });
     this.bind('change:board_diff', this.updateBoardState);
   },
@@ -61,10 +62,12 @@ var Application = Backbone.Model.extend({
         self.pollForever();
       },
       error: function(xhr) {
-        if (xhr.status === 502) {
+        var error_count = parseInt(self.get('error_count'));
+        self.set({ error_count: error_count+1 });
+        if (xhr.status === 502 || error_count > 10) {
           self.view.appendToChat({
             type: 'error',
-            text: 'An error has occured. Please refresh the page.'
+            text: 'An error has occured. Please refresh the page to continue.'
           });
         } else {
           self.pollForever();
