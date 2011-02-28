@@ -64,7 +64,7 @@ var Application = Backbone.Model.extend({
       error: function(xhr) {
         var error_count = parseInt(self.get('error_count'));
         self.set({ error_count: error_count+1 });
-        if (xhr.status === 502 || error_count > 10) {
+        if (xhr.status === 502 || error_count > 100) {
           self.view.appendToChat({
             type: 'error',
             text: 'An error has occured. Please refresh the page to continue.'
