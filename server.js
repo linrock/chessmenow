@@ -156,7 +156,7 @@ server.get('/:game_id', getOrSetUser, function(req, res) {
         moves:          data.game.moves,
         chosen_colors:  chosen_colors,
         game_state:     data.game,
-        player_state:   { id: req.uid, color: color },
+        player_state:   { id: req.uid, nickname: req.nickname, color: color },
       }
     });
   });
@@ -272,6 +272,19 @@ server.post('/:game_id/announcement', function(req, res) {
     text: ' has joined the game!'
   }));
   res.send('1', { 'Content-Type': 'application/json' });
+});
+
+server.post('/:game_id/resign', getOrSetUser, function(req, res) {
+  var color = req.body.color;
+  var channel = 'game:' + req.params.game_id;
+  r_client.get(channel, function(e, reply) {
+    data = JSON.parse(reply);
+    if ((color === 'w' || color === 'b') && !data.timestamps.ended_at && data.players[color].id === req.uid) {
+      res.send('1', { 'Content-Type': 'application/json' });
+    } else {
+      res.send('0', { 'Content-Type': 'application/json' });
+    };
+  });
 });
 
 server.post('/:game_id/end', function(req, res) {

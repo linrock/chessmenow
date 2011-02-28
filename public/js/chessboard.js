@@ -1,12 +1,10 @@
 var Application = Backbone.Model.extend({
   initialize: function() {
     _.bindAll(this, 'loadFen');
-    var moves = new MoveList();
     this.pingForever();
     this.pollForever();
     this.set({
       client: new Chess(),
-      moves: moves,
       selected: null,
       captured: game_state.captured,
       player: player_state,
@@ -242,13 +240,15 @@ var ApplicationView = Backbone.View.extend({
           model.selectTile(position);
         });
         this.$("#resign").live('click', function() {
-          $.post('/' + game_id + '/announcement', { text: 'resign' });
+          $.post('/' + game_id + '/resign', { color: player_state.color }, function(response) {
+            console.log(response);
+          });
         });
         this.$("#draw").live('click', function() {
-          $.post('/' + game_id + '/announcement', { text: 'draw' });
+          $.post('/' + game_id + '/draw', { text: 'draw' });
         });
         this.$("#rematch").live('click', function() {
-          $.post('/' + game_id + '/announcement', { text: 'rematch' });
+          $.post('/' + game_id + '/rematch', { text: 'rematch' });
         });
         break;
 

@@ -57,29 +57,6 @@
         span.time-left
           +float-right
           display: none
-      button#resign
-        +fancy-button($button-color1)
-        // display: none
-        border: 2px solid black
-        font-size: 1em
-        width: 100px
-        height: 25px
-        bottom: 25px
-      button#draw
-        +fancy-button($button-color1)
-        // display: none
-        border: 2px solid black
-        font-size: 1em
-        width: 100px
-        height: 25px
-        bottom: 0px
-      button#rematch
-        +fancy-button($button-color1)
-        display: none
-        border: 2px solid black
-        width: 160px
-        bottom: 0px
-        font-size: 2em
       #container-chessboard
         +column(10)
         position: relative
@@ -161,10 +138,30 @@
           #container-buttons
             +column(5, true)
             border: 1px solid green
-            display: none
             position: absolute
             left: 0px
             bottom: 0px
+            button#resign
+              +fancy-button($button-color1)
+              border: 2px solid black
+              font-size: 1em
+              width: 100px
+              height: 25px
+              bottom: 25px
+            button#draw
+              +fancy-button($button-color1)
+              border: 2px solid black
+              font-size: 1em
+              width: 100px
+              height: 25px
+              bottom: 0px
+            button#rematch
+              +fancy-button($button-color1)
+              display: none
+              border: 2px solid black
+              width: 160px
+              bottom: 0px
+              font-size: 2em
       .current-turn
         color: orange
         font-weight: bold
