@@ -297,6 +297,13 @@ server.post('/:game_id/resign', getOrSetUser, function(req, res) {
         user: req.nickname,
         text: score + ' ' + req.nickname + ' resigns!'
       });
+      r_client.get(channel, function(e, reply) {
+        var data = JSON.parse(reply);
+        if (!data.timestamps.ended_at) {
+          data.timestamps.ended_at = Date.now();
+        }
+        r_client.set(channel, JSON.stringify(data));
+      });
       res.send('1', { 'Content-Type': 'application/json' });
     } else {
       res.send('0', { 'Content-Type': 'application/json' });
