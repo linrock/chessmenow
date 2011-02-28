@@ -265,7 +265,7 @@ server.post('/:game_id/chat', getOrSetUser, function(req, res) {
 
 server.post('/:game_id/announcement', function(req, res) {
   var channel = 'game:' + req.params.game_id;
-  publisher.publish(channel, JSON.stringify({
+  r_client.publish(channel, JSON.stringify({
     type: 'announcement',
     text: ' has offered a draw!',
     text: ' has resigned!',
@@ -280,6 +280,12 @@ server.post('/:game_id/resign', getOrSetUser, function(req, res) {
   r_client.get(channel, function(e, reply) {
     data = JSON.parse(reply);
     if ((color === 'w' || color === 'b') && !data.timestamps.ended_at && data.players[color].id === req.uid) {
+      var winner = (color === 'w') ? 'Black' : 'White';
+      r_client.publish(channel, JSON.stringify({
+        type: 'announcement',
+        user: req.nickname,
+        text: winner + ' wins - ' + req.nickname + ' has resigned!'
+      }));
       res.send('1', { 'Content-Type': 'application/json' });
     } else {
       res.send('0', { 'Content-Type': 'application/json' });

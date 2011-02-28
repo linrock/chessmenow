@@ -248,10 +248,14 @@ var ApplicationView = Backbone.View.extend({
           });
         });
         this.$("#draw").live('click', function() {
-          $.post('/' + game_id + '/draw', { text: 'draw' });
+          $.post('/' + game_id + '/draw', { color: player_state.color }, function(response) {
+            console.log(response);
+          });
         });
         this.$("#rematch").live('click', function() {
-          $.post('/' + game_id + '/rematch', { text: 'rematch' });
+          $.post('/' + game_id + '/rematch', { color: player_state.color }, function(response) {
+            console.log(response);
+          });
         });
         break;
 
