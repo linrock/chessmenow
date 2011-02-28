@@ -66,9 +66,13 @@ function generateGameId(callback) {
 
 function publishMessage(game_id, message) {
   var channel = 'game:' + game_id;
-  var message = JSON.stringify(message);
-  r_client.rpush(channel + ':messages', message);
-  r_client.publish(channel, message);
+  var m = JSON.stringify(message);
+  if (message.type === 'move') {
+    r_client.rpush(channel + ':moves', m);
+  } else {
+    r_client.rpush(channel + ':messages', m);
+  }
+  r_client.publish(channel, m);
 };
 
 server.get('/', getOrSetUser, function(req, res) {
