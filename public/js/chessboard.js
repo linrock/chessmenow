@@ -53,9 +53,8 @@ var Application = Backbone.Model.extend({
             }
             break;
           case 'chat':
-            self.view.appendToChat(data);
-            break;
           case 'announcement':
+          case 'game':
             self.view.appendToChat(data);
             break;
         }
@@ -387,24 +386,24 @@ var ApplicationView = Backbone.View.extend({
     }
   },
   appendToChat: function(message) {
-    var chat_html = '';
+    var chat_html = '<div class="chat-row">';
     var chat_window = this.$("#chat-window");
-    chat_html += '<div class="chat-row">';
     switch (message.type) {
       case 'chat':
         chat_html += '<span class="chat-name">' + message.user +  ': </span>';
         chat_html += '<span class="chat-text">' + message.text + '</span>';
-        chat_html += '</div>';
         break;
       case 'announcement':
         chat_html += '<span class="chat-announcement">' + message.text + '</span>';
-        chat_html += '</div>';
+        break;
+      case 'game':
+        chat_html += '<span class="chat-game">' + message.text + '</span>';
         break;
       case 'error':
         chat_html += '<span class="chat-error">' + message.text + '</span>';
-        chat_html += '</div>';
         break;
     }
+    chat_html += '</div>';
     chat_window.append($(chat_html).fadeIn('fast'));
     chat_window.scrollTop(chat_window.attr('scrollHeight'));
   }

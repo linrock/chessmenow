@@ -282,7 +282,7 @@ server.post('/:game_id/resign', getOrSetUser, function(req, res) {
     if ((color === 'w' || color === 'b') && !data.timestamps.ended_at && data.players[color].id === req.uid) {
       var winner = (color === 'w') ? 'Black' : 'White';
       r_client.publish(channel, JSON.stringify({
-        type: 'announcement',
+        type: 'game',
         user: req.nickname,
         text: winner + ' wins - ' + req.nickname + ' has resigned!'
       }));
