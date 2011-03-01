@@ -27,6 +27,17 @@
     .clear
     #container-chat
       #chat-window
+        - each message in messages
+          .chat-row
+            - if (message.type === 'chat')
+              span.chat-name #{message.user}: 
+              span.chat-text= message.text
+            - else if (message.type === 'announcement')
+              span.chat-announcement= message.text
+            - else if (message.type === 'game')
+              span.chat-game= message.text
+            - else if (message.type === 'error')
+              span.chat-error= message.text
       form#chat
         input(type="text")#chat-input
   .clear
@@ -44,6 +55,7 @@ script(type="text/javascript", src="/media/js/chessboard.js")
   | var game_id = "#{game_id}";
   | var state = "#{state}";
   | var chosen_colors = !{JSON.stringify(chosen_colors)};
+  | var messages = !{JSON.stringify(messages)};
   | var game_state = !{JSON.stringify(game_state)};
   | var player_state = !{JSON.stringify(player_state)};
 

@@ -1,6 +1,7 @@
 const express = require('express'),
       redis = require('redis'),
-      uuid = require('node-uuid');
+      uuid = require('node-uuid'),
+      _ = require('underscore');
 
 var server = express.createServer();
 var r_client = redis.createClient();
@@ -157,17 +158,22 @@ server.get('/:game_id', getOrSetUser, function(req, res) {
         return 'started';
       }
     })();
-    res.render('game', {
-      locals: {
-        host:           host,
-        env:            env,
-        state:          state,
-        game_id:        req.params.game_id,
-        moves:          data.game.moves,
-        chosen_colors:  chosen_colors,
-        game_state:     data.game,
-        player_state:   { id: req.uid, nickname: req.nickname, color: color },
-      }
+    r_client.llen(channel + ':messages', function(e, length) {
+      r_client.lrange(channel + ':messages', 0, length, function(e, messages) {
+        var messages = _.map(messages, JSON.parse);
+        res.render('game', {
+          locals: {
+            host:           host,
+            env:            env,
+            state:          state,
+            game_id:        req.params.game_id,
+            moves:          data.game.moves,
+            chosen_colors:  chosen_colors,
+            game_state:     data.game,
+            player_state:   { id: req.uid, nickname: req.nickname, color: color },
+          }
+        });
+      });
     });
   });
 });
