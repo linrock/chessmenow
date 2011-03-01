@@ -67,6 +67,7 @@ function generateGameId(callback) {
 
 function publishMessage(game_id, message) {
   var channel = 'game:' + game_id;
+  message.timestamp = Date.now();
   var m = JSON.stringify(message);
   if (message.type === 'move') {
     r_client.rpush(channel + ':moves', m);
@@ -168,6 +169,7 @@ server.get('/:game_id', getOrSetUser, function(req, res) {
             state:          state,
             game_id:        req.params.game_id,
             moves:          data.game.moves,
+            messages:       messages,
             chosen_colors:  chosen_colors,
             game_state:     data.game,
             player_state:   { id: req.uid, nickname: req.nickname, color: color },
