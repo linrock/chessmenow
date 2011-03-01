@@ -229,10 +229,12 @@ server.post('/:game_id/color', getOrSetUser, function(req, res) {
         data.timestamps.started_at = Date.now();
       }
       r_client.set(channel, JSON.stringify(data));
+      var color_name = (color === 'w') ? 'White' : 'Black';
       publishMessage(req.params.game_id, {
         type: 'color',
         color: color,
         user: req.nickname,
+        text: req.nickname + ' has selected ' + color_name + '!',
         started_at: data.timestamps.started_at
       });
       res.send('1', { 'Content-Type': 'application/json' });

@@ -31,18 +31,14 @@ var Application = Backbone.Model.extend({
             if (data.color === 'b') {
               $(".b-player").css('visibility', 'visible');
               $("#choose-b").remove();
-              self.view.appendToChat({
-                type: 'announcement',
-                text: data.user + ' has picked black!'
-              });
             } else if (data.color === 'w') {
               $(".w-player").css('visibility', 'visible');
               $("#choose-w").remove();
-              self.view.appendToChat({
-                type: 'announcement',
-                text: data.user + ' has picked white!'
-              });
             }
+            self.view.appendToChat({
+              type: 'announcement',
+              text: data.text
+            });
             if (data.started_at) {
               self.set({ state: 'started' });
             }

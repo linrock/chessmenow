@@ -32,6 +32,8 @@
             - if (message.type === 'chat')
               span.chat-name #{message.user}: 
               span.chat-text= message.text
+            - else if (message.type === 'color')
+              span.chat-announcement= message.text
             - else if (message.type === 'announcement')
               span.chat-announcement= message.text
             - else if (message.type === 'game')
