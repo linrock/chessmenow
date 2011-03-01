@@ -1,4 +1,5 @@
 const express = require('express'),
+      utils = require('express/lib/express/utils'),
       redis = require('redis'),
       uuid = require('node-uuid'),
       _ = require('underscore');
@@ -272,7 +273,7 @@ server.post('/:game_id/move', function(req, res) {
 
 server.post('/:game_id/chat', getOrSetUser, function(req, res) {
   var channel = 'game:' + req.params.game_id;
-  var message = req.body.text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  var message = utils.htmlEscape(req.body.text);
   publishMessage(req.params.game_id, {
     type: 'chat',
     user: req.nickname,
