@@ -10,12 +10,12 @@
   #container-info
     #container-move-list
       #move-list
-        - for (var move in game_state.moves)
+        - each move,i in game_state.moves
           .move-row
-            span.move-num #{parseInt(move)+1}.
-            span.move= game_state.moves[move][0]
-            - if (game_state.moves[move][1])
-              span.move= game_state.moves[move][1]
+            span.move-num #{parseInt(i)+1}.
+            span.move= move[0]
+            - if (move[1])
+              span.move= move[1]
     #container-misc
       #container-captured
         #captured-white-pieces
