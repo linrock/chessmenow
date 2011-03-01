@@ -3,12 +3,14 @@ var Application = Backbone.Model.extend({
     _.bindAll(this, 'loadFen');
     this.pingForever();
     this.pollForever();
+    this.errorHandlerHack();
     this.set({
       client: new Chess(),
       selected: null,
       captured: game_state.captured,
       player: player_state,
       state: state,
+      request_count: 0,
       error_count: 0
     });
     this.bind('change:board_diff', this.updateBoardState);
@@ -23,6 +25,8 @@ var Application = Backbone.Model.extend({
   },
   pollForever: function() {
     var self = this;
+    var request_count = parseInt(self.get('request_count'));
+    self.set({ request_count: request_count+1 });
     $.ajax({
       url: '/' + game_id + '/xhr-polling',
       success: function(data) {
@@ -54,10 +58,21 @@ var Application = Backbone.Model.extend({
             self.view.appendToChat(data);
             if (data.state === 'ended') {
               self.set({ state: 'ended' });
+              console.dir(data);
+              $("#rematch").fadeIn('slow').click(function() {
+                window.location = '/' + data.new_game_id;
+              });
             }
             break;
         }
-        self.pollForever();
+        if (request_count > 50) {
+          self.view.appendToChat({
+            type: 'error',
+            text: 'An error has occured. Please refresh the page to continue.'
+          });
+        } else {
+          self.pollForever();
+        }
       },
       error: function(xhr) {
         var error_count = parseInt(self.get('error_count'));
@@ -72,6 +87,12 @@ var Application = Backbone.Model.extend({
         }
       }
     });
+  },
+  errorHandlerHack: function() {
+    // XXX for firefox/view source bullshit
+    setInterval(function() {
+      this.set({ request_count: 0 })
+    }, 5000);
   },
   loadFen: function(fen) {
     fen = fen || 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
@@ -233,6 +254,7 @@ var ApplicationView = Backbone.View.extend({
         var model = this.model;
         this.updateViewState();
         this.updateCaptured();
+        this.$("#resign").show();
         this.$(".w-player").css('visibility', 'visible');
         this.$(".b-player").css('visibility', 'visible');
         this.$("#move-list").css('visibility', 'visible');

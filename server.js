@@ -302,20 +302,23 @@ server.post('/:game_id/resign', getOrSetUser, function(req, res) {
     data = JSON.parse(reply);
     if ((color === 'w' || color === 'b') && !data.timestamps.ended_at && data.players[color].id === req.uid) {
       var score = (color === 'w') ? '(1-0)' : '(0-1)';
-      publishMessage(req.params.game_id, {
-        type: 'game',
-        state: 'ended',
-        user: req.nickname,
-        text: score + ' ' + req.nickname + ' resigns!'
+      generateGameId(function(new_game_id) {
+        publishMessage(req.params.game_id, {
+          type: 'game',
+          state: 'ended',
+          new_game_id: new_game_id,
+          user: req.nickname,
+          text: score + ' ' + req.nickname + ' resigns!'
+        });
+        r_client.get(channel, function(e, reply) {
+          var data = JSON.parse(reply);
+          if (!data.timestamps.ended_at) {
+            data.timestamps.ended_at = Date.now();
+          }
+          r_client.set(channel, JSON.stringify(data));
+        });
+        res.send('1', { 'Content-Type': 'application/json' });
       });
-      r_client.get(channel, function(e, reply) {
-        var data = JSON.parse(reply);
-        if (!data.timestamps.ended_at) {
-          data.timestamps.ended_at = Date.now();
-        }
-        r_client.set(channel, JSON.stringify(data));
-      });
-      res.send('1', { 'Content-Type': 'application/json' });
     } else {
       res.send('0', { 'Content-Type': 'application/json' });
     };
