@@ -299,8 +299,12 @@ server.post('/:game_id/resign', getOrSetUser, function(req, res) {
   var color = req.body.color;
   var channel = 'game:' + req.params.game_id;
   r_client.get(channel, function(e, reply) {
-    data = JSON.parse(reply);
+    var data = JSON.parse(reply);
     if ((color === 'w' || color === 'b') && !data.timestamps.ended_at && data.players[color].id === req.uid) {
+      if (!data.timestamps.ended_at) {
+        data.timestamps.ended_at = Date.now();
+        r_client.set(channel, JSON.stringify(data));
+      }
       var score = (color === 'w') ? '(1-0)' : '(0-1)';
       generateGameId(function(new_game_id) {
         publishMessage(req.params.game_id, {
@@ -310,28 +314,32 @@ server.post('/:game_id/resign', getOrSetUser, function(req, res) {
           user: req.nickname,
           text: score + ' ' + req.nickname + ' resigns!'
         });
-        r_client.get(channel, function(e, reply) {
-          var data = JSON.parse(reply);
-          if (!data.timestamps.ended_at) {
-            data.timestamps.ended_at = Date.now();
-          }
-          r_client.set(channel, JSON.stringify(data));
-        });
-        res.send('1', { 'Content-Type': 'application/json' });
       });
+      res.send('1', { 'Content-Type': 'application/json' });
     } else {
       res.send('0', { 'Content-Type': 'application/json' });
     };
   });
 });
 
-server.post('/:game_id/end', function(req, res) {
+server.post('/:game_id/game_over', function(req, res) {
   var channel = 'game:' + req.params.game_id;
   r_client.get(channel, function(err, reply) {
-    data = JSON.parse(reply);
+    var data = JSON.parse(reply);
+    // XXX Game ending should really be determined server-side
     if (!data.timestamps.ended_at) {
       data.timestamps.ended_at = Date.now();
       r_client.set(channel, JSON.stringify(data));
+      generateGameId(function(new_game_id) {
+        publishMessage(req.params.game_id, {
+          type: 'game',
+          state: 'ended',
+          new_game_id: new_game_id,
+          user: req.nickname,
+          text: req.body.message
+        });
+        res.send('1', { 'Content-Type': 'application/json' });
+      });
     }
   });
 });

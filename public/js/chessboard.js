@@ -90,8 +90,9 @@ var Application = Backbone.Model.extend({
   },
   errorHandlerHack: function() {
     // XXX for firefox/view source bullshit
+    var self = this;
     setInterval(function() {
-      this.set({ request_count: 0 })
+      self.set({ request_count: 0 })
     }, 5000);
   },
   loadFen: function(fen) {
@@ -158,7 +159,24 @@ var Application = Backbone.Model.extend({
           if (response == 0) {}
         });
         if (client.game_over()) {
-          $.post('/' + game_id + '/end', function(response) { });
+          var turn = client.turn();
+          var message = (function() {
+            if (client.in_checkmate()) {
+              if (turn === 'w') {
+                return "Checkmate - Black wins!";
+              } else if (turn === 'b') {
+                return "Checkmate - White wins!";
+              }
+            } else if (client.in_threefold_repetition()) {
+              return "Draw - 3x Repetition!";
+            } else if (client.in_stalemate()) {
+              return "Draw - Stalemate!";
+            } else if (client.in_draw()) {
+              return 'Draw!';
+            }
+          })();
+          $.post('/' + game_id + '/game_over', { message: message }, function(response) {
+          });
         }
       }
       return move;
