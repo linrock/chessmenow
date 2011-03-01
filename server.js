@@ -68,14 +68,17 @@ function generateGameId(callback) {
 
 function publishMessage(game_id, message) {
   var channel = 'game:' + game_id;
-  message.timestamp = Date.now();
-  var m = JSON.stringify(message);
-  if (message.type === 'move') {
-    r_client.rpush(channel + ':moves', m);
-  } else {
-    r_client.rpush(channel + ':messages', m);
-  }
-  r_client.publish(channel, m);
+  r_client.llen(channel + ':messages', function(e, length) {
+    message.timestamp = Date.now();
+    message.mid = length;
+    var m = JSON.stringify(message);
+    if (message.type === 'move') {
+      r_client.rpush(channel + ':moves', m);
+    } else {
+      r_client.rpush(channel + ':messages', m);
+    }
+    r_client.publish(channel, m);
+  });
 };
 
 server.get('/', getOrSetUser, function(req, res) {
@@ -169,6 +172,7 @@ server.get('/:game_id', getOrSetUser, function(req, res) {
             env:            env,
             state:          state,
             game_id:        req.params.game_id,
+            last_mid:       length,
             moves:          data.game.moves,
             messages:       messages,
             chosen_colors:  chosen_colors,

@@ -11,7 +11,8 @@ var Application = Backbone.Model.extend({
       player: player_state,
       state: state,
       request_count: 0,
-      error_count: 0
+      error_count: 0,
+      last_mid: last_mid
     });
     this.bind('change:board_diff', this.updateBoardState);
   },
