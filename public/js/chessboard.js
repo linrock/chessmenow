@@ -194,12 +194,14 @@ var Application = Backbone.Model.extend({
       } else if (turn === 'b') {
         state = "Checkmate - White wins!";
       }
-    } else if (client.in_stalemate()) {
-      state = "Stalemate!";
-    } else if (client.in_draw() || client.in_threefold_repetition()) {
-      state = "Draw!";
-    } else if (client.in_check()) {
-      state = "Check!";
+    } else if (client.in_draw()) {
+      if (client.in_stalemate()) {
+        state = "Draw - Stalemate!";
+      } else if (client.in_threefold_repetition()) {
+        state = "Draw - 3x Repetition!";
+      } else {
+        state = "Draw!";
+      }
     }
     this.set({ board_state: state });
   }
