@@ -17,7 +17,6 @@ var Application = Backbone.Model.extend({
       error_count: 0,
       last_mid: last_mid
     });
-    this.bind('change:board_diff', this.updateBoardState);
   },
   pingForever: function() {
     $(function() {
@@ -35,11 +34,8 @@ var Application = Backbone.Model.extend({
       url: '/' + game_id + '/xhr-polling',
       success: function(data) {
         var mid = self.get('last_mid');
-        console.log('last_mid: ' + mid);
         self.set({ last_mid: data.mid+1 });
         if (data.mid !== mid) {
-          console.log('missed a message!');
-          console.log('last_mid: ' + mid + ', data.mid: ' + data.mid);
           $.ajax({
             url: '/' + game_id + '/messages',
             data: { id_min: mid, id_max: data.mid-1 },
@@ -48,7 +44,6 @@ var Application = Backbone.Model.extend({
               for (i in data) {
                 self.processMessage(data[i]);
               }
-              console.dir(data);
             },
           });
         }
@@ -84,6 +79,7 @@ var Application = Backbone.Model.extend({
         if (data.move) {
           self.move(data.move, false);
         }
+        self.pollForMoves();
       },
       error: function(xhr) {
         var error_count = parseInt(self.get('error_count'));
@@ -164,6 +160,7 @@ var Application = Backbone.Model.extend({
     var client = this.get('client');
     var board = this.get('board');
     var move = client.move(move);
+    var self = this;
     if (move) {
       if (move.captured) {
         var captured = this.get('captured');
@@ -220,27 +217,6 @@ var Application = Backbone.Model.extend({
     } else {
       return false;
     }
-  },
-  updateBoardState: function() {
-    var client = this.get('client');
-    var turn = client.turn();
-    var state = '';
-    if (client.in_checkmate()) {
-      if (turn === 'w') {
-        state = "Checkmate - Black wins!";
-      } else if (turn === 'b') {
-        state = "Checkmate - White wins!";
-      }
-    } else if (client.in_draw()) {
-      if (client.in_stalemate()) {
-        state = "Draw - Stalemate!";
-      } else if (client.in_threefold_repetition()) {
-        state = "Draw - 3x Repetition!";
-      } else {
-        state = "Draw!";
-      }
-    }
-    this.set({ board_state: state });
   }
 });
 
@@ -321,17 +297,10 @@ var ApplicationView = Backbone.View.extend({
         });
         this.$("#resign").live('click', function() {
           $.post('/' + game_id + '/resign', { color: player_state.color }, function(response) {
-            console.log(response);
           });
         });
         this.$("#draw").live('click', function() {
           $.post('/' + game_id + '/draw', { color: player_state.color }, function(response) {
-            console.log(response);
-          });
-        });
-        this.$("#rematch").live('click', function() {
-          $.post('/' + game_id + '/rematch', { color: player_state.color }, function(response) {
-            console.log(response);
           });
         });
         break;
