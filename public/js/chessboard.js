@@ -2,7 +2,7 @@ var Application = Backbone.Model.extend({
   initialize: function() {
     _.bindAll(this, 'loadFen');
     this.pingForever();
-    this.pollForever();
+    this.pollForMessages();
     if (state !== 'ended') {
       this.pollForMoves();
     }
@@ -26,7 +26,7 @@ var Application = Backbone.Model.extend({
       }, 5000);
     });
   },
-  pollForever: function() {
+  pollForMessages: function() {
     var self = this;
     var request_count = parseInt(self.get('request_count'));
     self.set({ request_count: request_count+1 });
@@ -54,7 +54,7 @@ var Application = Backbone.Model.extend({
             text: 'An error has occured. Please refresh the page to continue.'
           });
         } else {
-          self.pollForever();
+          self.pollForMessages();
         }
       },
       error: function(xhr) {
@@ -66,7 +66,7 @@ var Application = Backbone.Model.extend({
             text: 'An error has occured. Please refresh the page to continue.'
           });
         } else {
-          self.pollForever();
+          self.pollForMessages();
         }
       }
     });

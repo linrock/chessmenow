@@ -191,7 +191,6 @@ server.get('/:game_id/xhr-polling', function(req, res) {
   var subscriber = redis.createClient();
   var channel = 'game:' + req.params.game_id;
   var user = 'user:' + req.cookies.id;
-  console.dir(req.query);
   subscriber.subscribe(channel);
   subscriber.on('message', function(channel, message) {
     r_client.get(user, function(e, reply) {
