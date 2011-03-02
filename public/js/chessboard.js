@@ -376,14 +376,21 @@ var ApplicationView = Backbone.View.extend({
   updateViewState: function() {
     this.$("#info").text(this.model.get('board_state'));
     var client = this.model.get('client');
-    if (this.model.get('state') === 'started') {
+    var state = this.model.get('state');
+    if (state === 'new') {
+      document.title = "New Game | Chess Me Now";
+    } else if (state === 'started') {
       if (client.turn() === 'w') {
         this.$(".w-player").addClass('current-turn');
         this.$(".b-player").removeClass('current-turn');
+        document.title = "White's Turn | Chess Me Now";
       } else {
         this.$(".b-player").addClass('current-turn');
         this.$(".w-player").removeClass('current-turn');
+        document.title = "Black's Turn | Chess Me Now";
       }
+    } else if (state === 'ended') {
+      document.title = "Game Over | Chess Me Now";
     }
   },
   updateCaptured: function() {
