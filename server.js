@@ -72,11 +72,7 @@ function publishMessage(game_id, message) {
     message.timestamp = Date.now();
     message.mid = length;
     var m = JSON.stringify(message);
-    if (message.type === 'move') {
-      r_client.rpush(channel + ':moves', m);
-    } else {
-      r_client.rpush(channel + ':messages', m);
-    }
+    r_client.rpush(channel + ':messages', m);
     r_client.publish(channel, m);
   });
 };
@@ -190,6 +186,7 @@ server.get('/:game_id/xhr-polling', function(req, res) {
   var subscriber = redis.createClient();
   var channel = 'game:' + req.params.game_id;
   var user = 'user:' + req.cookies.id;
+  console.dir(req.query);
   subscriber.subscribe(channel);
   subscriber.on('message', function(channel, message) {
     r_client.get(user, function(e, reply) {
@@ -200,6 +197,14 @@ server.get('/:game_id/xhr-polling', function(req, res) {
         subscriber.quit();
       }
     });
+  });
+});
+
+server.get('/:game_id/messages', function(req, res) {
+  var channel = 'game:' + req.params.game_id;
+  r_client.lrange(channel + ':messages', req.query.id_min, req.query.id_max, function(e, messages) {
+    var messages = _.map(messages, JSON.parse);
+    res.send(messages, { 'Content-Type': 'application/json' });
   });
 });
 

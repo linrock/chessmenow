@@ -31,41 +31,25 @@ var Application = Backbone.Model.extend({
     $.ajax({
       url: '/' + game_id + '/xhr-polling',
       success: function(data) {
-        switch (data.type) {
-          case 'color':
-            if (data.color === 'b') {
-              $(".b-player").css('visibility', 'visible');
-              $("#choose-b").remove();
-            } else if (data.color === 'w') {
-              $(".w-player").css('visibility', 'visible');
-              $("#choose-w").remove();
-            }
-            self.view.appendToChat({
-              type: 'announcement',
-              text: data.text
-            });
-            if (data.started_at) {
-              self.set({ state: 'started' });
-            }
-            break;
-          case 'move':
-            if (data.move) {
-              self.move(data.move, false);
-            }
-            break;
-          case 'chat':
-          case 'announcement':
-          case 'game':
-            self.view.appendToChat(data);
-            if (data.state === 'ended') {
-              self.set({ state: 'ended' });
+        var mid = self.get('last_mid');
+        console.log('last_mid: ' + mid);
+        self.set({ last_mid: data.mid+1 });
+        if (data.mid !== mid) {
+          console.log('missed a message!');
+          console.log('last_mid: ' + mid + ', data.mid: ' + data.mid);
+          $.ajax({
+            url: '/' + game_id + '/messages',
+            data: { id_min: mid, id_max: data.mid-1 },
+            async: false,
+            success: function(data) {
+              for (i in data) {
+                self.processMessage(data[i]);
+              }
               console.dir(data);
-              $("#rematch").fadeIn('slow').click(function() {
-                window.location = '/' + data.new_game_id;
-              });
-            }
-            break;
+            },
+          });
         }
+        self.processMessage(data);
         if (request_count > 50) {
           self.view.appendToChat({
             type: 'error',
@@ -88,6 +72,42 @@ var Application = Backbone.Model.extend({
         }
       }
     });
+  },
+  processMessage: function(data) {
+    switch (data.type) {
+      case 'color':
+        if (data.color === 'b') {
+          $(".b-player").css('visibility', 'visible');
+          $("#choose-b").remove();
+        } else if (data.color === 'w') {
+          $(".w-player").css('visibility', 'visible');
+          $("#choose-w").remove();
+        }
+        this.view.appendToChat({
+          type: 'announcement',
+          text: data.text
+        });
+        if (data.started_at) {
+          this.set({ state: 'started' });
+        }
+        break;
+      case 'move':
+        if (data.move) {
+          this.move(data.move, false);
+        }
+        break;
+      case 'chat':
+      case 'announcement':
+      case 'game':
+        this.view.appendToChat(data);
+        if (data.state === 'ended') {
+          this.set({ state: 'ended' });
+          $("#rematch").fadeIn('slow').click(function() {
+            window.location = '/' + data.new_game_id;
+          });
+        }
+        break;
+    }
   },
   errorHandlerHack: function() {
     // XXX for firefox/view source bullshit
