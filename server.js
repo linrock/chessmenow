@@ -72,8 +72,13 @@ function publishMessage(game_id, message) {
     message.timestamp = Date.now();
     message.mid = length;
     var m = JSON.stringify(message);
-    r_client.rpush(channel + ':messages', m);
-    r_client.publish(channel, m);
+    if (message.type === 'move') {
+      r_client.rpush(channel + ':moves', m);
+      r_client.publish(channel + ':moves', m);
+    } else {
+      r_client.rpush(channel + ':messages', m);
+      r_client.publish(channel, m);
+    }
   });
 };
 
@@ -197,6 +202,17 @@ server.get('/:game_id/xhr-polling', function(req, res) {
         subscriber.quit();
       }
     });
+  });
+});
+
+// XXX should use single subscriber per game.
+server.get('/:game_id/moves', function(req, res) {
+  var subscriber = redis.createClient();
+  var channel = 'game:' + req.params.game_id + ':moves';
+  subscriber.subscribe(channel);
+  subscriber.on('message', function(channel, message) {
+    res.send(message, { 'Content-Type': 'application/json' });
+    subscriber.quit();
   });
 });
 

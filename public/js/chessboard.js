@@ -3,6 +3,9 @@ var Application = Backbone.Model.extend({
     _.bindAll(this, 'loadFen');
     this.pingForever();
     this.pollForever();
+    if (state !== 'ended') {
+      this.pollForMoves();
+    }
     this.errorHandlerHack();
     this.set({
       client: new Chess(),
@@ -62,13 +65,31 @@ var Application = Backbone.Model.extend({
       error: function(xhr) {
         var error_count = parseInt(self.get('error_count'));
         self.set({ error_count: error_count+1 });
-        if (xhr.status === 502 || error_count > 100) {
+        if (xhr.status === 502 || error_count > 300) {
           self.view.appendToChat({
             type: 'error',
             text: 'An error has occured. Please refresh the page to continue.'
           });
         } else {
           self.pollForever();
+        }
+      }
+    });
+  },
+  pollForMoves: function() {
+    var self = this;
+    $.ajax({
+      url: '/' + game_id + '/moves',
+      success: function(data) {
+        if (data.move) {
+          self.move(data.move, false);
+        }
+      },
+      error: function(xhr) {
+        var error_count = parseInt(self.get('error_count'));
+        self.set({ error_count: error_count+1 });
+        if (xhr.status !== 502 && error_count < 300) {
+          self.pollForMoves();
         }
       }
     });
@@ -89,11 +110,6 @@ var Application = Backbone.Model.extend({
         });
         if (data.started_at) {
           this.set({ state: 'started' });
-        }
-        break;
-      case 'move':
-        if (data.move) {
-          this.move(data.move, false);
         }
         break;
       case 'chat':
