@@ -115,6 +115,9 @@ var Application = Backbone.Model.extend({
         if (data.state === 'ended') {
           this.set({ state: 'ended' });
           $("#rematch").fadeIn('slow').click(function() {
+            $.post('/' + game_id + '/announcement', {
+              text: player_state.nickname + ' has joined the rematch game (' + data.new_game_id + ')'
+            }), 
             window.location = '/' + data.new_game_id;
           });
         }
@@ -235,6 +238,7 @@ var ApplicationView = Backbone.View.extend({
     this.displayNames();
     this.initializeChat();
     this.$("#move-list").scrollTop($('#move-list').attr('scrollHeight'));
+    this.$("#chat-window").scrollTop($('#chat-window').attr('scrollHeight'));
   },
   generateBoard: function(color) {
     var client = this.model.get('client');

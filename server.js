@@ -299,22 +299,20 @@ server.post('/:game_id/move', function(req, res) {
 
 server.post('/:game_id/chat', getOrSetUser, function(req, res) {
   var channel = 'game:' + req.params.game_id;
-  var message = utils.htmlEscape(req.body.text);
   publishMessage(req.params.game_id, {
     type: 'chat',
     user: req.nickname,
-    text: message
+    text: utils.htmlEscape(req.body.text)
   });
   res.send('1', { 'Content-Type': 'application/json' });
 });
 
-server.post('/:game_id/announcement', function(req, res) {
+server.post('/:game_id/announcement', getOrSetUser, function(req, res) {
   var channel = 'game:' + req.params.game_id;
   publishMessage(req.params.game_id, {
     type: 'announcement',
-    text: ' has offered a draw!',
-    text: ' has resigned!',
-    text: ' has joined the game!'
+    user: req.nickname,
+    text: utils.htmlEscape(req.body.text)
   });
   res.send('1', { 'Content-Type': 'application/json' });
 });
