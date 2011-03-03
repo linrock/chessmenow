@@ -111,50 +111,10 @@ server.get('/:game_id', getOrSetUser, function(req, res) {
   // console.dir(req.params)
   // req.params.game_id = req.params[0];
   // var time_control = req.params[1];
-  var chosen_colors = [];
+  var chosen_colors = {};
   var color = null;
   var channel = 'game:' + req.params.game_id;
-  console.log(req.uid + ' has joined the party! (game: ' + req.params.game_id + ')');
-  r_client.get(channel, function(err, reply) {
-    if (!reply) {
-      data = {
-        timestamps: {
-          created_at: Date.now(),
-          started_at: null,
-          ended_at: null
-        },
-        players: {
-          w: {
-            id: null,
-            time_remaining: null,
-            last_move_at: null
-          },
-          b: {
-            id: null,
-            time_remaining: null,
-            last_move_at: null
-          }
-        },
-        game: {
-          fen: '',
-          moves: [],
-          last_move: {},
-          captured: []
-        }
-      };
-      r_client.set(channel, JSON.stringify(data), function(err, reply) {
-        r_client.send_command('expire', ['game:' + req.params.game_id, 600]); 
-      });
-    } else {
-      data = JSON.parse(reply);
-      if (data.players.w.id === req.uid) {
-        color = 'w';
-      } else if (data.players.b.id === req.uid) {
-        color = 'b';
-      }
-      if (data.players.w.id) { chosen_colors.push('w'); }
-      if (data.players.b.id) { chosen_colors.push('b'); }
-    }
+  var sendResponse = function() {
     var state = (function() {
       if (!data.timestamps.started_at) {
         return 'new';
@@ -183,6 +143,57 @@ server.get('/:game_id', getOrSetUser, function(req, res) {
         });
       });
     });
+  };
+  console.log(req.uid + ' has joined the party! (game: ' + req.params.game_id + ')');
+  r_client.get(channel, function(err, reply) {
+    if (!reply) {
+      data = {
+        timestamps: {
+          created_at: Date.now(),
+          started_at: null,
+          ended_at: null
+        },
+        players: {
+          w: {
+            id: null,
+            nickname: null,
+            time_remaining: null,
+            last_move_at: null
+          },
+          b: {
+            id: null,
+            nickname: null,
+            time_remaining: null,
+            last_move_at: null
+          }
+        },
+        game: {
+          fen: '',
+          moves: [],
+          last_move: {},
+          captured: []
+        }
+      };
+      r_client.set(channel, JSON.stringify(data), function(err, reply) {
+        r_client.send_command('expire', ['game:' + req.params.game_id, 600]); 
+      });
+      sendResponse();
+    } else {
+      data = JSON.parse(reply);
+      r_client.multi()
+        .get('user:' + data.players.w.id)
+        .get('user:' + data.players.b.id)
+        .exec(function(e, nicknames) {
+          if (data.players.w.id === req.uid) {
+            color = 'w';
+          } else if (data.players.b.id === req.uid) {
+            color = 'b';
+          }
+          if (nicknames[0]) { chosen_colors.w = nicknames[0]; }
+          if (nicknames[1]) { chosen_colors.b = nicknames[1]; }
+          sendResponse();
+        });
+    }
   });
 });
 

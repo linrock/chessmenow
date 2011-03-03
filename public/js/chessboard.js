@@ -93,12 +93,10 @@ var Application = Backbone.Model.extend({
   processMessage: function(data) {
     switch (data.type) {
       case 'color':
-        if (data.color === 'b') {
-          $(".b-player").css('visibility', 'visible');
-          $("#choose-b").remove();
-        } else if (data.color === 'w') {
-          $(".w-player").css('visibility', 'visible');
-          $("#choose-w").remove();
+        var c = data.color;
+        if (c === 'b' || c === 'w') {
+          $('.' + c + '-player').text(data.user).css('visibility', 'visible');
+          $('#choose-' + c).remove();
         }
         this.view.appendToChat({
           type: 'announcement',
@@ -325,7 +323,7 @@ var ApplicationView = Backbone.View.extend({
     var client = self.model.get('client');
     var player = self.model.get('player');
     _.each(['w','b'], function(c) {
-      if (!_.include(chosen_colors, c)) {
+      if (!chosen_colors[c]) {
         $("#choose-" + c).show().click(function() {
           player.color = c;
           $.post('/' + game_id + '/color', { color: c }, function(response) {
@@ -349,11 +347,11 @@ var ApplicationView = Backbone.View.extend({
     });
   },
   displayNames: function() {
-    if (_.include(chosen_colors, 'w')) {
-      $(".w-player").text('White');
+    if (chosen_colors.w) {
+      $(".w-player").text(chosen_colors.w);
     }
-    if (_.include(chosen_colors, 'b')) {
-      $(".b-player").text('Black');
+    if (chosen_colors.b) {
+      $(".b-player").text(chosen_colors.b);
     }
   },
   updateBoard: function() {
