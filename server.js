@@ -28,8 +28,8 @@ server.configure(function() {
 });
 
 function getNickname() {
-    var adjectives = ['Fuzzy', 'Nerd', 'Crazy', 'Psycho', 'Noob', 'Magical', 'Flying', 'Evil', 'Happy', 'Cool', 'Hax'];
-    var nouns = ['Pickles', 'Rage', 'Person', 'Noob', 'Narwhal', 'Bacon', 'Walrus', 'Santa', 'Cat', 'Jabroni', 'Ninja'];
+    var adjectives = ['Fuzzy','Nerdy','Crazy','Psycho','Noob','Magical','Flying','Evil','Happy','Cool','Mad','The','Amazing','Powerful','Ultimate','TheGreat','Captain','Clever','Unusual','Zany','Curious'];
+    var nouns = ['Pickles','Sandwich','Person','Noob','Narwhal','Bacon','Walrus','Santa','Cat','Jabroni','Ninja','Samurai','Carrot','Master','GM','Cucumber','Spinach','Liger','Jukebox','Piglet','Nerd','Platypus','Rutabaga','Duck','Coconut','Jedi','Champion'];
     return adjectives[Math.floor(Math.random()*adjectives.length)] + nouns[Math.floor(Math.random()*nouns.length)];
 };
 
