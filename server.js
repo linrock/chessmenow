@@ -189,8 +189,20 @@ server.get('/:game_id', getOrSetUser, function(req, res) {
           } else if (data.players.b.id === req.uid) {
             color = 'b';
           }
-          if (nicknames[0]) { chosen_colors.w = nicknames[0]; }
-          if (nicknames[1]) { chosen_colors.b = nicknames[1]; }
+          if (data.players.w.id) {
+            if (nicknames[0]) {
+              chosen_colors.w = nicknames[0];
+            } else {
+              chosen_colors.w = 'White';
+            }
+          }
+          if (data.players.b.id) {
+            if (nicknames[1]) {
+              chosen_colors.b = nicknames[1];
+            } else {
+              chosen_colors.b = 'Black';
+            }
+          }
           sendResponse();
         });
     }
