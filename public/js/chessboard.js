@@ -232,9 +232,9 @@ var ApplicationView = Backbone.View.extend({
     model.bind('change:captured', this.updateCaptured);
     model.bind('change:state', this.onStateChange);
     this.generateBoard(player_state.color);
-    this.onStateChange();
     this.displayNames();
     this.initializeChat();
+    this.onStateChange();
     this.$("#move-list").scrollTop($('#move-list').attr('scrollHeight'));
     this.$("#chat-window").scrollTop($('#chat-window').attr('scrollHeight'));
   },
@@ -297,6 +297,12 @@ var ApplicationView = Backbone.View.extend({
           var position = $(this).attr('id');
           model.selectTile(position);
         });
+        this.$(".tile").droppable({
+          accept: '.piece',
+          drop: function(e, ui) {
+            model.move({ from: model.get('selected'), to: e.target.id, promotion: 'q' }, true);
+          }
+        });
         this.$("#resign").live('click', function() {
           $.post('/' + game_id + '/resign', { color: player_state.color }, function(response) {
           });
@@ -312,7 +318,8 @@ var ApplicationView = Backbone.View.extend({
         this.$(".w-player").css('visibility', 'visible').removeClass('current-turn');
         this.$(".b-player").css('visibility', 'visible').removeClass('current-turn');
         this.$("#move-list").css('visibility', 'visible').fadeIn('fast');
-        this.$(".tile").die('click');
+        this.$(".tile").die('click')
+        this.$(".tile").draggable('destroy');
         this.$("#resign").die('click').hide();
         this.$("#draw").die('click').hide();
         break;
@@ -355,6 +362,7 @@ var ApplicationView = Backbone.View.extend({
     }
   },
   updateBoard: function() {
+    var self = this;
     var board_diff = this.model.get('board_diff');
     var showChanges = function(pieces) {
       _.each(pieces, function(v,k) {
@@ -368,6 +376,18 @@ var ApplicationView = Backbone.View.extend({
           this.$('#' + k + ' > div').removeClass();
         }
       });
+      if (self.model.get('state') !== 'ended') {
+        this.$(".piece").draggable('destroy');
+        this.$(".piece").draggable({
+          start: function(e, ui) {
+            self.model.set({ selected: e.target.parentNode.id });
+          },
+          delay: 25,
+          distance: 5,
+          stack: '.piece',
+          revert: true
+        });
+      }
     };
     showChanges(board_diff);
   },
