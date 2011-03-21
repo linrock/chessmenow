@@ -318,7 +318,8 @@ var ApplicationView = Backbone.View.extend({
         this.$(".w-player").css('visibility', 'visible').removeClass('current-turn');
         this.$(".b-player").css('visibility', 'visible').removeClass('current-turn');
         this.$("#move-list").css('visibility', 'visible').fadeIn('fast');
-        this.$(".tile").die('click');
+        this.$(".tile").die('click')
+        this.$(".tile").draggable('destroy');
         this.$("#resign").die('click').hide();
         this.$("#draw").die('click').hide();
         break;
@@ -375,16 +376,18 @@ var ApplicationView = Backbone.View.extend({
           this.$('#' + k + ' > div').removeClass();
         }
       });
-      this.$(".piece").draggable('destroy');
-      this.$(".piece").draggable({
-        start: function(e, ui) {
-          self.model.set({ selected: e.target.parentNode.id });
-        },
-        delay: 25,
-        distance: 5,
-        stack: '.piece',
-        revert: true
-      });
+      if (self.model.get('state') !== 'ended') {
+        this.$(".piece").draggable('destroy');
+        this.$(".piece").draggable({
+          start: function(e, ui) {
+            self.model.set({ selected: e.target.parentNode.id });
+          },
+          delay: 25,
+          distance: 5,
+          stack: '.piece',
+          revert: true
+        });
+      }
     };
     showChanges(board_diff);
   },
