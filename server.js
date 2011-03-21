@@ -1,5 +1,5 @@
 const express = require('express'),
-      utils = require('express/lib/express/utils'),
+      utils = require('express/lib/utils'),
       redis = require('redis'),
       uuid = require('node-uuid'),
       _ = require('underscore');
@@ -13,8 +13,8 @@ r_client.on('error', function(err) {
 
 var env, host;
 server.configure(function() {
-  server.use(express.bodyDecoder());
-  server.use(express.cookieDecoder());
+  server.use(express.bodyParser());
+  server.use(express.cookieParser());
   server.set('views', __dirname + '/views');
   server.set('view engine', 'jade');
   server.configure('development', function() {
