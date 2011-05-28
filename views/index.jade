@@ -12,7 +12,7 @@
     b Step 3:
     | Play!
 button#new-game New Game
-:javascript
-  | $("#new-game").click(function() {
-  |   window.location = '/new';
-  | });
+script(type="text/javascript")
+  $("#new-game").click(function() {
+    window.location = '/new';
+  });

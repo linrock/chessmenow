@@ -52,15 +52,14 @@
   h2#info
 
 script(type="text/javascript", src="/media/js/chessboard.js")
-:javascript
-  | var host = "#{host}";
-  | var game_id = "#{game_id}";
-  | var state = "#{state}";
-  | var last_mid = #{last_mid};
-  | var chosen_colors = !{JSON.stringify(chosen_colors)};
-  | var game_state = !{JSON.stringify(game_state)};
-  | var player_state = !{JSON.stringify(player_state)};
-
-  | var a = new ApplicationView({ model: new Application() });
-  | a.model.loadFen(game_state.fen);
-  | a.highlightMove(game_state.last_move);
+script(type="text/javascript")
+  var host = "#{host}";
+  var game_id = "#{game_id}";
+  var state = "#{state}";
+  var last_mid = #{last_mid};
+  var chosen_colors = !{JSON.stringify(chosen_colors)};
+  var game_state = !{JSON.stringify(game_state)};
+  var player_state = !{JSON.stringify(player_state)};
+  var a = new ApplicationView({ model: new Application() });
+  a.model.loadFen(game_state.fen);
+  a.highlightMove(game_state.last_move);
